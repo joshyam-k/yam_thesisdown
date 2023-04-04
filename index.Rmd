@@ -1,5 +1,5 @@
 ---
-title: 'Wasian gone Bayesian'
+title: 'Bayesian Hierarchical Zero-Inflation Models'
 author: 'Josh Yamamoto'
 date: 'May 2023'
 institution: 'Reed College'
