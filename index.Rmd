@@ -1,5 +1,5 @@
 ---
-title: 'My Final College Paper'
+title: 'Wasian gone Bayesian'
 author: 'Josh Yamamoto'
 date: 'May 2023'
 institution: 'Reed College'
@@ -7,7 +7,7 @@ division: 'Mathematics and Natural Sciences'
 advisor: 'Leonard Wainstein'
 # If you have more two advisors, un-silence line 7
 #altadvisor: 'Your Other Advisor'
-department: 'Mathematics'
+department: 'Mathematics & Statistics'
 degree: 'Bachelor of Arts'
 knit: bookdown::render_book
 site: bookdown::bookdown_site
