@@ -14,7 +14,7 @@ In this thesis, I will concerned with modeling a response variable from various 
 
 As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
 
-```{r, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%'}
+```{r zi_ex, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%'}
 set.seed(6)
 library(tidyverse)
 library(here)
@@ -51,6 +51,7 @@ ggplot() +
 
 And in reality, this form of zero-inflated data is one that we see quite often in the real world. Importantly, an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself, for example if we collected data on the total weight of fish caught at a lake by individuals on a given day, we likely would see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But other times it could be a characteristic of the data collection process itself, for example a measurement error or a sampling error could cause data to be zero-inflated as well.
 
+
 Importantly, as I am working in a modeling setting, *when I say that data is zero-inflated I mean that the response variable is zero-inflated*. Although I will simply refer to my data as being zero-inflated and my models as being suited for zero-inflated data for the duration of this thesis, this is simply a matter of convenience and not a statement that the methods work for any situation in which data can be considered zero-inflated. Put simply, *I explore, present, and evaluate a model that is suited for a response variable which has a significant portion of zeroes, with the non-zero portion of that variable belonging to a positive continuous distribution.*
 
 ## Clustered Data
@@ -59,174 +60,112 @@ Furthermore, we will be operating in a setting where the data is not only zero-i
 
 For example, going back to the fishing in a lake example. If we looked at data on the weight of each individual fish caught, we would imagine that fish of the same species would generally be more similar in weight than two fish from different species.
 
-## Line breaks
 
-Make sure to add white space between lines if you'd like to start a new paragraph.  Look at what happens below in the outputted document if you don't:
+## Forestry Setting
 
-Here is the first sentence.  Here is another sentence.  Here is the last sentence to end the paragraph.
-This should be a new paragraph.
+One specific setting that exhibits both of these data features is data on the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory & Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: "The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems."^[@mcconville2020tutorial].
 
-*Now for the correct way:* 
+These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes is remote sensed data. The remote sensed data typically includes climate metrics (e.g. temperature and precipitation), geomorphological measures (e.g. elevation and eastness), as well as metrics like tree canopy cover which can be measured from a satellite.
 
-Here is the first sentence.  Here is another sentence.  Here is the last sentence to end the paragraph.
+While the main use of the additional remote sensed data sources are to increase the accuracy of the estimators that the FIA builds, they are also used to make rational decisions about the aforementioned plot-level data collection. Before sending a crew out to a given sampled location, the FIA will first look at the remote sensed data for that location. If that location happens to be in a place where there is clearly no forest, for example in the middle of a parking lot, the FIA will not send a crew out and instead will mark all forest attributes for that location as being zero. As you might imagine, this happens quite a bit, and so an interesting characteristic of many forest attribute variables collected by the FIA is that they are zero-inflated. Importantly, this is an example of where the data is zero-inflated because of the data collection process.
 
-This should be a new paragraph.
+Importantly, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
 
-## R chunks
+If we look at the distribution of the FIA collected forest attribute "Dry Above Ground Biomass From live Trees", we can see that it is indeed quite zero-inflated.
 
-When you click the **Knit** button above a document will be generated that includes both content as well as the output of any embedded **R** code chunks within the document. You can embed an **R** code chunk like this (`cars` is a built-in **R** dataset):
-
-```{r cars}
-summary(cars)
+```{r forestry_data, echo = F, message=F, warning = F, cache=T, fig.align='center', out.width='80%'}
+data <- readRDS(here("data", "wa_plots_public.rds"))
+ggplot() +
+  geom_density(
+    data = data[data$DRYBIO_AG_TPA_live_ADJ > 25, ],
+    aes(x = DRYBIO_AG_TPA_live_ADJ, y = 20*..count..),
+    fill = "#023047",
+    color = "white",
+    alpha = 0.9
+    ) + 
+  geom_histogram(
+    data = data[data$DRYBIO_AG_TPA_live_ADJ == 0, ],
+    aes(x = DRYBIO_AG_TPA_live_ADJ),
+    bins = 40,
+    fill = "#023047",
+    color = "white",
+    alpha = 0.9
+    ) +
+  labs(
+    x = "Dry Above Ground Biomass from Live Trees",
+    y = "Count"
+  ) +
+  theme_bw()
 ```
 
-## Inline code
+Not only is the FIA data a good real life example of when we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
 
-If you'd like to put the results of your analysis directly into your discussion, add inline code like this:
+###  Immediate Modeling Struggles
 
-> The `cos` of $2 \pi$ is `r cos(2*pi)`. 
+To motivate using a more complex method, I'll first show what happens when I try to just fit a simple linear regression to this type of data. If we regress our response variable on a useful covariate and plot both the data and the simple linear regression line together we get the following
 
-Another example would be the direct calculation of the standard deviation:
-
-> The standard deviation of `speed` in `cars` is `r sd(cars$speed)`.
-
-One last neat feature is the use of the `ifelse` conditional statement which can be used to output text depending on the result of an **R** calculation:
-
-> `r ifelse(sd(cars$speed) < 6, "The standard deviation is less than 6.", "The standard deviation is equal to or greater than 6.")`
-
-Note the use of `>` here, which signifies a quotation environment that will be indented.
-
-As you see with `$2 \pi$` above, mathematics can be added by surrounding the mathematical text with dollar signs.  More examples of this are in [Mathematics and Science] if you uncomment the code in [Math].  
-
-## Including plots
-
-You can also embed plots. For example, here is a way to use the base **R** graphics package to produce a plot using the built-in `pressure` dataset:
-
-```{r pressure, echo=FALSE, cache=TRUE, fig.height=3, fig.width=5}
-plot(pressure)
+```{r scatter_zi, echo = F, message=F, warning=F, cache=T, fig.align='center', out.width='80%'}
+data %>% 
+  slice_sample(n = 1500) %>% 
+  ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
+  geom_point(alpha = 0.6, size = 2) +
+   stat_smooth(
+    geom = "line", method = "lm",
+    se = F, alpha = 0.9,
+    linewidth = 2, color = "#219ebc"
+    ) +
+  labs(
+    x = "Tree Canopy Coverage",
+    y = "Dry Above Ground Biomass From live Trees"
+  ) +
+  theme_bw()
 ```
 
-Note that the `echo=FALSE` parameter was added to the code chunk to prevent printing of the **R** code that generated the plot. There are plenty of other ways to add chunk options (like `fig.height` and `fig.width` in the chunk above).  More information is available at <https://yihui.org/knitr/options/>.  
+While this model isn't awful it's certainly misspecified. What I mean by this is that a simple straight line doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the *non-zero* response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
 
-Another useful chunk option is the setting of `cache=TRUE` as you see here.  If document rendering becomes time consuming due to long computations or plots that are expensive to generate you can use knitr caching to improve performance.  Later in this file, you'll see a way to reference plots created in **R** or external figures.
+We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While it's perhaps feels unfair to motivate my method by piting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used model. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead they model I present is interpretable and intuitive while being flexible enough to capture the structure of the zero-inflated data.
 
-## Loading and exploring data
+### The New Model
 
-Included in this template is a file called `flights.csv`.  This file includes a subset of the larger dataset of information about all flights that departed from Seattle and Portland in 2014. More information about this dataset and its **R** package is available at <https://github.com/ismayc/pnwflights14>. This subset includes only Portland flights and only rows that were complete with no missing values. Merges were also done with the `airports` and `airlines` data sets in the `pnwflights14` package to get more descriptive airport and airline names.
+While I will exhaustively describe details of, and the math behind, the exact model in a later section, I'll go through a non-technical overview of how it will function here.
 
-We can load in this data set using the following commands:
+The defining characteristic of the model is that it is a two-part model. Instead of trying to fit the data with a singular model, we instead fit two different models and then combine them at the end. The two models are
 
-```{r load_data}
-# flights.csv is in the data directory
-flights_path <- here::here("data", "flights.csv")
-# string columns will be read in as strings and not factors now
-flights <- read.csv(flights_path, stringsAsFactors = FALSE)
-```
+1.  A classification model fit to the entire data set that predicts how likely it is that a certain data point has a non-zero response value.
 
-The data is now stored in the data frame called `flights` in **R**.  To get a better feel for the variables included in this dataset we can use a variety of functions. Here we can see the dimensions (rows by columns) and also the names of the columns.
+2.  A regression model fit to the non-zero portion of the dataset that predicts the continuous response variable.
 
-```{r str}
-dim(flights)
-names(flights)
-```
+To get a final prediction for a data point we take the prediction from model (1) and multiply it by the prediction from model (2).
 
-Another good idea is to take a look at the dataset in table form.  With this dataset having more than 20,000 rows, we won't explicitly show the results of the command here. I recommend you enter the command into the Console **_after_** you have run the **R** chunks above to load the data into **R**.
+$$
+\text{final prediction} = \underbrace{\bigg(\text{regression model output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{how likely it is that that point is non-zero}\bigg)}_{\text{Model (1)}}
+$$
 
-```{r view_flights, eval=FALSE}
-View(flights)
-```
+The intuition here is that if our classification model is sufficiently accurate, then points that indeed have zero-response will get sent towards zero due to the fact that the regression output will be multiplied by a number close to zero, while points that have a non-zero response will remain unchanged when multiplied by a number close to one. This method also operates under the idea that a regression model can be well fit to the non-zero portion of the response variable, and thus our regression component should be less biased than if we just fit a single regression model to the entire data set like we described in the previous section.
 
-While not required, it is highly recommended you use the `dplyr` package to manipulate and summarize your data set as needed.  It uses a syntax that is easy to understand using chaining operations.  Below I've created a few examples of using `dplyr` to get information about the Portland flights in 2014.  You will also see the use of the `ggplot2` package, which produces beautiful, high-quality academic visuals.
+### Building the Model
 
-We begin by checking to ensure that needed packages are installed and then we load them into our current working environment:
+Now, as the title suggests I'll be building these models in a Bayesian frame. But what does that even mean and why would one want to do that? While most of the thesis will be devoted to answering the second question, I'll spend some time in the next section describing Bayesian methods, and walking through how they differ from a Frequentist approach.
 
-```{r load_pkgs, message=FALSE}
-# List of packages required for this analysis
-pkg <- c("dplyr", "ggplot2", "knitr", "bookdown")
-# Check if packages are not installed and assign the
-# names of the packages not installed to the variable new.pkg
-new.pkg <- pkg[!(pkg %in% installed.packages())]
-# If there are any packages in the list that aren't installed,
-# install them
-if (length(new.pkg)) {
-  install.packages(new.pkg, repos = "https://cran.rstudio.com")
-}
-# Load packages
-library(thesisdown)
-library(dplyr)
-library(ggplot2)
-library(knitr)
-```
+Importantly, since this thesis is simply an earnest exploration of a Bayesian method, it has no intention to participate in the deep and opaque philosophical dialogue regarding whether Bayesian or Frequentist methods are a more "correct" way to do statistics.
 
-\clearpage
+That being said, the word Bayesian is so overwhelmingly ideologically tied to this statistical dichotomy that it is, by nature, very difficult to talk about a Bayesian method without talking about Frequentism as well. Because classical statistical methods are all Frequentist ones, there is often a pressure to validate a Bayesian method by standing it next to its Frequentist counterpart. While this Bayesian thesis will indeed feature an alternative Frequentist method, it does so, not to argue for one side or the other, but rather to illustrate some of the key differences in, and logic behind, Bayesian and Frequentist analyses.
 
-The example we show here does the following:
+## Looking Ahead
 
-- Selects only the `carrier_name` and `arr_delay` from the `flights` dataset and then assigns this subset to a new variable called `flights2`. 
+In order to introduce, study, and implement these models I will structure the research in the following way:
 
-- Using `flights2`, we determine the largest arrival delay for each of the carriers.
+-   Chapter 2 gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 
-```{r max_delays}
-flights2 <- flights %>%
-  select(carrier_name, arr_delay)
-max_delays <- flights2 %>%
-  group_by(carrier_name) %>%
-  summarize(max_arr_delay = max(arr_delay, na.rm = TRUE))
-```
+-   Chapter 3 gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
 
-A useful function in the `knitr` package for making nice tables in _R Markdown_ is called `kable`.  It is much easier to use than manually entering values into a table by copying and pasting values into Excel or LaTeX.  This again goes to show how nice reproducible documents can be! (Note the use of `results="asis"`, which will produce the table instead of the code to create the table.)  The `caption.short` argument is used to include a shorter title to appear in the List of Tables.
+-   Chapter 4 sets up the simulation study that serves as the main process by which we evaluate the various models.
 
-```{r maxdelays, results="asis"}
-kable(max_delays,
-  col.names = c("Airline", "Max Arrival Delay"),
-  caption = "Maximum Delays by Airline",
-  caption.short = "Max Delays by Airline",
-  longtable = TRUE,
-  booktabs = TRUE
-)
-```
+-   Chapter 5 showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 
-The last two options make the table a little easier-to-read.
-
-We can further look into the properties of the largest value here for American Airlines Inc.  To do so, we can isolate the row corresponding to the arrival delay of 1539 minutes for American in our original `flights` dataset.
+-   Chapter 6 gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 
 
-```{r max_props}
-flights %>%
-  filter(
-    arr_delay == 1539,
-    carrier_name == "American Airlines Inc."
-  ) %>%
-  select(-c(
-    month, day, carrier, dest_name, hour,
-    minute, carrier_name, arr_delay
-  ))
-```
 
-We see that the flight occurred on March 3rd and departed a little after 2 PM on its way to Dallas/Fort Worth.  Lastly, we show how we can visualize the arrival delay of all departing flights from Portland on March 3rd against time of departure.
 
-```{r march3plot, fig.height=3, fig.width=6}
-flights %>%
-  filter(month == 3, day == 3) %>%
-  ggplot(aes(x = dep_time, y = arr_delay)) +
-  geom_point()
-```
-
-## Additional resources
-
-- _Markdown_ Cheatsheet - <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet>
-
-- _R Markdown_
-    - Reference Guide - <https://www.rstudio.com/wp-content/uploads/2015/03/rmarkdown-reference.pdf>
-    - Cheatsheet - <https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf>
-
-- _RStudio IDE_
-    - Cheatsheet - <https://github.com/rstudio/cheatsheets/raw/master/rstudio-ide.pdf>
-    - Official website - <https://rstudio.com/products/rstudio/>
-
-- Introduction to `dplyr` - <https://cran.rstudio.com/web/packages/dplyr/vignettes/dplyr.html>
-
-- `ggplot2`
-    - Documentation - <https://ggplot2.tidyverse.org/>
-    - Cheatsheet - <https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf>
 
