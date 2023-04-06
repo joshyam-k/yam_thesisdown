@@ -86,11 +86,14 @@ Importantly, while $y^*_{ij}$ is fit on only the non-zero data, and $p_{ij}$ is 
 
 ### Frequentist
 
-Write super short description of Maxmimum Likelihood? (not sure if we even need this part)
+As it is not the focus of this thesis, we will not go in depth into how these models are fit in a Frequentist setting. Still, it's important to at least provide a brief summary of how it is most often done. 
+
+In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. The main gist of what's happening here is that we are answering the question: under what fixed parameter values would we be most likely to see the data that we observed? And we can connect this back to \@ref(bayes-freq), where we talked about how Frequentists treat parameters as being fixed and the data as random. At it's core, MLE is doing just that.
+
 
 ### Bayesian
 
-Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_u, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. But all of the specifics that we lay out below, simply have to do with the fact that we treat our parameters as random and try to quantify how they might vary.
+Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_u, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
 
 We'll start by describing the logistic regression model, before moving on to the two different versions of the generalized linear regression component.
 
@@ -272,9 +275,45 @@ $$
 
 #### (Generalized) Linear Regression Component: Gamma
 
-An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. To motivate this we can look at the distribution of the response for the forestry data.
+An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \@ref(fig:gamma) displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response can be skewed in a way that a Normal distribution simply can't.
 
-Because the response variable is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
+```{r gamma, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="test"}
+gamma <- ggplot(data.frame(x = c(0, 20)), aes(x)) +
+  stat_function(
+    fun = dgamma, args = list(shape = 2, rate = 0.5),
+    linewidth = 1.5, aes(color = "one")
+  ) +
+   stat_function(
+    fun = dgamma, args = list(shape = 9.5, rate = 2),
+    linewidth = 1.5, aes(color = "two")
+  ) +
+   stat_function(
+    fun = dgamma, args = list(shape = 7.5, rate = 1),
+    linewidth = 1.5, aes(color = "three")
+  ) +
+  scale_color_manual(
+    name  = "",
+    breaks = c("one", "two", "three"),
+    values = c("one" = "#2b66c4", "two" = "#b1cefc", "three" = "#041736"),
+    labels = unname(TeX(c("$a = 2, b = 0.5 $", "$a = 9.5, b = 2$", "$a = 7.5, b = 1")))
+  ) +
+  theme_minimal() +
+  labs(
+    x = "X",
+    y = "",
+    title = "Gamma(a,b)"
+  ) +
+  theme(
+    legend.position = c(.7, .8),
+    legend.text = element_text(size = 8),
+    plot.title = element_text(size = 11.5)
+  )
+
+gamma
+```
+
+
+Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
 $$
 y_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j
@@ -322,7 +361,8 @@ $$
 \begin{aligned}
 \hat{y}^*_{ij} &= \mathbf{x}_{ij}^T\hat{\boldsymbol{\beta}} + \hat{u}_j \\
 \hat{p}_{ij} &= \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\hat{\boldsymbol{\gamma}} + \hat{v}_j)}} \\
-\hat{y}_{ij} &= \hat{y}^*_{ij}\cdot \hat{p}_{ij}
+\hat{y}_{ij} &= \hat{y}^*_{ij}\cdot \hat{p}_{ij} \\
+\hat{\bar{y}_j} &= \sum_{i \in n_j}\hat{y}_{ij}
 \end{aligned}
 $$
 
@@ -330,7 +370,7 @@ But in the Bayesian frame our model parameters are no longer fixed values, but a
 
 1.  Sampling variability in the data: we never expect our model to be perfectly deterministic, rather the real outcomes should be expected to vary around the model.
 
-2.  Posterior variability of the model parameters: we shouldn't go through all the trouble of constructing posterior distributions for our parameters to just throw out that information when it comes time to make predictions, rather we incorporate the variability in our posterior distributions.
+2.  Posterior variability of the model parameters: we shouldn't go through all the trouble of constructing posterior distributions for our parameters to just throw out that information when it comes time to make predictions, rather we incorporate the variability in our posterior distributions into our predictions.
 
 Within the Bayesian frame, these two sources of variability are combined to produce what is called a posterior predictive distribution.
 
@@ -338,34 +378,29 @@ To get a feel for how this works, I'll just focus on constructing a posterior pr
 
 ### Theoretical version
 
-To really stress the logic of what we're doing, imagine that we only had one parameter $A$ in our model. Since there is uncertainty about the parameter value, we integrate over the possible values of our model parameter:
+To really stress the logic of what we're doing, imagine that we haven't collected any data yet and that we only had one parameter $A$ in our model. In any model we assume that the data for a fixed parameter $A$ has distribution $p(y \ | \ A)$. Moreover, before having observed any data, all of our uncertainty about the value of $A$ is contained by the prior $p(A)$. We can imagine $p(y \ | \ A)$ capturing the variability in (1) and $p(A)$ capturing the variability in (2).
+
+To produce an estimate for the distribution of a new data point $y_{ij, \ new}$ we simply integrate the product of the previous two terms over $A$.
+
 
 $$
 \begin{aligned}
-p(y_{ij, \ new} ) &= \int_A P(y_{ij, \ new}, A) dA  \\
+\int_A p(y_{ij, \ new} \ | \ A)p(A )dA   = p(y_{ij, \ new} )   \\
 \end{aligned}
 $$
 
-This is sometimes called the prior probability distribution as it represents our knowledge about $y_{ij, \ new}$ before observing any data. We can then rewrite this in terms of terms that we know:
+This is sometimes called the prior predictive distribution for $y_{ij, \ new}$ as it represents our knowledge about $y_{ij, \ new}$ before observing any data. 
+
+But we can do much better at describing the variability of the model parameters than this. After observing the sample data we update our knowledge. Again we have the same $p(y_{ij, \ new} \ | \ A)$ which captures the sampling variability in the data, but now the variability of the model parameter is described by the posterior distribution $p(A \ | \ \mathbf{y})$. Again we get a distribution for $y_{ij, \ new}$ by integrating over $A$, except this time we end up with $p(y_{ij, \ new} \ | \ \mathbf{y})$ which is aptly named the **posterior predictive distribution**
 
 $$
 \begin{aligned}
-p(y_{ij, \ new} ) &=\int_A p(y_{ij, \ new} \ | \ A)p(A )dA  
+\int_A p(y_{ij, \ new} \ | \ A, \mathbf{y})p(A \ | \ \mathbf{y})dA &=  \int_A p(y_{ij, \ new} \ | \ A)p(A \ | \ \mathbf{y})dA \qquad y_{ij, \ new} \ \  \text{independent of } \mathbf{y} \\
+&= p(y_{ij, \ new} \ | \ \mathbf{y})\
 \end{aligned}
 $$
 
-Recall that for fixed values of our model parameter, the data $\mathbf{y}$ have the distribution $p(\mathbf{y} \ | \ A)$. We can think of this distribution capturing the variability from (1), and by weighting by $p(A)$ we capture the variability in (2),the model parameters, as well.
-
-But we can do much better at describing the variability of the model parameters than this. After observing the sample data we update out knowledge
-
-$$
-\begin{aligned}
-p(y_{ij, \ new} \ | \ \mathbf{y}) &=\int_A p(y_{ij, \ new} \ | \ A, \mathbf{y})p(A \ | \ \mathbf{y})dA  \\
-&= \int_A p(y_{ij, \ new} \ | \ A)p(A \ | \ \mathbf{y})dA \qquad y_{ij, \ new} \ \  \text{independent of } \mathbf{y}
-\end{aligned}
-$$
-
-Again we have the same $p(y_{ij, \ new} \ | \ A)$ which captures the sampling variability in the data, but now the variability of the model parameter is described by the posterior distribution.
+Note that the quality of this posterior predictive distribution depends strongly on the quality of our posterior distribution. In other words, this distribution will only accurately capture the structure of new data points, if the underlying posterior distribution correctly captures the structure of the parameters of interest.
 
 As we move on to the expression for each full model, just remember that while the integral looks very complicated, all that we're doing is incorporating both sources of variability and averaging across the possible values of the model parameters. The posterior predictive distribution for a point $y^*_{ij, \ new}$ using the normal regression model can be written as:
 
@@ -394,7 +429,7 @@ p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \in
 \end{aligned}
 $$
 
-The distributions $p(y^*_{ij, \ new} \ | \ \mathbf{y})$ and $p(p_{ij, \ new}\ | \ \mathbf{y})$ not only capture where we think each prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
+The distributions $p(y^*_{ij, \ new} \ | \ \mathbf{y})$ and $p(z_{ij, \ new}\ | \ \mathbf{y})$ not only capture where we think each prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
 
 While the theory behind constructing these posterior predictive is pretty intuitive, it's clear that even in the case of a fairly simple model, the actual computations are rather unwieldy. Again, we are saved by the fact that in practice the posterior is too complex to algebraically solve for, so we're already functioning in a setting where we use MCMC to simulate draws from the approximate posterior.
 
