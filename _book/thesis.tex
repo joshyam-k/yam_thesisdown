@@ -293,10 +293,15 @@ In this thesis, I will concerned with modeling a response variable from various 
 \section{Zero-Inflated Data}\label{zero-inflated-data}}
 
 As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of ``zeroness'', I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/zi_ex-1} \end{center}
+\begin{figure}
 
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/ziex-1} 
+
+}
+
+\caption{Zero-Inflated data}\label{fig:ziex}
+\end{figure}
 And in reality, this form of zero-inflated data is one that we see quite often in the real world. Importantly, an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself, for example if we collected data on the total weight of fish caught at a lake by individuals on a given day, we likely would see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But other times it could be a characteristic of the data collection process itself, for example a measurement error or a sampling error could cause data to be zero-inflated as well.
-\newline
 
 Importantly, as I am working in a modeling setting, \emph{when I say that data is zero-inflated I mean that the response variable is zero-inflated}. Although I will simply refer to my data as being zero-inflated and my models as being suited for zero-inflated data for the duration of this thesis, this is simply a matter of convenience and not a statement that the methods work for any situation in which data can be considered zero-inflated. Put simply, \emph{I explore, present, and evaluate a model that is suited for a response variable which has a significant portion of zeroes, with the non-zero portion of that variable belonging to a positive continuous distribution.}
 
@@ -304,7 +309,6 @@ Importantly, as I am working in a modeling setting, \emph{when I say that data i
 \section{Clustered Data}\label{clustered-data}}
 
 Furthermore, we will be operating in a setting where the data is not only zero-inflated, but where it also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points across clusters.
-\newline
 
 For example, going back to the fishing in a lake example. If we looked at data on the weight of each individual fish caught, we would imagine that fish of the same species would generally be more similar in weight than two fish from different species.
 
@@ -320,17 +324,29 @@ While the main use of the additional remote sensed data sources are to increase 
 Importantly, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
 
 If we look at the distribution of the FIA collected forest attribute ``Dry Above Ground Biomass From live Trees'', we can see that it is indeed quite zero-inflated.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/forestry_data-1} \end{center}
+\begin{figure}
 
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/forestrydata-1} 
+
+}
+
+\caption{Zero-Inflated Forestry data.}\label{fig:forestrydata}
+\end{figure}
 Not only is the FIA data a good real life example of when we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
 
 \hypertarget{immediate-modeling-struggles}{%
 \subsection{Immediate Modeling Struggles}\label{immediate-modeling-struggles}}
 
 To motivate using a more complex method, I'll first show what happens when I try to just fit a simple linear regression to this type of data. If we regress our response variable on a useful covariate and plot both the data and the simple linear regression line together we get the following
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/scatter_zi-1} \end{center}
+\begin{figure}
 
-While this model isn't awful it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure @ref(fig:scatter\_zi) doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/scatterzi-1} 
+
+}
+
+\caption{The shortcomings of a simple linear regression model in this context.}\label{fig:scatterzi}
+\end{figure}
+While this model isn't awful it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \ref{fig:scatterzi} doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
 
 We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While it's perhaps feels unfair to motivate my method by piting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used model. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead they model I present is interpretable and intuitive while being flexible enough to capture the structure of the zero-inflated data.
 
@@ -370,13 +386,13 @@ That being said, the word Bayesian is so overwhelmingly ideologically tied to th
 In order to introduce, study, and implement these models I will structure the research in the following way:
 \begin{itemize}
 \item
-  Chapter 2 gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
+  Chapter \ref{bayes-freq} gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 \item
-  Chapter 3 gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
+  Chapter \ref{methods-sec} gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
 \item
-  Chapter 4 sets up the simulation study that serves as the main process by which we evaluate the various models.
+  Chapter \ref{sim-study} sets up the simulation study that serves as the main process by which we evaluate the various models.
 \item
-  Chapter 5 showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
+  Chapter \ref{res-sec} showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 \item
   Chapter 6 gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 \end{itemize}
@@ -435,8 +451,14 @@ So a Frequentist would end up with what is called a 95\% confidence interval for
 Let's pause to ask ourselves what is random in Equation \eqref{eq:freq-ci}. For starters, \(\bar{X}\) is certainly random since it came from a random sample from the population, but an immediate implication of this is that the interval itself is actually random too. The very first step in our process was to use asymptotic theory (the Central Limit Theorem) to place a distribution on our observed data \(\bar{X}\). This randomness in the data thus carries through to our confidence interval and we end up with an uncertainty statement about the \textbf{procedure} being performed and not the parameter itself. Different samples will results in different \(\bar{X}\)s which will result in different confidence intervals.
 
 It's perhaps easiest to understand how to interpret Equation \eqref{eq:freq-ci} through a quick simulation and visualization. If we generated a 100 new samples from the population with the true parameter \(\theta\) being 5, and computed a confidence interval for each, we could then plot all 100 intervals and count how many of them contain the true parameter.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/ci-coverage-ex-1} \end{center}
+\begin{figure}
 
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/ci-coverage-ex-1} 
+
+}
+
+\caption{A visualization of Frequentist confidence intervals.}\label{fig:ci-coverage-ex}
+\end{figure}
 First of all, \ref{fig:ci-coverage-ex} really drills home the point that Frequentists treat the parameter as fixed and try to quantify how the data might vary around it. Here we see that in 6 of our iterations of this sampling procedure, the confidence interval did not contain the true parameter, giving us coverage of 94\%. The reason we did not observe 95\% coverage, is again due to the fact that the intervals are random and Equation \eqref{eq:freq-ci} is an asymptotic statement about the process of resampling data and computing a new confidence interval. Thus, the correct interpretation of Equation \eqref{eq:freq-ci} is that if we repeated the sampling procedure many times, we'd expect the true mean, \(\theta\), to be captured by such an interval 95\% of the time.
 
 With this new understanding, we can unpack why it's incorrect to interpret Equation \eqref{eq:freq-ci} as saying that ``the interval contains the true parameter with probability 0.95''. As we just saw, our confidence interval is really a statement about a result we'd see if we repeated the whole procedure many times, and it is absolutely not a statement about any singular instance of the procedure. For a given confidence interval, the true parameter either lies within the interval or it doesn't, with 100\% certainty.
@@ -541,8 +563,14 @@ Which we can recognize as being a normal distribution with mean \(\theta_f\) and
 \]
 
 where each have notably been influenced by both the prior and the likelihood. It can be helpful to visualize what has happened here with a plot.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/bayes-dists-1} \end{center}
+\begin{figure}
 
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/bayes-dists-1} 
+
+}
+
+\caption{The Prior, Likelihood, and Posterior for this example all plotted together.}\label{fig:bayes-dists}
+\end{figure}
 Above we see the three main components of a Bayesian analysis plotted all together. It's helpful to visualize what's happening here because it really drills home the idea that the posterior is, in a sense, a tradeoff between the prior and the likelihood function. More technically, the posterior is the normalized product of the likelihood and the prior. The result is that the prior information has pulled the posterior to the left and has introduced more variance than from the likelihood function alone.
 
 Clearly, even in this simple example it takes quite a bit of work to derive the exact expression for the posterior. In fact, in practice the posterior is often times something that is incredibly complicated and so we don't even bother trying to simplify the product of the likelihood and the prior down into a distribution that we can recognize. Instead we make use of the massive computational advances that have been made that allow us to algorithmically approximate the posterior. Mainly, a process called Markov Chain Monte Carlo (MCMC) is used due to it's very powerful ability to produce samples from the posterior distribution.
@@ -608,7 +636,7 @@ Although we could model these two parts however we wanted to, we will use a line
 We fit a generalized linear model with random intercepts to the \textbf{non-zero} portion of the data (the \(*\) helps differentiate this model from our final model). The linear predictor is specified as follows
 
 \[
-\mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij} \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_u^2)
+\mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij} \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
 With a link function \(g^{-1}\) and a probability distribution for the response, we get the final model as
@@ -624,10 +652,10 @@ Here, \(\mathbf{x}_{ij}^T = (x^1_{ij}, ..., x^P_{ij})\) is a \(P\times 1\) vecto
 Next we fit a logistic regression random intercepts model to the full data set
 
 \[
-P(z_{ij} = 1) = p_{ij} = \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j)}} \qquad \text{where} \qquad v_j \sim \mathcal{N}(0, \sigma_v^2)
+P(z_{ij} = 1) = p_{ij} = \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j)}} \qquad \text{where} \qquad v_j \sim \mathcal{N}(0, \sigma_{v}^2)
 \]
 
-Here \(\boldsymbol{\gamma}\) is a \(1\times P\) vector of fixed effects and \(v_j\) is the random effect associated with domain \(j\). Again, \(\sigma^2_v\) is the between domain variance parameter.
+Here \(\boldsymbol{\gamma}\) is a \(1\times P\) vector of fixed effects and \(v_j\) is the random effect associated with domain \(j\). Again, \(\sigma^2_{v}\) is the between domain variance parameter.
 
 We will get into how each of these model pieces are estimated in the next section, but once we have estimates for all of our coefficients, we get our final model by taking the product of these two estimated models.
 
@@ -638,7 +666,7 @@ We will get into how each of these model pieces are estimated in the next sectio
 And we get a prediction for a single domain by averaging the predictions over all samples in that domain
 
 \[
-\hat{\bar{y}}_j = \frac{1}{n_j}\sum_{i \in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij}
+\hat{Y}_j = \frac{1}{n_j}\sum_{i \in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij}
 \]
 
 Importantly, while \(y^*_{ij}\) is fit on only the non-zero data, and \(p_{ij}\) is fit on the entire data, when we make predictions on new data, both models are applied to the entire new data set.
@@ -656,7 +684,7 @@ In most cases (and in particular in most statistical software), Frequentist regr
 \hypertarget{bayesian}{%
 \subsection{Bayesian}\label{bayesian}}
 
-Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior \(p(\theta \ | \ \text{data})\), but now we have many parameters of interest \(p(\beta_1, \beta_2, \sigma^2_u, ... \ \text{etc} \ | \ \text{data})\), and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
+Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior \(p(\theta \ | \ \text{data})\), but now we have many parameters of interest \(p(\beta_1, \beta_2, \sigma^2_{u}, ... \ \text{etc} \ | \ \text{data})\), and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
 
 We'll start by describing the logistic regression model, before moving on to the two different versions of the generalized linear regression component.
 
@@ -672,19 +700,19 @@ z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text
 So far we have done nothing differently than in the usual frequentist formulation of a model, but now instead of treating our model parameters as fixed but unknown, we treat them as random variables and attach priors to them. The random intercepts are given a normal prior centered on zero with hyper-prior \(\sigma_v^2\).
 
 \[
-v_j \ | \ \sigma_v^2 \sim \mathcal{N}(0, \sigma_v^2)
+v_j \ | \ \sigma_{v}^2 \sim \mathcal{N}(0, \sigma_{v}^2)
 \]
 
-Although \(\boldsymbol{\gamma}\) and \(\sigma_v^2\) are different parameters than the one's in the previous model, we attach the same priors to them
+Although \(\boldsymbol{\gamma}\) and \(\sigma_{v}^2\) are different parameters than the one's in the previous model, we attach the same priors to them
 
 \[
 \begin{aligned}
 \gamma_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in 1...P \\
-\sigma_v^2 &\sim \text{Half-Cauchy}(0, r_1^2)
+\sigma_{v}^2 &\sim \text{Half-Cauchy}(0, r_1^2)
 \end{aligned}
 \]
 
-The prior parameters \(m_p, s_p^2, r_1^2\) are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that ``even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region.'' (gelman 2006). While dependence between priors \emph{can} be modeled in a bayesian frame, we will assume that all of our priors are independent of each other.
+The prior parameters \(m_p, s_p^2, r_1^2\) are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that ``even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region.''\footnote{Gelman (2006)}. While dependence between priors \emph{can} be modeled in a bayesian frame, we will assume that all of our priors are independent of each other.
 
 An example of what the prior distributions look like across a few of their parameter values is shown below.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-3-1} \end{center}
@@ -693,18 +721,18 @@ Again, in estimating the actual \textbf{model parameters} in a Bayesian analysis
 
 \[
 \begin{aligned}
-p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1, ...\gamma_P, v_1,... ,v_J, \sigma_v^2) \\
- &= \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1)\cdot...\cdot p(\gamma_P)p(v_1) \cdot ... \cdot p(v_J)p(\sigma_v^2)
+p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1, ...\gamma_P, v_1,... ,v_J, \sigma_{v}^2) \\
+ &= \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2)\bigg]\cdot p(\gamma_1)\cdot...\cdot p(\gamma_P)p(v_1) \cdot ... \cdot p(v_J)p(\sigma_{v}^2)
 \end{aligned}
 \]
 
 If we were able to compute a closed form expression for the posterior, we could then attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only \(\sigma_u^2\). In that case, the marginal posterior can be computed as follows:
 
 \[
-p(\sigma_v^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P du_1 ... du_Jd\sigma_{\varepsilon}^2
+p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
 \]
 
-The result would be a probability density function that encapsulates all of our information about \(\sigma_u^2\).
+The result would be a probability density function that encapsulates all of our information about \(\sigma_{v}^2\).
 
 As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language ``Stan''. The specific version of MCMC algorithm that Stan runs is called ``Hamiltonian Monte Carlo''. While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that \emph{has the desired posterior distribution as it's stationary distribution.} Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
 
@@ -712,9 +740,9 @@ In it's most basic configuration Stan will output 2,000 sets of parameter draws 
 
 \[
 \begin{bmatrix}
-  \gamma_1^{(1)} & \dots & \gamma_P^{(1)} & v_1^{(1)} & \dots & v_J^{(1)}  & (\sigma_v^2)^{(1)} \\
+  \gamma_1^{(1)} & \dots & \gamma_P^{(1)} & v_1^{(1)} & \dots & v_J^{(1)}  & (\sigma_{v}^2)^{(1)} \\
   \\ \vdots   &  & \vdots  & \vdots & &  \vdots & \vdots  \\ \\
-  \gamma_1^{(2000)} & \dots &\gamma_P^{(2000)} & v_1^{(2000)}& \dots & v_J^{(2000)} & (\sigma_v^2)^{(2000)}
+  \gamma_1^{(2000)} & \dots &\gamma_P^{(2000)} & v_1^{(2000)}& \dots & v_J^{(2000)} & (\sigma_{v}^2)^{(2000)}
 \end{bmatrix}
 \]
 
@@ -726,7 +754,7 @@ One really nice aspect of this is that the while the combination of all of the c
 The simplest way to model the non-zero response is through simple linear regression i.e generalized linear regression using the identity link and assuming a Normal distribution on the response. Again it may seem silly to introduce a simple linear regression model in this way, but we do so to stress that this form of the model still places just as many distributional assumptions as a more common GLM does.
 
 \[
-y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij}
+y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij}
 \]
 
 In this setting, the error term is assumed to be distributed \(\mathcal{N}(0, \sigma_{\varepsilon}^2)\).
@@ -734,10 +762,10 @@ In this setting, the error term is assumed to be distributed \(\mathcal{N}(0, \s
 Again the random intercepts have priors
 
 \[
-u_j \ | \ \sigma_u^2 \sim \mathcal{N}(0, \sigma_u^2)
+u_j \ | \ \sigma_{u}^2 \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
-with hyperprior (i.e priors put on a hyperparameter) \(\sigma_u^2\).
+with hyperprior (i.e priors put on a hyperparameter) \(\sigma_{u}^2\).
 
 And the other model parameters are given the same class of priors as before.
 
@@ -745,7 +773,7 @@ And the other model parameters are given the same class of priors as before.
 \begin{aligned}
 \beta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
 \sigma_{\varepsilon}^2 &\sim \text{Half-Cauchy}(0, r_1^2) \\
-\sigma_u^2 &\sim \text{Half-Cauchy}(0, r_2^2)
+\sigma_{u}^2 &\sim \text{Half-Cauchy}(0, r_2^2)
 \end{aligned}
 \]
 
@@ -753,8 +781,8 @@ Importantly while \(s_p^2, r_1^2, r_2^2\) are given the same names as in the pre
 
 \[
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1, ..., \beta_P, u_1, ..., u_J, \sigma_u^2, \sigma_{\varepsilon}^2) \\
- &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u},\sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_u^2)p( \sigma_{\varepsilon}^2) 
+p(\boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1, ..., \beta_P, u_1, ..., u_J, \sigma_{u}^2, \sigma_{\varepsilon}^2) \\
+ &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u},\sigma_{u}^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \sigma_{\varepsilon}^2) 
 \end{aligned}
 \]
 
@@ -762,9 +790,9 @@ and we employ MCMC using Stan to simulate draws from it. Similarly, the Stan out
 
 \[
 \begin{bmatrix}
-  \beta_1^{(1)} & \dots & \beta_P^{(1)} & u_1^{(1)} & \dots & u_J^{(1)} & (\sigma_u^2)^{(1)} & (\sigma_{\varepsilon}^2)^{(1)} \\
+  \beta_1^{(1)} & \dots & \beta_P^{(1)} & u_1^{(1)} & \dots & u_J^{(1)} & (\sigma_{u}^2)^{(1)} & (\sigma_{\varepsilon}^2)^{(1)} \\
   \\ \vdots &  & \vdots & \vdots & & \vdots & \vdots & \vdots \\ \\
-  \beta_1^{(2000)} & \dots & \beta_P^{(2000)} & u_1^{(2000)} & \dots & u_J^{(2000)} & (\sigma_u^2)^{(2000)} & (\sigma_{\varepsilon}^2)^{(2000)}
+  \beta_1^{(2000)} & \dots & \beta_P^{(2000)} & u_1^{(2000)} & \dots & u_J^{(2000)} & (\sigma_{u}^2)^{(2000)} & (\sigma_{\varepsilon}^2)^{(2000)}
 \end{bmatrix}
 \]
 
@@ -795,26 +823,26 @@ E[y_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
 The random intercepts have the same types of prior as in the normal model:
 
 \[
-u_j \ | \ \sigma_u^2 \sim \mathcal{N}(0, \sigma_u^2)
+u_j \ | \ \sigma_{u}^2 \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
-with hyperprior \(\sigma_u^2\). We then define priors for the other parameters as
+with hyperprior \(\sigma_{u}^2\). We then define priors for the other parameters as
 
 \[
 \begin{aligned}
-\delta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
+\beta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
 \alpha &\sim \text{Half-Cauchy}(t_1, r_1^2)\\
-\sigma_w^2 &\sim \text{Half-Cauchy}(0, r_2^2)
+\sigma_{u}^2 &\sim \text{Half-Cauchy}(0, r_2^2)
 \end{aligned}
 \]
 
 where \(m_p, s_p^2, t_1, r_1, r_2\) are real valued numbers. While the Cauchy prior put on the shape parameter \(\alpha\) is still bounded below by zero, we now allow it's mode to be set based on the given data.
 
-Letting \(\boldsymbol{\delta} = (\delta_1, ..., \delta_P)\) and \(\mathbf{w} = (w_1, ..., w_J)\) we can write out the joint posterior distribution as
+Letting \(\boldsymbol{\delta} = (\delta_1, ..., \delta_P)\) and \(\mathbf{u} = (u_1, ..., u_J)\) we can write out the joint posterior distribution as
 
 \[
 \begin{aligned}
-p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \alpha \ | \ \mathbf{y}) &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_u^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_u^2)p( \alpha) 
+p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y}) &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_{u}^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \alpha) 
 \end{aligned}
 \]
 
@@ -829,8 +857,7 @@ In the Frequentist frame the model parameters are treated as fixed but unknown a
 \begin{aligned}
 \hat{y}^*_{ij} &= \mathbf{x}_{ij}^T\hat{\boldsymbol{\beta}} + \hat{u}_j \\
 \hat{p}_{ij} &= \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\hat{\boldsymbol{\gamma}} + \hat{v}_j)}} \\
-\hat{y}_{ij} &= \hat{y}^*_{ij}\cdot \hat{p}_{ij} \\
-\hat{\bar{y}_j} &= \sum_{i \in n_j}\hat{y}_{ij}
+\hat{Y}_{j} &= \sum_{i\in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij} 
 \end{aligned}
 \]
 
@@ -872,12 +899,12 @@ But we can do much better at describing the variability of the model parameters 
 
 Note that the quality of this posterior predictive distribution depends strongly on the quality of our posterior distribution. In other words, this distribution will only accurately capture the structure of new data points, if the underlying posterior distribution correctly captures the structure of the parameters of interest.
 
-As we move on to the expression for each full model, just remember that while the integral looks very complicated, all that we're doing is incorporating both sources of variability and averaging across the possible values of the model parameters. The posterior predictive distribution for a point \(y^*_{ij, \ new}\) using the normal regression model can be written as:
+As we move on to the expression for each full model, just remember that while the integral looks very complicated, all that we're doing is incorporating both sources of variability and averaging across the possible values of the model parameters. The posterior predictive distribution for a point \(y^*_{ij, \ new}\) using the Normal regression model can be written as:
 
 \[
 \begin{aligned}
-p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_u^2} \int_{\sigma_{\varepsilon}^2} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2, \sigma_{\varepsilon}^2)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_u^2d\sigma_{\varepsilon}^2
+p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_{u}^2} \int_{\sigma_{\varepsilon}^2} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_{u}^2d\sigma_{\varepsilon}^2
 \end{aligned}
 \]
 
@@ -885,8 +912,8 @@ Similarly, for the Gamma model it can be written as
 
 \[
 \begin{aligned}
-p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\delta_1}  \dots \int_{\delta_P} \int_{w_1} \dots \int_{w_J} \int_{\sigma_w^2} \int_{\alpha} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\delta}, \boldsymbol{w}, \sigma_w^2, \alpha)p(\boldsymbol{\delta}, \mathbf{w}, \sigma_w^2, \alpha \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\delta_1 ...  d\delta_Pdw_1...dw_Jd\sigma_w^2d\alpha
+p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_{u}^2} \int_{\alpha} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_{u}^2d\alpha
 \end{aligned}
 \]
 
@@ -894,8 +921,8 @@ And for the classification model it can be expressed as
 
 \[
 \begin{aligned}
-p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \int_{v_1} \dots \int_{v_J} \int_{\sigma_v^2}  \bigg[p(z_{ij, \ new} \ | \ \boldsymbol{\gamma}, \boldsymbol{v}, \sigma_v^2)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\gamma_1 ...  d\gamma_Pdv_1...dv_Jd\sigma_u^2
+p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \int_{v_1} \dots \int_{v_J} \int_{\sigma_{v}^2}  \bigg[p(z_{ij, \ new} \ | \ \boldsymbol{\gamma}, \mathbf{v}, \sigma_{v}^2)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_{v}^2 \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\gamma_1 ...  d\gamma_Pdv_1...dv_Jd\sigma_{v}^2
 \end{aligned}
 \]
 
@@ -926,11 +953,11 @@ For the Gamma model we do the same thing but using the appropriate distribution
 
 \[
 \begin{bmatrix}
-y_{ij, \ new}^{(1)} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\delta}^{(1)} + w_j^{(1)}}\Bigg) \\
+y_{ij, \ new}^{(1)} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}\Bigg) \\
 \\
 \vdots \\
 \\
-y_{ij, \ new}^{(2000)} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\delta}^{(2000)} + w_j^{(2000)}}\Bigg)
+y_{ij, \ new}^{(2000)} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}\Bigg)
 \end{bmatrix}
 \]
 
@@ -949,12 +976,16 @@ While it may not be immediately clear, these processes are really just mimicking
 \hypertarget{combining-the-model-predictions}{%
 \subsection{Combining the Model Predictions}\label{combining-the-model-predictions}}
 
-Now that we have two sets which represent approximate the posterior predictive distribution for unit \(i\) in domain \(j\) for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of \(y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}\), but it's unclear how we should combine the predictive distributions from the individual models to get here. We might just match MCMC iteration \(k\) from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up? To understand what to do about this, we'll dive into some theory behind building the models simultaneously.
+Now that we have two sets which represent approximate the posterior predictive distribution for unit \(i\) in domain \(j\) for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of \(y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}\), but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. We might just match MCMC iteration \(k\) from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up?
+
+One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. Moreover, as the two models grow to be more complicated this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
 
 \hypertarget{simultaneous-v.s-separate}{%
 \section{Simultaneous v.s Separate}\label{simultaneous-v.s-separate}}
 
-To get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors \textbf{between} models. There are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain (pfefferman paper). Finally, this section we will focus on the normal regression model since that is the one primarily used in the thesis. With all of that in mind, in this setting our posterior would be:
+As we just mentioned, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors \textbf{between} models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain\footnote{Pfeffermann, Terryn, \& Moura (2008)}.
+
+Finally, this result holds regardless of the particular models that we use, but for the sake of simplicity we'll use a logistic regression model with no random effects and a Normal linear regression model with no random effects. With all of that in mind, in this setting our posterior for both models would be:
 
 \[
 \begin{aligned}
@@ -966,8 +997,7 @@ We can expand this by writing out the likelihood more fully based on whether \(y
 
 \[
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot \\
-& \ \ \ \ \ \  p(\beta_1, ... \beta_P, \gamma_1,...\gamma_P, u_1, ... u_J, v_1, ... v_J, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
 \end{aligned}
 \]
 
@@ -1003,11 +1033,11 @@ So the full posterior for the model built simultaneously is equal to the product
 \hypertarget{practical-backing}{%
 \subsection{Practical Backing}\label{practical-backing}}
 
-To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are nearly identical
+To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are nearly identical.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-4-1} \end{center}
 
-\hypertarget{wrapping-it-all-up}{%
-\section{Wrapping it all up}\label{wrapping-it-all-up}}
+\hypertarget{posterior-predictive-distribution-finalized}{%
+\section{Posterior Predictive Distribution Finalized}\label{posterior-predictive-distribution-finalized}}
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
@@ -1026,30 +1056,44 @@ To get the posterior predictive distribution for \(\bar{y}_{j, \ new}\) we take 
 
 \[
 \begin{bmatrix}
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(1)} \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(2)} \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(1)} \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2)} \\
 \vdots \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(2000)}
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2000)}
 \end{bmatrix} \qquad = \qquad 
 \begin{bmatrix}
-\bar{y}_{j, \ new}^{(1)} \\
-\bar{y}_{j, \ new}^{(2)} \\
+\hat{Y}_{j, \ new}^{(1)} \\
+\hat{Y}_{j, \ new}^{(2)} \\
 \vdots \\
-\bar{y}_{j, \ new}^{(2000)}
+\hat{Y}_{j, \ new}^{(2000)}
 \end{bmatrix}
 \]
 
 Which is an approximation of the posterior predictive distribution for the mean of the response in domain \(j\).
 
+\hypertarget{prediction-intervals}{%
+\section{Prediction Intervals}\label{prediction-intervals}}
+
+In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \ref{bayes-freq} provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
+
+Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are predictions themselves, these prediction intervals are baked right into the prediction process.
+
+Unfortunately it is far less straightforward in the Frequentist setting. While prediction intervals are straightforward to generate for singular regression models, things get a lot more complicated with a two part model like ours. The reality is that we spent a good amount of time trying to construct a bootstrap procedure to generate these prediction intervals and beyond being very computationally intensive, we also couldn't find one that actually worked correctly. While this was certainly frustrating, the struggle to try to develop a process for generating these prediction intervals for the Frequentist models, really highlighted how nice it is that you get them for free in the Bayesian model.
+
+\hypertarget{a-note-of-caution}{%
+\subsubsection{A note of caution}\label{a-note-of-caution}}
+
+While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals will only be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estiamtes for free, but a 95\% prediction interval will likely not get 95\% coverage, thus indicating that the intervals themselves are also incorrect.
+
 \hypertarget{sim-study}{%
 \chapter{Simulation Study}\label{sim-study}}
 
-We now introduce and the set up for the simulation study that will be the main avenue through which we evaluate the various models. For each individual simulation settings we ran 400 iterations of the simulation.
+We now introduce and the set up for the simulation study that will be the main avenue through which we evaluate the various models.
 
 \hypertarget{aims}{%
 \section{Aims}\label{aims}}
 
-The the first aim for this simulation study is to understand when we might benefit from using a Bayesian model.
+The first aim for this simulation study is to understand when we might benefit from using a Bayesian model.
 
 In order to try to answer this question of \emph{when} we will be turning a few dials. Because we are functioning in a setting with grouped data with moderately small sample sizes we will vary the data along two axes
 \begin{itemize}
@@ -1067,71 +1111,53 @@ The second aim is to get a sense for the role that the prior plays in a Bayesian
 \item
   Informative
 \end{itemize}
-The idea to vary the quality of the priors comes out of the idea that while the likelihood does dominate the prior in large sample size settings, the prior plays a much larger role in smaller sample settings and thus we might expect a lot more regularization and convergence in the bayesian models when more information is added through the priors.
+The idea to vary the quality of the priors comes out of the idea that while the likelihood does dominate the prior in large sample size settings, the prior plays a much larger role in smaller sample settings and thus we might expect a lot more regularization and model convergence in the Bayesian models when more information is added through the priors.
 
-To quantify the idea of \emph{benefiting} from using a Bayesian model we will be looking to see if it has
-\begin{itemize}
-\tightlist
-\item
-  Lower prediction error
-\item
-  Better coverage
-\item
-  Lower Bias
-\end{itemize}
 \hypertarget{data-and-dials}{%
 \section{Data and Dials}\label{data-and-dials}}
+
+\hypertarget{estimands}{%
+\subsection{Estimands}\label{estimands}}
+
+The primary estimand for this simulation study will be \(Y_j\): the mean of our response variable in domain \(j\). In order to stay consistent across all models and simulation runs, we only made predictions on group \(1\).
 
 \hypertarget{data-generating-process}{%
 \subsection{Data Generating Process}\label{data-generating-process}}
 
 Our population data for the simulation was generated by the following process that takes as inputs the number of domains (\(J\)) and the number of total observations (\(N\)). The number of observations per group is thus (\(n = N/J\)). The population was generated using \(N = 50\cdot 500\) and \(J = 50\), to give us 500 observations per group.
-\begin{Shaded}
-\begin{Highlighting}[]
-\NormalTok{DGP }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(N, J) \{}
-  
-  \CommentTok{\# Generate X}
-\NormalTok{  X }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(N, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{)}
-  
-  \CommentTok{\# observations per group}
-\NormalTok{  n }\OtherTok{\textless{}{-}}\NormalTok{ N}\SpecialCharTok{/}\NormalTok{J}
-\NormalTok{  group }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\FunctionTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, J), n) }
-    
-  \CommentTok{\# Generate REs for each model individually}
-\NormalTok{  random\_effects\_y }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(J, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }
-\NormalTok{  random\_effects\_z }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(J, }\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{) }
-    
-  \CommentTok{\# 1.5 chosen so that we have \textless{}50\% 0\textquotesingle{}z}
-\NormalTok{  xb }\OtherTok{\textless{}{-}} \FloatTok{1.5} \SpecialCharTok{+}\NormalTok{ X }\SpecialCharTok{+}\NormalTok{ random\_effects\_z[group]}
-  
-  \CommentTok{\# Probability of being non{-}zero}
-\NormalTok{  prob }\OtherTok{\textless{}{-}} \FunctionTok{exp}\NormalTok{(xb) }\SpecialCharTok{/}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{+} \FunctionTok{exp}\NormalTok{(xb)) }
-  
-  \CommentTok{\# simulating Z}
-\NormalTok{  Z }\OtherTok{\textless{}{-}} \DecValTok{1}\SpecialCharTok{*}\NormalTok{(}\FunctionTok{runif}\NormalTok{(N) }\SpecialCharTok{\textless{}}\NormalTok{ prob) }
-    
-  \CommentTok{\# Make Y}
-\NormalTok{  ypure }\OtherTok{\textless{}{-}} \DecValTok{10} \SpecialCharTok{+}\NormalTok{ X }\SpecialCharTok{+}\NormalTok{ random\_effects\_y[group] }
-    
-  \CommentTok{\# generate gamma distributed Y}
-\NormalTok{  Y }\OtherTok{\textless{}{-}} \FunctionTok{rgamma}\NormalTok{(N, }\AttributeTok{shape =} \DecValTok{3}\NormalTok{, }\AttributeTok{rate =} \DecValTok{1}\SpecialCharTok{/}\NormalTok{ypure) }
-  
-  \CommentTok{\# zero{-}inflate data by multiplying by Z}
-\NormalTok{  Y }\OtherTok{\textless{}{-}}\NormalTok{ Z}\SpecialCharTok{*}\NormalTok{Y }
-  
-  \FunctionTok{return}\NormalTok{(}\FunctionTok{tibble}\NormalTok{(X, Y, Z, group))}
 
-\NormalTok{\}}
-\end{Highlighting}
-\end{Shaded}
+The DGP is defined as follows
+
+\[
+\begin{aligned}
+z_{ij} &\sim \text{Bernoulli}(p_{ij}) \ \ \ \ \text{where} \ \ \ \ p_{ij} = \frac{\text{exp}\big(1.5 + X_{ij} + v_j\big)}{1 + \text{exp}\big(1.5 + X_{ij} + v_j\big)} \\
+y^*_{ij} &\sim \text{Gamma}(3, \  1/b_{ij}) \ \ \ \ \text{where} \ \ \ \ b_{ij} = 10 + X_{ij} + u_{j} \\
+y_{ij} &=z_{ij}\cdot y^*_{ij}
+\end{aligned}
+\]
+
+Where \(X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\), \(v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\) and \(u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\)
+
 This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response \(Y\) and a covariate \(X\). For example if we examine the generated population data we see the following.
 
 The response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-7-1} \end{center}
+\begin{figure}
 
-If we examine the correlation between \(X\) and \(Y\) we get 0.305, and indeed when we examine the plot of \(Y\) against \(X\) we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-8-1} \end{center}
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-6-1} 
 
+}
+
+\caption{The distribution of the response variable in the population that we generated for our simulation.}\label{fig:unnamed-chunk-6}
+\end{figure}
+If we examine the correlation between \(X\) and \(Y\) we get 0.305, for the entire data set. And indeed when we examine the plot of \(Y\) against \(X\) we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-7-1} 
+
+}
+
+\caption{Scatterplot of the main covariate against the response variable in Group 1 of our generated population data.}\label{fig:unnamed-chunk-7}
+\end{figure}
 \hypertarget{dials}{%
 \subsection{Dials}\label{dials}}
 
@@ -1143,7 +1169,7 @@ The exact levels of the dials for number of groups and number of observations pe
 \item
   J = \(\{5, 10, 25, 50\}\)
 \end{itemize}
-We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how ``small'' the data is. In order to generate data sets for these settings we first sampled \(J\) groups from the population, and then within those groups we sampled \(n\) observations.
+We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how ``small'' the data is. In order to generate data sets for these settings we first sampled \(J\) groups from the population, and then within those groups we sampled \(n\) observations. Importantly, because we were always predicting on group 1, we always forced that group into each simulation iteration. For each of the 12 individual settings we ran 400 total iterations of the simulation.
 
 Next, within each \((n,\ J)\) combination we built the Bayesian models with two types of priors: Non-Informative and Informative. Note that across our models we have a variety of parameters that require priors.
 \begin{itemize}
@@ -1154,7 +1180,7 @@ Next, within each \((n,\ J)\) combination we built the Bayesian models with two 
 \item
   For the Logistic regression model we have new fixed effects coefficients \((\boldsymbol{\gamma})\) and the variance parameter for the random intercepts \((\sigma_v^2)\).
 \end{itemize}
-Note that across all models the random effects are assumed to be \(\mathcal{N}(0, \tau^2)\) distributed and thus can be thought of as universally having a normal prior with a variance hyperparameter. While the distributions chosen for these priors were introduced in the methods section, we will now choose real valued numbers used as parameters for the priors.
+Note that across all models the random effects are assumed to be \(\mathcal{N}(0, \tau^2)\) distributed and thus can be thought of as universally having a normal prior with a variance hyperparameter. While the distributions chosen for these priors were introduced in the methods section, we will now choose real valued numbers used to center and scale those priors.
 
 These parameters that require priors can be placed into 3 main groups: fixed effects, variance, and shape. We simplified the process of assigning the levels of priors by not varying the priors within these groups within each bracket of quality.
 
@@ -1162,7 +1188,7 @@ These parameters that require priors can be placed into 3 main groups: fixed eff
 \subsubsection{Non-Informative}\label{non-informative}}
 
 In order to include no prior knowledge in your analysis, a flat prior can be used: \(p(\theta) \propto 1\). Recall that the posterior can be factored into a normalized product of the likelihood and the prior. Thus, to use a flat, non-informative, prior is to ``let the data speak for itself'' and utilize only the likelihood function in estimating the posterior. That being said prior distributions should still not cover parameter values that are impossible, and thus the flat priors will have supports that are restricted to the range of possible values that the parameter could take on. For the fixed effects parameters a support of \((-100, 100)\) was used and for the variance and shape parameters \((0, 100)\) was used.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-10-1} \end{center}
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 \hypertarget{informative}{%
 \subsubsection{Informative}\label{informative}}
@@ -1170,10 +1196,10 @@ In order to include no prior knowledge in your analysis, a flat prior can be use
 Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
 An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients are small \emph{positive} numbers between the range of 0 to 10 and thus the prior \(\mathcal{N}(5, 9)\) was used.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-11-1} \end{center}
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-10-1} \end{center}
 
 Next, following the advice of Gelman 2013 the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-12-1} \end{center}
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-11-1} \end{center}
 
 Finally, since the non-zero portion of the response variable has a mean of 31.12, we can use the following ``back of the napkin'' calculation to get an idea for what the shape parameter should be centered on. Recall that a \(\text{Gamma}(\alpha, \beta)\) distribution has mean \(\alpha / \beta\) and variance \(\alpha / \beta^2\).
 
@@ -1193,13 +1219,8 @@ but now plugging in our approximate value for \(\beta\) gives us
 \frac{\alpha}{0.09} \approx 31.4 \implies \alpha \approx 2.8
 \]
 
-And so we might guess that the shape parameter is around 3. Obviously this calculation will vary quite a bit depending on the sample that we generate, so we use the scale parameter of 5 to empasize our uncertainty in that estimate.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-13-1} \end{center}
-
-\hypertarget{estimands}{%
-\section{4.3 Estimands}\label{estimands}}
-
-The primary estimand for this simulation study will be \(\mu_j^y\): the mean of our response variable \(y\) in domain \(j\). In order to stay consistent across all models and simulation runs, we only made predictions on domain \(1\).
+And so we might guess that the shape parameter is around 3. Obviously this calculation will vary quite a bit depending on the sample that we generate, so we use the scale parameter of 5 to emphasize our uncertainty in that estimate. Thus the complete prior used was \(\text{Half-Cauchy}(3, 5)\).
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-12-1} \end{center}
 
 \hypertarget{methods}{%
 \section{Methods}\label{methods}}
@@ -1214,7 +1235,7 @@ There will be 3 different models run throughout the simulation.
   \item
     Linear Random Effects Model (\texttt{lme4::lmer})
   \item
-    Generalized Linear Random Effects Model (Binomial) (\texttt{lme4::lmer})
+    Logistic regression Random Effects Model (\texttt{lme4::glmer})
   \end{itemize}
 \item
   Bayesian two-part \#1
@@ -1238,12 +1259,12 @@ There will be 3 different models run throughout the simulation.
 \hypertarget{performance-metrics}{%
 \section{Performance metrics}\label{performance-metrics}}
 
-Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(\mu^y_1 = 23.7\)
+Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\)
 
 The most broadly used and expected performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is computed as follows:
 
 \[
-\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{\mu}^y_{j, s} - \mu_{j}\bigg)^2}
+\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{\mu}^y_{j, s} - Y_{j}\bigg)^2}
 \]
 
 Where \(S\) is the total number of simulation reps, \(\hat{\mu}_{j, s}\) is the estimated mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\), and \(\mu_{j, s}\) is the true mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\).
@@ -1251,19 +1272,19 @@ Where \(S\) is the total number of simulation reps, \(\hat{\mu}_{j, s}\) is the 
 Next we will be examining the Empirical Bias of each model:
 
 \[
-\text{Empirical Bias}_j = E[\hat{\mu}^y_j] - \mu^y_{j} \qquad \text{where} \qquad E[\hat{\mu}^y_j] = \frac{1}{S}\sum_{s = 1}^S\hat{\mu}^y_{j, s}
+\text{Empirical Bias}_j = E[\hat{\mu}_j] - Y_{j} \qquad \text{where} \qquad E[\hat{\mu}_j] = \frac{1}{S}\sum_{s = 1}^S\hat{\mu}_{j, s}
 \]
 
 As well as the Empirical Variance of each model:
 
 \[
-\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{\mu}^y_{j,s} - E[\hat{\mu}^y_j]\Big)
+\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{\mu}_{j,s} - E[\hat{\mu}_j]\Big)
 \]
 
-We will look at Confidence Interval coverage at a 95\% confidence level for the Bayesian Models:
+We will look at Predictive Interval (PI) coverage at a 95\% confidence level for the Bayesian Models:
 
 \[
-\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(\mu^y_{j} \in \text{CI}(\hat{\mu}^y_{j, s}))
+\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(Y_{j} \in \text{PI}(\hat{\mu}_{j, s}))
 \]
 
 And finally we will look at the total number of model failures.
@@ -1278,6 +1299,11 @@ Importantly, one solution to combating MCMC convergence issues is to bump up the
 
 \hypertarget{res-sec}{%
 \chapter{Results}\label{res-sec}}
+
+\hypertarget{expectations}{%
+\section{Expectations}\label{expectations}}
+
+Before diving into the actual results, we'll first give a brief overview of what we were expecting to see.
 
 We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in section 4.5. Across all of these sections we will label simulation settings like \(n = \cdot\) - \(g = \cdot\). For example if we have \((n = 15, g = 10 )\) it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on \(n\times g = 150\) data points.
 
@@ -1299,9 +1325,15 @@ This grid is organized so that the setting with the smallest sample sizes and sm
 \]
 
 Importantly we omit the Frequentist model in the following plot because it registered no model failures across the entire simulation. The model failure-rate results are as follows:
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{figure}
 
-Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(g = 10\) to \(g=5\) that is quite alarming.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/failures-1} 
+
+}
+
+\caption{Model Failure rates across all simulation settings.}\label{fig:failures}
+\end{figure}
+Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(J = 10\) to \(J=5\) that is quite alarming.
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 
@@ -1320,50 +1352,80 @@ Simulation Rep & Model & Prediction & Model Failure \\
 2 & Frequentist & $26.98$ & 0 \\ 
 \bottomrule
 \end{longtable}
-Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain if we included all models in the analysis.
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-17-1} \end{center}
+Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain in each setting.
+\begin{figure}
 
-Clearly the Bayesian models fail far too much for any trustworthy and meaningful conclusions to be made in any of the \(g = 5\) settings and so they will essentially be ommited from the rest of the evaluation. While this may seem very disappointing, there is still an interesting takeaway that can be extracted from the high failure rates in those settings.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/keep-1} 
+
+}
+
+\caption{Percent of Results we would get to use if we only included simulation iterations where none of the models failed.}\label{fig:keep}
+\end{figure}
+Clearly the Bayesian models fail far too much for any trustworthy and meaningful conclusions to be made in any of the \(g = 5\) settings and so they will essentially be omited from the rest of the evaluation. While this may seem very disappointing, there is still an interesting takeaway that can be extracted from the high failure rates in those settings.
 
 \hypertarget{model-regularization-through-informative-priors}{%
 \subsection{Model Regularization through Informative Priors}\label{model-regularization-through-informative-priors}}
 
 If we only compare the ``Flat Priors, Normal'' and ``Informative Priors, Normal'' failure rates, we are able to get a sense for the role that the prior distributions play here. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-18-1} \end{center}
+\begin{figure}
 
-While in the \(g = 25\) and \(g = 50\) settings both models exhibit no failures, we do indeed see that in the smaller settings where \(g = 5\) and \(g = 10\) the model with informative priors does have lower failure rates than the model with flat priors. While clearly, informative priors do not completely ameliorate the model failure issues, it's clear that they do have a positive impact on how often a Bayesian model converges. Although we aren't saying anything about the actual performance metrics of the models here, a Bayesian model that does not converge is a model that cannot be used. This is not to say that one should always use informative priors in every Bayesian analysis setting, in fact sometimes you have no prior knowledge to employ. Rather, the lesson here should be that if you are experiencing model convergence issues in a Bayesian analysis setting, one potential fix could be to add more information into your priors.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/regularization-1} 
+
+}
+
+\caption{Model Failure Rate comparison between the Bayesian Normal model with flat priors and with informative priors.}\label{fig:regularization}
+\end{figure}
+While in the \(J = 25\) and \(J = 50\) settings both models exhibit no failures, we do indeed see that in the smaller settings where \(J = 5\) and \(J = 10\) the model with informative priors does have lower failure rates than the model with flat priors. While informative priors do not completely ameliorate the model failure issues, it's clear that they do have a positive impact on how often a Bayesian model converges. Although we aren't saying anything about the actual performance metrics of the models here, a Bayesian model that does not converge is a model that cannot be used. This is not to say that one should always use informative priors in every Bayesian analysis setting, in fact sometimes you have no prior knowledge to employ. Rather, the lesson here should be that if you are experiencing model convergence issues in a Bayesian analysis setting, one potential fix could be to add more information into your priors.
 
 \hypertarget{root-mean-squared-error}{%
 \section{Root Mean Squared Error}\label{root-mean-squared-error}}
 
 We begin by comparing the RMSE of our models. As a reminder, due to the high model failure rates, the settings with \(g = 5\) are not included in theses evaluations. The performance metrics below are calculated over the simulation reps in which none of the models being evaluated failed to converge (although this is only drops results in the settings where \(g = 10\) since we observed no model failures at larger values of \(g\)).
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-21-1} \end{center}
+\begin{figure}
 
-As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to ``learn'' the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors.The only setting in which they are outperformed is when \(g = 5\) where they are marginally outperformed by the frequentist model. Note that the true value of the response for group one was \(23.7\) which gives a sense of scale for this model prediction error metric. While there are small difference in how the models performed, the differences are pretty marginal given the scale of our response.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/rmse-1} 
+
+}
+
+\caption{Root Mean Squared Error}\label{fig:rmse}
+\end{figure}
+As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to ``learn'' the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors.The only setting in which they are outperformed is when \(g = 10\) where they are marginally outperformed by the frequentist model. Note that the true value of the response for group one was \(23.7\) which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, the differences are pretty marginal given the scale of our response.
 
 \hypertarget{empirical-variance}{%
 \section{Empirical Variance}\label{empirical-variance}}
 
 Next we look at the empirical variance which gives a sense for how variable the predictions of the various models were across the different data sets in each simulation run.
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-22-1} \end{center}
+\begin{figure}
 
-Again we see the decrease in variance as \(n\) and \(g\) increase that we'd expect to see. And besides small amounts of separation between the models in the setting \((n = 15, \ g = 10)\), they all seem to perform very similarly.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/variance-1} 
+
+}
+
+\caption{Empirical Variance}\label{fig:variance}
+\end{figure}
+Again we see the decrease in variance as \(n\) and \(J\) increase that we'd expect to see. And besides small amounts of separation between the models in the setting \((n = 15, \ J = 10)\), they all seem to perform very similarly.
 
 \hypertarget{empirical-bias}{%
 \section{Empirical Bias}\label{empirical-bias}}
 
-Next we examine the Empirical Bias of the same three models. These results are by far the most unexpected as we do not see clear decreases in bias as \(n\) and \(g\) increase:
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-23-1} \end{center}
+Next we examine the Empirical Bias of the same three models. These results are by far the most unexpected as we do not see clear decreases in bias as \(n\) and \(J\) increase:
+\begin{figure}
 
-That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where \(g = 10\) due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. These differences are quite marginal given the scale of the response and so we want to be wary of applying to much weight to the fact that the Bayesian Normal models perform better here.
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/bias-1} 
+
+}
+
+\caption{Empirical Bias}\label{fig:bias}
+\end{figure}
+That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where \(g = 10\) due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. I truly wish that I could take this plot and proclaim the Bayesian Normal model with informative priors to perform far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that initially were a bit befuddling in Figure \ref{fig:bias}.
 
 \hypertarget{coverage}{%
 \section{Coverage}\label{coverage}}
 
 And finally, we examine the coverage of the Bayesian models. Note that we do not include the frequentist model here.
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-24-1} \end{center}
+\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-16-1} \end{center}
 
-Interestingly, we see significant over-coverage in each setting for every model.
+Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind is that our simulation data was generated in a Frequentist way. What I mean by that is that all of the parameters used to generate the data were fixed constants, and not random variables (as a Bayesian conceptualizes them to be). For this reason all of the Bayesian models are, at least slightly, misspecified.
 
 \appendix
 
@@ -1434,11 +1496,17 @@ Angel, E. (2001a). \emph{Batch-file computer graphics : A bottom-up approach wit
 \leavevmode\vadjust pre{\hypertarget{ref-angel2002a}{}}%
 Angel, E. (2001b). \emph{Test second book by angel}. Boston, MA: Wesley Addison Longman.
 
+\leavevmode\vadjust pre{\hypertarget{ref-gelman2006prior}{}}%
+Gelman, A. (2006). Prior distributions for variance parameters in hierarchical models (comment on article by browne and draper).
+
 \leavevmode\vadjust pre{\hypertarget{ref-gelman1995bayesian}{}}%
 Gelman, A., Carlin, J. B., Stern, H. S., \& Rubin, D. B. (1995). \emph{Bayesian data analysis}. Chapman; Hall/CRC.
 
 \leavevmode\vadjust pre{\hypertarget{ref-mcconville2020tutorial}{}}%
 McConville, K. S., Moisen, G. G., \& Frescino, T. S. (2020). A tutorial on model-assisted estimation with application to forest inventory. \emph{Forests}, \emph{11}(2), 244.
+
+\leavevmode\vadjust pre{\hypertarget{ref-pfeffermann2008small}{}}%
+Pfeffermann, D., Terryn, B., \& Moura, F. A. (2008). Small area estimation under a two-part random effects model with application to estimation of literacy in developing countries. \emph{Survey Methodology}, \emph{34}(2), 235--249.
 
 \end{CSLReferences}
 

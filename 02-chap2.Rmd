@@ -60,7 +60,7 @@ Let's pause to ask ourselves what is random in Equation \@ref(eq:freq-ci). For s
 
 It's perhaps easiest to understand how to interpret Equation \@ref(eq:freq-ci) through a quick simulation and visualization. If we generated a 100 new samples from the population with the true parameter $\theta$ being 5, and computed a confidence interval for each, we could then plot all 100 intervals and count how many of them contain the true parameter.
 
-```{r ci-coverage-ex, message=F, warning=F, echo=F, fig.align='center', out.width='80%'}
+```{r ci-coverage-ex, message=F, warning=F, echo=F, fig.align='center', out.width='80%', fig.cap='A visualization of Frequentist confidence intervals.'}
 library(tidyverse)
 set.seed(7)
 pop <- rnorm(10000, 5, 1)
@@ -203,7 +203,7 @@ $$
 
 where each have notably been influenced by both the prior and the likelihood. It can be helpful to visualize what has happened here with a plot.
 
-```{r bayes-dists, echo=F, message=F, warning=F, fig.align='center', out.width='80%'}
+```{r bayes-dists, echo=F, message=F, warning=F, fig.align='center', out.width='80%', fig.cap="The Prior, Likelihood, and Posterior for this example all plotted together."}
 library(tidyverse)
 set.seed(110)
 

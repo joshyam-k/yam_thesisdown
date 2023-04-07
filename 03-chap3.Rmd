@@ -15,6 +15,7 @@ z_{ij} =
 \end{cases}
 $$
 
+
 ## Model Structure Formalized
 
 We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do, and I think that looking at the steps draws out a lot of helpful intuition.
@@ -47,7 +48,7 @@ Although we could model these two parts however we wanted to, we will use a line
 We fit a generalized linear model with random intercepts to the **non-zero** portion of the data (the $*$ helps differentiate this model from our final model). The linear predictor is specified as follows
 
 $$
-\mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij} \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_u^2)
+\mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij} \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
 With a link function $g^{-1}$ and a probability distribution for the response, we get the final model as
@@ -63,10 +64,10 @@ Here, $\mathbf{x}_{ij}^T = (x^1_{ij}, ..., x^P_{ij})$ is a $P\times 1$ vector of
 Next we fit a logistic regression random intercepts model to the full data set
 
 $$
-P(z_{ij} = 1) = p_{ij} = \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j)}} \qquad \text{where} \qquad v_j \sim \mathcal{N}(0, \sigma_v^2)
+P(z_{ij} = 1) = p_{ij} = \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j)}} \qquad \text{where} \qquad v_j \sim \mathcal{N}(0, \sigma_{v}^2)
 $$
 
-Here $\boldsymbol{\gamma}$ is a $1\times P$ vector of fixed effects and $v_j$ is the random effect associated with domain $j$. Again, $\sigma^2_v$ is the between domain variance parameter.
+Here $\boldsymbol{\gamma}$ is a $1\times P$ vector of fixed effects and $v_j$ is the random effect associated with domain $j$. Again, $\sigma^2_{v}$ is the between domain variance parameter.
 
 We will get into how each of these model pieces are estimated in the next section, but once we have estimates for all of our coefficients, we get our final model by taking the product of these two estimated models.
 
@@ -77,7 +78,7 @@ $$
 And we get a prediction for a single domain by averaging the predictions over all samples in that domain
 
 $$
-\hat{\bar{y}}_j = \frac{1}{n_j}\sum_{i \in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij}
+\hat{Y}_j = \frac{1}{n_j}\sum_{i \in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij}
 $$
 
 Importantly, while $y^*_{ij}$ is fit on only the non-zero data, and $p_{ij}$ is fit on the entire data, when we make predictions on new data, both models are applied to the entire new data set.
@@ -93,7 +94,7 @@ In most cases (and in particular in most statistical software), Frequentist regr
 
 ### Bayesian
 
-Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_u, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
+Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_{u}, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
 
 We'll start by describing the logistic regression model, before moving on to the two different versions of the generalized linear regression component.
 
@@ -108,19 +109,19 @@ $$
 So far we have done nothing differently than in the usual frequentist formulation of a model, but now instead of treating our model parameters as fixed but unknown, we treat them as random variables and attach priors to them. The random intercepts are given a normal prior centered on zero with hyper-prior $\sigma_v^2$.
 
 $$
-v_j \ | \ \sigma_v^2 \sim \mathcal{N}(0, \sigma_v^2)
+v_j \ | \ \sigma_{v}^2 \sim \mathcal{N}(0, \sigma_{v}^2)
 $$
 
-Although $\boldsymbol{\gamma}$ and $\sigma_v^2$ are different parameters than the one's in the previous model, we attach the same priors to them
+Although $\boldsymbol{\gamma}$ and $\sigma_{v}^2$ are different parameters than the one's in the previous model, we attach the same priors to them
 
 $$
 \begin{aligned}
 \gamma_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in 1...P \\
-\sigma_v^2 &\sim \text{Half-Cauchy}(0, r_1^2)
+\sigma_{v}^2 &\sim \text{Half-Cauchy}(0, r_1^2)
 \end{aligned}
 $$
 
-The prior parameters $m_p, s_p^2, r_1^2$ are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that "even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region." (gelman 2006). While dependence between priors *can* be modeled in a bayesian frame, we will assume that all of our priors are independent of each other.
+The prior parameters $m_p, s_p^2, r_1^2$ are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that "even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region."^[@gelman2006prior]. While dependence between priors *can* be modeled in a bayesian frame, we will assume that all of our priors are independent of each other.
 
 An example of what the prior distributions look like across a few of their parameter values is shown below.
 
@@ -199,18 +200,18 @@ Again, in estimating the actual **model parameters** in a Bayesian analysis the 
 
 $$
 \begin{aligned}
-p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1, ...\gamma_P, v_1,... ,v_J, \sigma_v^2) \\
- &= \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1)\cdot...\cdot p(\gamma_P)p(v_1) \cdot ... \cdot p(v_J)p(\sigma_v^2)
+p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2)\bigg]\cdot p(\gamma_1, ...\gamma_P, v_1,... ,v_J, \sigma_{v}^2) \\
+ &= \bigg[\prod_{i=1}^np(y_i \ | \ \boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2)\bigg]\cdot p(\gamma_1)\cdot...\cdot p(\gamma_P)p(v_1) \cdot ... \cdot p(v_J)p(\sigma_{v}^2)
 \end{aligned}
 $$
 
 If we were able to compute a closed form expression for the posterior, we could then attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only $\sigma_u^2$. In that case, the marginal posterior can be computed as follows:
 
 $$
-p(\sigma_v^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P du_1 ... du_Jd\sigma_{\varepsilon}^2
+p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
 $$
 
-The result would be a probability density function that encapsulates all of our information about $\sigma_u^2$.
+The result would be a probability density function that encapsulates all of our information about $\sigma_{v}^2$.
 
 As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language "Stan". The specific version of MCMC algorithm that Stan runs is called "Hamiltonian Monte Carlo". While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that *has the desired posterior distribution as it's stationary distribution.* Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
 
@@ -218,9 +219,9 @@ In it's most basic configuration Stan will output 2,000 sets of parameter draws 
 
 $$
 \begin{bmatrix}
-  \gamma_1^{(1)} & \dots & \gamma_P^{(1)} & v_1^{(1)} & \dots & v_J^{(1)}  & (\sigma_v^2)^{(1)} \\
+  \gamma_1^{(1)} & \dots & \gamma_P^{(1)} & v_1^{(1)} & \dots & v_J^{(1)}  & (\sigma_{v}^2)^{(1)} \\
   \\ \vdots   &  & \vdots  & \vdots & &  \vdots & \vdots  \\ \\
-  \gamma_1^{(2000)} & \dots &\gamma_P^{(2000)} & v_1^{(2000)}& \dots & v_J^{(2000)} & (\sigma_v^2)^{(2000)}
+  \gamma_1^{(2000)} & \dots &\gamma_P^{(2000)} & v_1^{(2000)}& \dots & v_J^{(2000)} & (\sigma_{v}^2)^{(2000)}
 \end{bmatrix}
 $$
 
@@ -231,7 +232,7 @@ One really nice aspect of this is that the while the combination of all of the c
 The simplest way to model the non-zero response is through simple linear regression i.e generalized linear regression using the identity link and assuming a Normal distribution on the response. Again it may seem silly to introduce a simple linear regression model in this way, but we do so to stress that this form of the model still places just as many distributional assumptions as a more common GLM does.
 
 $$
-y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij}
+y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j + \varepsilon_{ij}
 $$
 
 In this setting, the error term is assumed to be distributed $\mathcal{N}(0, \sigma_{\varepsilon}^2)$.
@@ -239,10 +240,10 @@ In this setting, the error term is assumed to be distributed $\mathcal{N}(0, \si
 Again the random intercepts have priors
 
 $$
-u_j \ | \ \sigma_u^2 \sim \mathcal{N}(0, \sigma_u^2)
+u_j \ | \ \sigma_{u}^2 \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
-with hyperprior (i.e priors put on a hyperparameter) $\sigma_u^2$.
+with hyperprior (i.e priors put on a hyperparameter) $\sigma_{u}^2$.
 
 And the other model parameters are given the same class of priors as before.
 
@@ -250,7 +251,7 @@ $$
 \begin{aligned}
 \beta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
 \sigma_{\varepsilon}^2 &\sim \text{Half-Cauchy}(0, r_1^2) \\
-\sigma_u^2 &\sim \text{Half-Cauchy}(0, r_2^2)
+\sigma_{u}^2 &\sim \text{Half-Cauchy}(0, r_2^2)
 \end{aligned}
 $$
 
@@ -258,8 +259,8 @@ Importantly while $s_p^2, r_1^2, r_2^2$ are given the same names as in the previ
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1, ..., \beta_P, u_1, ..., u_J, \sigma_u^2, \sigma_{\varepsilon}^2) \\
- &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u},\sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_u^2)p( \sigma_{\varepsilon}^2) 
+p(\boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) &\propto \bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1, ..., \beta_P, u_1, ..., u_J, \sigma_{u}^2, \sigma_{\varepsilon}^2) \\
+ &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta}, \mathbf{u},\sigma_{u}^2, \sigma_{\varepsilon}^2)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \sigma_{\varepsilon}^2) 
 \end{aligned}
 $$
 
@@ -267,9 +268,9 @@ and we employ MCMC using Stan to simulate draws from it. Similarly, the Stan out
 
 $$
 \begin{bmatrix}
-  \beta_1^{(1)} & \dots & \beta_P^{(1)} & u_1^{(1)} & \dots & u_J^{(1)} & (\sigma_u^2)^{(1)} & (\sigma_{\varepsilon}^2)^{(1)} \\
+  \beta_1^{(1)} & \dots & \beta_P^{(1)} & u_1^{(1)} & \dots & u_J^{(1)} & (\sigma_{u}^2)^{(1)} & (\sigma_{\varepsilon}^2)^{(1)} \\
   \\ \vdots &  & \vdots & \vdots & & \vdots & \vdots & \vdots \\ \\
-  \beta_1^{(2000)} & \dots & \beta_P^{(2000)} & u_1^{(2000)} & \dots & u_J^{(2000)} & (\sigma_u^2)^{(2000)} & (\sigma_{\varepsilon}^2)^{(2000)}
+  \beta_1^{(2000)} & \dots & \beta_P^{(2000)} & u_1^{(2000)} & \dots & u_J^{(2000)} & (\sigma_{u}^2)^{(2000)} & (\sigma_{\varepsilon}^2)^{(2000)}
 \end{bmatrix}
 $$
 
@@ -328,26 +329,26 @@ $$
 The random intercepts have the same types of prior as in the normal model:
 
 $$
-u_j \ | \ \sigma_u^2 \sim \mathcal{N}(0, \sigma_u^2)
+u_j \ | \ \sigma_{u}^2 \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
-with hyperprior $\sigma_u^2$. We then define priors for the other parameters as
+with hyperprior $\sigma_{u}^2$. We then define priors for the other parameters as
 
 $$
 \begin{aligned}
-\delta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
+\beta_p &\sim \mathcal{N}(m_p, s_p^2)  \qquad \forall p\in P \\
 \alpha &\sim \text{Half-Cauchy}(t_1, r_1^2)\\
-\sigma_w^2 &\sim \text{Half-Cauchy}(0, r_2^2)
+\sigma_{u}^2 &\sim \text{Half-Cauchy}(0, r_2^2)
 \end{aligned}
 $$
 
 where $m_p, s_p^2, t_1, r_1, r_2$ are real valued numbers. While the Cauchy prior put on the shape parameter $\alpha$ is still bounded below by zero, we now allow it's mode to be set based on the given data.
 
-Letting $\boldsymbol{\delta} = (\delta_1, ..., \delta_P)$ and $\mathbf{w} = (w_1, ..., w_J)$ we can write out the joint posterior distribution as
+Letting $\boldsymbol{\delta} = (\delta_1, ..., \delta_P)$ and $\mathbf{u} = (u_1, ..., u_J)$ we can write out the joint posterior distribution as
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \alpha \ | \ \mathbf{y}) &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_u^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_u^2)p( \alpha) 
+p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y}) &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_{u}^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \alpha) 
 \end{aligned}
 $$
 
@@ -361,8 +362,7 @@ $$
 \begin{aligned}
 \hat{y}^*_{ij} &= \mathbf{x}_{ij}^T\hat{\boldsymbol{\beta}} + \hat{u}_j \\
 \hat{p}_{ij} &= \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\hat{\boldsymbol{\gamma}} + \hat{v}_j)}} \\
-\hat{y}_{ij} &= \hat{y}^*_{ij}\cdot \hat{p}_{ij} \\
-\hat{\bar{y}_j} &= \sum_{i \in n_j}\hat{y}_{ij}
+\hat{Y}_{j} &= \sum_{i\in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij} 
 \end{aligned}
 $$
 
@@ -402,12 +402,12 @@ $$
 
 Note that the quality of this posterior predictive distribution depends strongly on the quality of our posterior distribution. In other words, this distribution will only accurately capture the structure of new data points, if the underlying posterior distribution correctly captures the structure of the parameters of interest.
 
-As we move on to the expression for each full model, just remember that while the integral looks very complicated, all that we're doing is incorporating both sources of variability and averaging across the possible values of the model parameters. The posterior predictive distribution for a point $y^*_{ij, \ new}$ using the normal regression model can be written as:
+As we move on to the expression for each full model, just remember that while the integral looks very complicated, all that we're doing is incorporating both sources of variability and averaging across the possible values of the model parameters. The posterior predictive distribution for a point $y^*_{ij, \ new}$ using the Normal regression model can be written as:
 
 $$
 \begin{aligned}
-p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_u^2} \int_{\sigma_{\varepsilon}^2} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_u^2, \sigma_{\varepsilon}^2)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_u^2d\sigma_{\varepsilon}^2
+p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_{u}^2} \int_{\sigma_{\varepsilon}^2} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_{u}^2d\sigma_{\varepsilon}^2
 \end{aligned}
 $$
 
@@ -415,8 +415,8 @@ Similarly, for the Gamma model it can be written as
 
 $$
 \begin{aligned}
-p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\delta_1}  \dots \int_{\delta_P} \int_{w_1} \dots \int_{w_J} \int_{\sigma_w^2} \int_{\alpha} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\delta}, \boldsymbol{w}, \sigma_w^2, \alpha)p(\boldsymbol{\delta}, \mathbf{w}, \sigma_w^2, \alpha \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\delta_1 ...  d\delta_Pdw_1...dw_Jd\sigma_w^2d\alpha
+p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \int_{u_1} \dots \int_{u_J} \int_{\sigma_{u}^2} \int_{\alpha} \bigg[p(y^*_{ij, \ new} \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha)p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\beta_1 ...  d\beta_Pdu_1...du_Jd\sigma_{u}^2d\alpha
 \end{aligned}
 $$
 
@@ -424,8 +424,8 @@ And for the classification model it can be expressed as
 
 $$
 \begin{aligned}
-p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \int_{v_1} \dots \int_{v_J} \int_{\sigma_v^2}  \bigg[p(z_{ij, \ new} \ | \ \boldsymbol{\gamma}, \boldsymbol{v}, \sigma_v^2)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})\bigg] \\
-& \ \ \ \ \ d\gamma_1 ...  d\gamma_Pdv_1...dv_Jd\sigma_u^2
+p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \int_{v_1} \dots \int_{v_J} \int_{\sigma_{v}^2}  \bigg[p(z_{ij, \ new} \ | \ \boldsymbol{\gamma}, \mathbf{v}, \sigma_{v}^2)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_{v}^2 \ | \ \mathbf{y})\bigg] \\
+& \ \ \ \ \ d\gamma_1 ...  d\gamma_Pdv_1...dv_Jd\sigma_{v}^2
 \end{aligned}
 $$
 
@@ -455,11 +455,11 @@ For the Gamma model we do the same thing but using the appropriate distribution
 
 $$
 \begin{bmatrix}
-y_{ij, \ new}^{(1)} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\delta}^{(1)} + w_j^{(1)}}\Bigg) \\
+y_{ij, \ new}^{(1)} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}\Bigg) \\
 \\
 \vdots \\
 \\
-y_{ij, \ new}^{(2000)} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\delta}^{(2000)} + w_j^{(2000)}}\Bigg)
+y_{ij, \ new}^{(2000)} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}\Bigg)
 \end{bmatrix}
 $$
 
@@ -477,11 +477,15 @@ While it may not be immediately clear, these processes are really just mimicking
 
 ### Combining the Model Predictions
 
-Now that we have two sets which represent approximate the posterior predictive distribution for unit $i$ in domain $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. We might just match MCMC iteration $k$ from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up? To understand what to do about this, we'll dive into some theory behind building the models simultaneously.
+Now that we have two sets which represent approximate the posterior predictive distribution for unit $i$ in domain $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. We might just match MCMC iteration $k$ from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up?
+
+One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. Moreover, as the two models grow to be more complicated this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
 
 ## Simultaneous v.s Separate
 
-To get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors **between** models. There are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain (pfefferman paper). Finally, this section we will focus on the normal regression model since that is the one primarily used in the thesis. With all of that in mind, in this setting our posterior would be:
+As we just mentioned, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors **between** models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain^[@pfeffermann2008small].
+
+Finally, this result holds regardless of the particular models that we use, but for the sake of simplicity we'll use a logistic regression model with no random effects and a Normal linear regression model with no random effects.  With all of that in mind, in this setting our posterior for both models would be:
 
 $$
 \begin{aligned}
@@ -493,8 +497,7 @@ We can expand this by writing out the likelihood more fully based on whether $y$
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot \\
-& \ \ \ \ \ \  p(\beta_1, ... \beta_P, \gamma_1,...\gamma_P, u_1, ... u_J, v_1, ... v_J, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
 \end{aligned}
 $$
 
@@ -529,9 +532,7 @@ So the full posterior for the model built simultaneously is equal to the product
 
 ### Practical Backing
 
-To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are nearly identical
-
-
+To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are nearly identical.
 
 ```{r, echo=F, message=F, warning=F, fig.align='center', out.width='80%'}
 library(here)
@@ -547,7 +548,7 @@ full_comp %>%
   theme(legend.position = "bottom")
 ```
 
-##  Wrapping it all up
+## Posterior Predictive Distribution Finalized
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
@@ -566,17 +567,31 @@ To get the posterior predictive distribution for $\bar{y}_{j, \ new}$ we take av
 
 $$
 \begin{bmatrix}
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(1)} \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(2)} \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(1)} \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2)} \\
 \vdots \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}y_{ij, \ new}^{(2000)}
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2000)}
 \end{bmatrix} \qquad = \qquad 
 \begin{bmatrix}
-\bar{y}_{j, \ new}^{(1)} \\
-\bar{y}_{j, \ new}^{(2)} \\
+\hat{Y}_{j, \ new}^{(1)} \\
+\hat{Y}_{j, \ new}^{(2)} \\
 \vdots \\
-\bar{y}_{j, \ new}^{(2000)}
+\hat{Y}_{j, \ new}^{(2000)}
 \end{bmatrix}
 $$
 
 Which is an approximation of the posterior predictive distribution for the mean of the response in domain $j$.
+
+
+## Prediction Intervals
+
+In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \@ref(bayes-freq) provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
+
+Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are predictions themselves, these prediction intervals are baked right into the prediction process. 
+
+Unfortunately it is far less straightforward in the Frequentist setting. While prediction intervals are straightforward to generate for singular regression models, things get a lot more complicated with a two part model like ours. The reality is that we spent a good amount of time trying to construct a bootstrap procedure to generate these prediction intervals and beyond being very computationally intensive, we also couldn't find one that actually worked correctly. While this was certainly frustrating, the struggle to try to develop a process for generating these prediction intervals for the Frequentist models, really highlighted how nice it is that you get them for free in the Bayesian model.
+
+#### A note of caution
+
+While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals will only be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estiamtes for free, but a 95% prediction interval will likely not get 95% coverage, thus indicating that the intervals themselves are also incorrect. 
+

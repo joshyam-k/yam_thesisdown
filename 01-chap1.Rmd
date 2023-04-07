@@ -1,11 +1,3 @@
-<!--
-This is for including Chapter 1.  Notice that it's also good practice to name your chunk.  This will help you debug potential issues as you knit.  The chunk above is called intro and the one below is called chapter1.  Feel free to change the name of the Rmd file as you wish, but don't forget to change it here from chap1.Rmd.
--->
-
-<!--
-The {#rmd-basics} text after the chapter declaration will allow us to link throughout the document back to the beginning of Chapter 1.  These labels will automatically be generated (if not specified) by changing the spaces to hyphens and capital letters to lowercase.  Look for the reference to this label at the beginning of Chapter 2.
--->
-
 # Introduction {#intro-section}
 
 In this thesis, I will concerned with modeling a response variable from various explanatory variables in data that exhibits two distinctive features: (i) the response variable that is "zero-inflated", and (ii) the data is "clustered".
@@ -14,7 +6,7 @@ In this thesis, I will concerned with modeling a response variable from various 
 
 As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
 
-```{r zi_ex, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%'}
+```{r ziex, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%', fig.cap="Zero-Inflated data"}
 set.seed(6)
 library(tidyverse)
 library(here)
@@ -50,14 +42,12 @@ ggplot() +
 ```
 
 And in reality, this form of zero-inflated data is one that we see quite often in the real world. Importantly, an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself, for example if we collected data on the total weight of fish caught at a lake by individuals on a given day, we likely would see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But other times it could be a characteristic of the data collection process itself, for example a measurement error or a sampling error could cause data to be zero-inflated as well.
-\newline
 
 Importantly, as I am working in a modeling setting, *when I say that data is zero-inflated I mean that the response variable is zero-inflated*. Although I will simply refer to my data as being zero-inflated and my models as being suited for zero-inflated data for the duration of this thesis, this is simply a matter of convenience and not a statement that the methods work for any situation in which data can be considered zero-inflated. Put simply, *I explore, present, and evaluate a model that is suited for a response variable which has a significant portion of zeroes, with the non-zero portion of that variable belonging to a positive continuous distribution.*
 
 ## Clustered Data
 
 Furthermore, we will be operating in a setting where the data is not only zero-inflated, but where it also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points across clusters.
-\newline
 
 For example, going back to the fishing in a lake example. If we looked at data on the weight of each individual fish caught, we would imagine that fish of the same species would generally be more similar in weight than two fish from different species.
 
@@ -74,7 +64,7 @@ Importantly, the FIA groups the continental U.S. into smaller domains called Eco
 
 If we look at the distribution of the FIA collected forest attribute "Dry Above Ground Biomass From live Trees", we can see that it is indeed quite zero-inflated.
 
-```{r forestry_data, echo = F, message=F, warning = F, cache=T, fig.align='center', out.width='80%'}
+```{r forestrydata, echo = F, message=F, warning = F, cache=T, fig.align='center', out.width='80%', fig.cap='Zero-Inflated Forestry data.'}
 data <- readRDS(here("data", "wa_plots_public.rds"))
 ggplot() +
   geom_density(
@@ -105,7 +95,7 @@ Not only is the FIA data a good real life example of when we see this zero-infla
 
 To motivate using a more complex method, I'll first show what happens when I try to just fit a simple linear regression to this type of data. If we regress our response variable on a useful covariate and plot both the data and the simple linear regression line together we get the following
 
-```{r scatter_zi, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%'}
+```{r scatterzi, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%', fig.cap="The shortcomings of a simple linear regression model in this context."}
 data %>% 
   slice_sample(n = 1500) %>% 
   ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
@@ -122,7 +112,7 @@ data %>%
   theme_bw()
 ```
 
-While this model isn't awful it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \@ref(fig:scatter_zi) doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the *non-zero* response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
+While this model isn't awful it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \@ref(fig:scatterzi) doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the *non-zero* response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
 
 We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While it's perhaps feels unfair to motivate my method by piting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used model. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead they model I present is interpretable and intuitive while being flexible enough to capture the structure of the zero-inflated data.
 
@@ -157,13 +147,13 @@ That being said, the word Bayesian is so overwhelmingly ideologically tied to th
 
 In order to introduce, study, and implement these models I will structure the research in the following way:
 
--   Chapter 2 gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
+-   Chapter \@ref(bayes-freq) gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 
--   Chapter 3 gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
+-   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
 
--   Chapter 4 sets up the simulation study that serves as the main process by which we evaluate the various models.
+-   Chapter \@ref(sim-study) sets up the simulation study that serves as the main process by which we evaluate the various models.
 
--   Chapter 5 showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
+-   Chapter \@ref(res-sec) showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 
 -   Chapter 6 gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 

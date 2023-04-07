@@ -1,5 +1,11 @@
 # Results {#res-sec}
 
+## Expectations
+
+Before diving into the actual results, we'll first give a brief overview of what we were expecting to see.
+
+
+
 ```{r, echo = F, message=F, warning=F}
 library(tidyverse)
 library(here)
@@ -26,7 +32,7 @@ $$
 
 Importantly we omit the Frequentist model in the following plot because it registered no model failures across the entire simulation. The model failure-rate results are as follows:
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r failures, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Model Failure rates across all simulation settings.'}
 model_fails <- read_csv(here("data", "failure_counts.csv"))
 
 model_fails %>% 
@@ -39,10 +45,10 @@ model_fails %>%
   select(-n_failures) %>% 
   mutate(
     n = paste0("n = ", n),
-    g = paste0("g = ", g)
+    g = paste0("J = ", g)
   ) %>% 
   mutate(
-    g = fct_relevel(g, c("g = 5", "g = 10", "g = 25", "g = 50")),
+    g = fct_relevel(g, c("J = 5", "J = 10", "J = 25", "J = 50")),
     n = fct_relevel(n, c("n = 50", "n = 30", "n = 15"))
   ) %>% 
   ggplot(aes(x = model, fill = model, y = failure_rate)) +
@@ -56,21 +62,20 @@ model_fails %>%
   facet_grid(g ~ n) +
   theme_bw() +
   theme(strip.background = element_rect(fill="#e6e6e6"),
-        legend.position = "bottom",
+        legend.position = "right",
         axis.text.x = element_blank(),
         axis.title.x = element_blank(),
         axis.ticks.x = element_blank()) +
   labs(
     y = "Failure Rate"
-  ) +
-  guides(fill=guide_legend(nrow=3,byrow=TRUE))
+  ) 
 ```
 
-Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from $g = 10$ to $g=5$ that is quite alarming.
+Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from $J = 10$ to $J=5$ that is quite alarming.
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r tab1, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
 tbl <- read_csv(here("data", "sim_res_n30_g10.csv"))
 
 tbl %>% 
@@ -96,16 +101,29 @@ tbl %>%
   fmt_number(
     y_hat_mean, decimals = 2
   ) %>% 
-  cols_align("center")
+  cols_align("center") %>% 
+  tab_style(
+    style = cell_borders(
+      sides = c("top"),
+      color = "black",
+      weight = px(3),
+      style = "solid"
+    ),
+    locations = cells_body(
+      columns = everything(),
+      rows = 5
+    )
+  )
 ```
 
-Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain if we included all models in the analysis.
+Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain in each setting.
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
-levs <- c("n15_g5",  "n30_g5", "n50_g5",
-          "n15_g10",  "n30_g10", "n50_g10", 
-          "n15_g25",  "n30_g25", "n50_g25", 
-          "n15_g50", "n30_g50", "n50_g50")
+```{r keep, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Percent of Results we would get to use if we only included simulation iterations where none of the models failed.'}
+
+levs <- c("(n = 15, J = 5)", "(n = 30, J = 5)", "(n = 50, J = 5)",
+          "(n = 15, J = 10)", "(n = 30, J = 10)", "(n = 50, J = 10)", 
+          "(n = 15, J = 25)", "(n = 30, J = 25)", "(n = 50, J = 25)", 
+          "(n = 15, J = 50)", "(n = 30, J = 50)", "(n = 50, J = 50)")
 
 
 model_fails %>% 
@@ -114,25 +132,31 @@ model_fails %>%
   mutate(useable_data = 1 - failure_rate) %>% 
   select(setting, useable_data) %>% 
   ungroup() %>% 
+  separate(setting, into = c("n", "g"), sep = "_") %>% 
+  mutate(
+    n = parse_number(n),
+    g = parse_number(g)
+  ) %>% 
+  mutate(setting = paste0("(n = ",n, ", J = ", g, ")")) %>% 
   mutate(setting = fct_relevel(setting, levs)) %>% 
   ggplot(aes(x = setting, y = useable_data)) +
-  geom_col(fill = "grey30", alpha = 0.8) +
+  geom_col(fill = "#adb5ac", alpha = 0.9) +
   scale_y_continuous(labels = scales::percent) +
   theme_bw() +
   labs(
-    x = "Setting",
+    x = "",
     y = "Percent of Useable Results"
   ) +
   coord_flip()
 ```
 
-Clearly the Bayesian models fail far too much for any trustworthy and meaningful conclusions to be made in any of the $g = 5$ settings and so they will essentially be ommited from the rest of the evaluation. While this may seem very disappointing, there is still an interesting takeaway that can be extracted from the high failure rates in those settings.
+Clearly the Bayesian models fail far too much for any trustworthy and meaningful conclusions to be made in any of the $g = 5$ settings and so they will essentially be omited from the rest of the evaluation. While this may seem very disappointing, there is still an interesting takeaway that can be extracted from the high failure rates in those settings.
 
 ### Model Regularization through Informative Priors
 
 If we only compare the "Flat Priors, Normal" and "Informative Priors, Normal" failure rates, we are able to get a sense for the role that the prior distributions play here. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r regularization, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Model Failure Rate comparison between the Bayesian Normal model with flat priors and with informative priors.'}
 model_fails %>% 
   filter(model %in% c("flat", "info")) %>% 
   separate(setting, into = c("n", "g"), sep = "_") %>% 
@@ -143,10 +167,10 @@ model_fails %>%
   select(-n_failures) %>% 
   mutate(
     n = paste0("n = ", n),
-    g = paste0("g = ", g)
+    g = paste0("J = ", g)
   ) %>% 
   mutate(
-    g = fct_relevel(g, c("g = 5", "g = 10", "g = 25", "g = 50")),
+    g = fct_relevel(g, c("J = 5", "J = 10", "J = 25", "J = 50")),
     n = fct_relevel(n, c("n = 15", "n = 30", "n = 50"))
   ) %>% 
   ggplot(aes(x = g, color = model, group = model, y = failure_rate)) +
@@ -163,11 +187,12 @@ model_fails %>%
   theme(strip.background = element_rect(fill="#e6e6e6"),
         legend.position = "bottom") +
   labs(
+    x = "J",
     y = "Failure Rate"
   ) 
 ```
 
-While in the $g = 25$ and $g = 50$ settings both models exhibit no failures, we do indeed see that in the smaller settings where $g = 5$ and $g = 10$ the model with informative priors does have lower failure rates than the model with flat priors. While clearly, informative priors do not completely ameliorate the model failure issues, it's clear that they do have a positive impact on how often a Bayesian model converges. Although we aren't saying anything about the actual performance metrics of the models here, a Bayesian model that does not converge is a model that cannot be used. This is not to say that one should always use informative priors in every Bayesian analysis setting, in fact sometimes you have no prior knowledge to employ. Rather, the lesson here should be that if you are experiencing model convergence issues in a Bayesian analysis setting, one potential fix could be to add more information into your priors.
+While in the $J = 25$ and $J = 50$ settings both models exhibit no failures, we do indeed see that in the smaller settings where $J = 5$ and $J = 10$ the model with informative priors does have lower failure rates than the model with flat priors. While informative priors do not completely ameliorate the model failure issues, it's clear that they do have a positive impact on how often a Bayesian model converges. Although we aren't saying anything about the actual performance metrics of the models here, a Bayesian model that does not converge is a model that cannot be used. This is not to say that one should always use informative priors in every Bayesian analysis setting, in fact sometimes you have no prior knowledge to employ. Rather, the lesson here should be that if you are experiencing model convergence issues in a Bayesian analysis setting, one potential fix could be to add more information into your priors.
 
 ```{r, echo=F, message=F, warning=F}
 make_res_plot <- function(data, var) {
@@ -179,9 +204,9 @@ make_res_plot <- function(data, var) {
     ) %>% 
     mutate(
       n = paste0("n = ", n),
-      g = paste0("g = ", g)
+      g = paste0("J = ", g)
     ) %>% 
-    mutate(g = fct_relevel(g, c("g = 10", "g = 25", "g = 50"))) %>% 
+    mutate(g = fct_relevel(g, c("J = 10", "J = 25", "J = 50"))) %>% 
     ggplot(aes(x = n, y = {{ var }}, group = model, color = model)) +
     geom_point() +
     geom_line() +
@@ -206,7 +231,7 @@ res <- read_csv(here("data", "full_sim_res.csv")) %>%
   filter(!(settings %in% c("n15_g5", "n30_g5", "n50_g5")))
 ```
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r rmse, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Root Mean Squared Error'}
 make_res_plot(res, rmse) +
   labs(
     x = "",
@@ -214,13 +239,13 @@ make_res_plot(res, rmse) +
   )
 ```
 
-As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to "learn" the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors.The only setting in which they are outperformed is when $g = 5$ where they are marginally outperformed by the frequentist model. Note that the true value of the response for group one was $23.7$ which gives a sense of scale for this model prediction error metric. While there are small difference in how the models performed, the differences are pretty marginal given the scale of our response.
+As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to "learn" the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors.The only setting in which they are outperformed is when $g = 10$ where they are marginally outperformed by the frequentist model. Note that the true value of the response for group one was $23.7$ which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, the differences are pretty marginal given the scale of our response.
 
 ## Empirical Variance
 
 Next we look at the empirical variance which gives a sense for how variable the predictions of the various models were across the different data sets in each simulation run.
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r variance, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Empirical Variance'}
 make_res_plot(res, E_var) +
   labs(
     x = "",
@@ -228,13 +253,13 @@ make_res_plot(res, E_var) +
   )
 ```
 
-Again we see the decrease in variance as $n$ and $g$ increase that we'd expect to see. And besides small amounts of separation between the models in the setting $(n = 15, \ g = 10)$, they all seem to perform very similarly.
+Again we see the decrease in variance as $n$ and $J$ increase that we'd expect to see. And besides small amounts of separation between the models in the setting $(n = 15, \ J = 10)$, they all seem to perform very similarly.
 
 ## Empirical Bias
 
-Next we examine the Empirical Bias of the same three models. These results are by far the most unexpected as we do not see clear decreases in bias as $n$ and $g$ increase:
+Next we examine the Empirical Bias of the same three models. These results are by far the most unexpected as we do not see clear decreases in bias as $n$ and $J$ increase:
 
-```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
+```{r bias, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Empirical Bias'}
 make_res_plot(res, E_bias) +
   labs(
     x = "",
@@ -242,7 +267,8 @@ make_res_plot(res, E_bias) +
   )
 ```
 
-That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $g = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. These differences are quite marginal given the scale of the response and so we want to be wary of applying to much weight to the fact that the Bayesian Normal models perform better here.
+That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $g = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. I truly wish that I could take this plot and proclaim the Bayesian Normal model with informative priors to perform far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that initially were a bit befuddling in Figure \@ref(fig:bias).
+
 
 ## Coverage
 
@@ -258,9 +284,9 @@ res %>%
   ) %>% 
   mutate(
     n = paste0("n = ", n),
-    g = paste0("g = ", g)
+    g = paste0("J = ", g)
   ) %>% 
-  mutate(g = fct_relevel(g, c("g = 10", "g = 25", "g = 50"))) %>% 
+  mutate(g = fct_relevel(g, c("J = 10", "J = 25", "J = 50"))) %>% 
   ggplot(aes(x = n, y = coverage, group = model, color = model)) +
     geom_point() +
     geom_line() +
@@ -271,10 +297,15 @@ res %>%
       labels = c("Flat Priors, Normal", "Informative Priors, Gamma", "Informative Priors, Normal"),
       values = c("#e07a5f", "#4da5d1", "#81b29a")
     ) + 
-    ylim(c(0.9, 1)) +
+    ylim(c(0.5, 1)) +
     theme_bw() +
     theme(legend.position = "bottom") +
-    guides(color = guide_legend(nrow = 3, byrow = TRUE)) 
+    guides(color = guide_legend(nrow = 3, byrow = TRUE)) +
+  labs(
+    x = ""
+  )
 ```
 
-Interestingly, we see significant over-coverage in each setting for every model.
+Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind is that our simulation data was generated in a Frequentist way. What I mean by that is that all of the parameters used to generate the data were fixed constants, and not random variables (as a Bayesian conceptualizes them to be). For this reason all of the Bayesian models are, at least slightly, misspecified. 
+
+
