@@ -41,15 +41,6 @@ abstract: |
 # is needed on the line after the `|`.
 acknowledgements: |
   I want to thank a few people.
-abbreviations:
-  ABC: American Broadcasting Company
-  CBS: Colombia Broadcasting System
-  CUS: Computer User Services
-  PBS: Public Broadcasting System
-  NBC: National Broadcasting Company
-# Note that abbreviations in lowercase letters will NOT be automatically capitalized
-# Delete or silence the abbreviations section if you do not want a list of abbreviations
-  
 # Specify the location of the bibliography below
 bibliography: bib/thesis.bib
 # Download your specific csl file and refer to it in the line below.
