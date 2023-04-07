@@ -26,9 +26,6 @@ params:
 # Can only choose one at a time.
 output:
   thesisdown::thesis_pdf: default 
-#  thesisdown::thesis_gitbook: default         
-#  thesisdown::thesis_word: default
-#  thesisdown::thesis_epub: default
 
 # If you are creating a PDF you'll need to write your preliminary content 
 # (e.g., abstract, acknowledgements) below or use code similar to line 25-26 

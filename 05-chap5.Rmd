@@ -71,7 +71,7 @@ model_fails %>%
   ) 
 ```
 
-Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from $J = 10$ to $J=5$ that is quite alarming.
+Perhaps the most notable takeaway from Figure \@ref(fig:failures) is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from $J = 10$ to $J = 5$ that is quite alarming.
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 

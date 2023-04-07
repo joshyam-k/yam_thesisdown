@@ -770,7 +770,7 @@ An alternative model that we considered in this thesis was a Gamma Generalized L
 
 }
 
-\caption{test}\label{fig:gamma}
+\caption{The Gamma(a, b) Distribution}\label{fig:gamma}
 \end{figure}
 Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
@@ -1159,8 +1159,10 @@ In order to include no prior knowledge in your analysis, a flat prior can be use
 
 Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
-An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients are small \emph{positive} numbers between the range of 0 to 10 and thus the prior \(\mathcal{N}(5, 9)\) was used.
+An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small \emph{positive} numbers between the range of 0 to 10 and thus the prior \(\mathcal{N}(5, 3^2)\) was used.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-10-1} \end{center}
+
+On the other hand, we tweaked the scale of this prior for the logistic regression model since the response being modeled is on a different scale. At this point we don't have much of an idea of how the chance of being non-zero changes as the covariate changes, so we use a \(\mathcal{N}(1,1)\) prior for the fixed effects coefficients in the logistic regression model (this may seem like a tight distribution, but in the context of logistic regression slope coefficients it's really quite wide).
 
 Next, following the advice of Gelman 2013 the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-11-1} \end{center}
@@ -1297,7 +1299,7 @@ Importantly we omit the Frequentist model in the following plot because it regis
 
 \caption{Model Failure rates across all simulation settings.}\label{fig:failures}
 \end{figure}
-Perhaps the most notable takeaway here is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(J = 10\) to \(J=5\) that is quite alarming.
+Perhaps the most notable takeaway from Figure \ref{fig:failures} is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(J = 10\) to \(J = 5\) that is quite alarming.
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 

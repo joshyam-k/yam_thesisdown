@@ -278,7 +278,7 @@ $$
 
 An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \@ref(fig:gamma) displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response can be skewed in a way that a Normal distribution simply can't.
 
-```{r gamma, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="test"}
+```{r gamma, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="The Gamma(a, b) Distribution"}
 gamma <- ggplot(data.frame(x = c(0, 20)), aes(x)) +
   stat_function(
     fun = dgamma, args = list(shape = 2, rate = 0.5),
@@ -301,8 +301,7 @@ gamma <- ggplot(data.frame(x = c(0, 20)), aes(x)) +
   theme_minimal() +
   labs(
     x = "X",
-    y = "",
-    title = "Gamma(a,b)"
+    y = ""
   ) +
   theme(
     legend.position = c(.7, .8),

@@ -184,7 +184,7 @@ fixed_eff + variance + shape
 
 Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
-An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients are small *positive* numbers between the range of 0 to 10 and thus the prior $\mathcal{N}(5, 9)$ was used.
+An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small *positive* numbers between the range of 0 to 10 and thus the prior $\mathcal{N}(5, 3^2)$ was used.
 
 ```{r, warning = F, message = F, echo=F, fig.align='center', out.width='80%'}
 ggplot(data.frame(x = c(-10, 20)), aes(x)) +
@@ -198,6 +198,8 @@ ggplot(data.frame(x = c(-10, 20)), aes(x)) +
   ) +
   theme_minimal()
 ```
+
+On the other hand, we tweaked the scale of this prior for the logistic regression model since the response being modeled is on a different scale. At this point we don't have much of an idea of how the chance of being non-zero changes as the covariate changes, so we use a $\mathcal{N}(1,1)$ prior for the fixed effects coefficients in the logistic regression model (this may seem like a tight distribution, but in the context of logistic regression slope coefficients it's really quite wide).
 
 Next, following the advice of Gelman 2013 the scale parameter of $2.5$ was used to parametrize the Cauchy prior put on all variance parameters. In full the $\text{Half-Cauchy}(0, 2.5)$ prior was utilized.
 
