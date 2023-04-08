@@ -13,6 +13,8 @@ We now present the results from the simulation study. Each section compares each
 
 Before diving into the actual results, we'll first give a brief overview of what we were expecting to see. 
 
+One of the main expectations we had was that we'd see improvements of some kind when using Bayesian models with informative priors compared to Bayesian models with flat priors. At the very least, we hoped to see that the informative priors would assist in reducing the rate at which Bayesian models failed to converge in small sample size settings.
+
 
 
 
