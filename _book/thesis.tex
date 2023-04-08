@@ -208,10 +208,6 @@ Second paragraph of abstract starts here.
 }
 
 	\usepackage{setspace}\onehalfspacing
-	\usepackage{amsmath}
-\usepackage{booktabs}
-\usepackage{caption}
-\usepackage{longtable}
 % End of CII addition
 %%
 %% End Preamble
@@ -1222,8 +1218,8 @@ There will be 3 different models run throughout the simulation.
     Bayesian Generalized Linear Random Effects Model (Binomial) (\texttt{rstanarm::stan\_glmer})
   \end{itemize}
 \end{itemize}
-\hypertarget{performance-metrics}{%
-\section{Performance metrics}\label{performance-metrics}}
+\hypertarget{metrics}{%
+\section{Performance metrics}\label{metrics}}
 
 Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\)
 
@@ -1266,12 +1262,12 @@ Importantly, one solution to combating MCMC convergence issues is to bump up the
 \hypertarget{res-sec}{%
 \chapter{Results}\label{res-sec}}
 
+We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \ref{metrics}. Across all of these sections we will label simulation settings like \(n = \cdot\) - \(J = \cdot\). For example if we have \((n = 15, J = 10 )\) it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on \(n\times J = 150\) data points.
+
 \hypertarget{expectations}{%
 \section{Expectations}\label{expectations}}
 
 Before diving into the actual results, we'll first give a brief overview of what we were expecting to see.
-
-We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in section 4.5. Across all of these sections we will label simulation settings like \(n = \cdot\) - \(g = \cdot\). For example if we have \((n = 15, g = 10 )\) it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on \(n\times g = 150\) data points.
 
 \hypertarget{model-failures}{%
 \section{Model Failures}\label{model-failures}}
@@ -1302,22 +1298,14 @@ Importantly we omit the Frequentist model in the following plot because it regis
 Perhaps the most notable takeaway from Figure \ref{fig:failures} is that the number of groups that seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(J = 10\) to \(J = 5\) that is quite alarming.
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
+\begin{figure}
 
-\captionsetup[table]{labelformat=empty,skip=1pt}
-\begin{longtable}{cccc}
-\toprule
-Simulation Rep & Model & Prediction & Model Failure \\ 
-\midrule
-1 & Informative Priors, Normal & $29.19$ & 0 \\ 
-1 & Flat Priors, Normal & $29.18$ & 1 \\ 
-1 & Informative Priors, Gamma & $29.14$ & 1 \\ 
-1 & Frequentist & $29.05$ & 0 \\ 
-2 & Informative Priors, Normal & $27.63$ & 0 \\ 
-2 & Flat Priors, Normal & $27.02$ & 0 \\ 
-2 & Informative Priors, Gamma & $27.05$ & 0 \\ 
-2 & Frequentist & $26.98$ & 0 \\ 
-\bottomrule
-\end{longtable}
+{\centering \includegraphics[width=0.95\linewidth]{figure/tb1} 
+
+}
+
+\caption{Results Excerpt Example}\label{fig:tbl}
+\end{figure}
 Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain in each setting.
 \begin{figure}
 
@@ -1392,6 +1380,9 @@ And finally, we examine the coverage of the Bayesian models. Note that we do not
 \begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-16-1} \end{center}
 
 Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind is that our simulation data was generated in a Frequentist way. What I mean by that is that all of the parameters used to generate the data were fixed constants, and not random variables (as a Bayesian conceptualizes them to be). For this reason all of the Bayesian models are, at least slightly, misspecified.
+
+\hypertarget{general-remarks}{%
+\section{General Remarks}\label{general-remarks}}
 
 \appendix
 

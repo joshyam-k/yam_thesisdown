@@ -1,18 +1,20 @@
 # Results {#res-sec}
 
-## Expectations
-
-Before diving into the actual results, we'll first give a brief overview of what we were expecting to see.
-
-
-
 ```{r, echo = F, message=F, warning=F}
 library(tidyverse)
 library(here)
 library(gt)
+library(knitr)
 ```
 
-We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in section 4.5. Across all of these sections we will label simulation settings like $n = \cdot$ - $g = \cdot$. For example if we have $(n = 15, g = 10 )$ it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on $n\times g = 150$ data points.
+We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \@ref(metrics). Across all of these sections we will label simulation settings like $n = \cdot$ - $J = \cdot$. For example if we have $(n = 15, J = 10 )$ it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on $n\times J = 150$ data points.
+
+## Expectations
+
+Before diving into the actual results, we'll first give a brief overview of what we were expecting to see. 
+
+
+
 
 ## Model Failures
 
@@ -75,46 +77,10 @@ Perhaps the most notable takeaway from Figure \@ref(fig:failures) is that the nu
 
 What's more, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table below we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 
-```{r tab1, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
-tbl <- read_csv(here("data", "sim_res_n30_g10.csv"))
-
-tbl %>% 
-  mutate(model_failure = ifelse(n_warnings > 0, 1, 0)) %>% 
-  head(10) %>% 
-  mutate(sim_rep = sort(rep(1:2, 5))) %>% 
-  select(sim_rep, model, y_hat_mean, model_failure) %>% 
-  mutate(model = case_when(
-    model == "b_info_prior_norm" ~ "Informative Priors, Normal",
-    model == "b_flat_prior" ~ "Flat Priors, Normal",
-    model == "b_restrictive_prior" ~ "Restrictive Priors, Normal",
-    model == "b_info_prior_gam" ~ "Informative Priors, Gamma",
-    model == "f" ~ "Frequentist"
-  )) %>% 
-  filter(model != "Restrictive Priors, Normal") %>% 
-  gt() %>% 
-  cols_label(
-    sim_rep = "Simulation Rep",
-    model = "Model",
-    y_hat_mean = "Prediction",
-    model_failure = "Model Failure"
-  ) %>% 
-  fmt_number(
-    y_hat_mean, decimals = 2
-  ) %>% 
-  cols_align("center") %>% 
-  tab_style(
-    style = cell_borders(
-      sides = c("top"),
-      color = "black",
-      weight = px(3),
-      style = "solid"
-    ),
-    locations = cells_body(
-      columns = everything(),
-      rows = 5
-    )
-  )
+```{r tbl, echo=F, warning=F, message=F, fig.cap="Results Excerpt Example", out.width="95%", fig.align="center"}
+include_graphics(path = "figure/tb1.png")
 ```
+
 
 Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, we show what percent of the simulation results we'd be able to retain in each setting.
 
@@ -307,5 +273,8 @@ res %>%
 ```
 
 Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind is that our simulation data was generated in a Frequentist way. What I mean by that is that all of the parameters used to generate the data were fixed constants, and not random variables (as a Bayesian conceptualizes them to be). For this reason all of the Bayesian models are, at least slightly, misspecified. 
+
+
+## General Remarks
 
 

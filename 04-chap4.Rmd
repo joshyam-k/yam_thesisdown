@@ -269,7 +269,7 @@ There will be 3 different models run throughout the simulation.
     -   Bayesian Generalized Linear Random Effects Model (Gamma) (`rstanarm::stan_glmer`)
     -   Bayesian Generalized Linear Random Effects Model (Binomial) (`rstanarm::stan_glmer`)
 
-## Performance metrics
+## Performance metrics {#metrics}
 
 Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of $Y_1 = 23.7$
 
