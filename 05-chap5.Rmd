@@ -279,4 +279,15 @@ Interestingly, while we get close to 95% coverage in all of our Bayesian models,
 
 ## General Remarks
 
+It would be relatively easy to look at these results and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis.
+
+It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value, which is often the case in the statistical modeling literature. The performance metrics of the each of the models in this thesis are indubitably interesting, but to present them as the only takeaway would be a huge disservice to the Bayesian models. For this reason we'll make some larger remarks about the performance metrics, but we'll also spend some time discussing
+
+
+
+
+
+
+
+
 

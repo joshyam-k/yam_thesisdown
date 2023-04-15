@@ -6,11 +6,12 @@ In this thesis, I will concerned with modeling a response variable from various 
 
 As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
 
-```{r ziex, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%', fig.cap="Zero-Inflated data"}
+```{r ziex, echo=F, message=F, warning=F, fig.align='center', out.width='80%', fig.cap="Zero-Inflated data"}
 set.seed(6)
 library(tidyverse)
 library(here)
 library(gt)
+library(patchwork)
 
 z <- tibble(
   z = rep(0, 2500)
@@ -96,6 +97,7 @@ Not only is the FIA data a good real life example of when we see this zero-infla
 To motivate using a more complex method, I'll first show what happens when I try to just fit a simple linear regression to this type of data. If we regress our response variable on a useful covariate and plot both the data and the simple linear regression line together we get the following
 
 ```{r scatterzi, echo=F, message=F, warning=F, cache=T, fig.align='center', out.width='80%', fig.cap="The shortcomings of a simple linear regression model in this context."}
+set.seed(30)
 data %>% 
   slice_sample(n = 1500) %>% 
   ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
@@ -120,20 +122,60 @@ We would call this model statistically biased, as it is overly simple and thus d
 
 While I will exhaustively describe details of, and the math behind, the exact model in a later section, I'll go through a non-technical overview of how it will function here.
 
-
 The defining characteristic of the model is that it is a two-part model. Instead of trying to fit the data with a singular model, we instead fit two different models and then combine them at the end. The two models are
 
 1.  A classification model fit to the entire data set that predicts how likely it is that a certain data point has a non-zero response value.
 
-2.  A regression model fit to the non-zero portion of the dataset that predicts the continuous response variable.
+2.  A regression model fit to the *non-zero* portion of the dataset that predicts the continuous response variable.
 
 To get a final prediction for a data point we take the prediction from model (1) and multiply it by the prediction from model (2).
 
 $$
-\text{final prediction} = \underbrace{\bigg(\text{regression model output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{how likely it is that that point is non-zero}\bigg)}_{\text{Model (1)}}
+\text{Final Prediction} = \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}}
 $$
 
-The intuition here is that if our classification model is sufficiently accurate, then points that indeed have zero-response will get sent towards zero due to the fact that the regression output will be multiplied by a number close to zero, while points that have a non-zero response will remain unchanged when multiplied by a number close to one. This method also operates under the idea that a regression model can be well fit to the non-zero portion of the response variable, and thus our regression component should be less biased than if we just fit a single regression model to the entire data set like we described in the previous section.
+Let's think back to Figure \@ref(fig:scatterzi) to unpack why this is a reasonable strategy.
+
+```{r modintuition, echo=F, message=F, warning=F, fig.align='center', out.width='95%', fig.height=3.6, fig.cap="Example of two new data points that we might be interested in testing our model on."}
+set.seed(19)
+data_samp <- data %>% 
+  slice_sample(n = 1000) %>% 
+  filter(DRYBIO_AG_TPA_live_ADJ < 250)
+
+p1 <- data_samp %>% 
+  ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
+  geom_point(alpha = 0.6, size = 2) +
+  geom_point(data = tibble(tcc = 50, DRYBIO_AG_TPA_live_ADJ = 0),
+             aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ), color = "red", size = 5) +
+  labs(
+    x = "Tree Canopy Coverage",
+    y = "Dry Above Ground Biomass From live Trees"
+  ) +
+  ylim(c(0, 280)) +
+  theme_bw()
+
+p2 <- data_samp %>% 
+  ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
+  geom_point(alpha = 0.6, size = 2) +
+  geom_point(data = tibble(tcc = 50, DRYBIO_AG_TPA_live_ADJ = 70),
+             aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ), color = "red", size = 5) +
+  labs(
+    x = "Tree Canopy Coverage",
+    y = ""
+  ) +
+  ylim(c(0, 280)) +
+  theme_bw()
+
+p1 + p2
+
+```
+
+Let's start with the left hand side of Figure \@ref(fig:modintuition) that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent to zero by that classification model output.
+
+On the other hand, the right hand side of Figure \@ref(fig:modintuition) has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
+
+Clearly the success of this strategy relies on the quality of the two individual models, but at least we can see how this method has the capacity to capture the zero-inflation data structure.
+
 
 ### Building the Model
 

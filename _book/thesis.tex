@@ -321,15 +321,28 @@ The defining characteristic of the model is that it is a two-part model. Instead
 \item
   A classification model fit to the entire data set that predicts how likely it is that a certain data point has a non-zero response value.
 \item
-  A regression model fit to the non-zero portion of the dataset that predicts the continuous response variable.
+  A regression model fit to the \emph{non-zero} portion of the dataset that predicts the continuous response variable.
 \end{enumerate}
 To get a final prediction for a data point we take the prediction from model (1) and multiply it by the prediction from model (2).
 
 \[
-\text{final prediction} = \underbrace{\bigg(\text{regression model output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{how likely it is that that point is non-zero}\bigg)}_{\text{Model (1)}}
+\text{Final Prediction} = \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}}
 \]
 
-The intuition here is that if our classification model is sufficiently accurate, then points that indeed have zero-response will get sent towards zero due to the fact that the regression output will be multiplied by a number close to zero, while points that have a non-zero response will remain unchanged when multiplied by a number close to one. This method also operates under the idea that a regression model can be well fit to the non-zero portion of the response variable, and thus our regression component should be less biased than if we just fit a single regression model to the entire data set like we described in the previous section.
+Let's think back to Figure \ref{fig:scatterzi} to unpack why this is a reasonable strategy.
+\begin{figure}
+
+{\centering \includegraphics[width=0.95\linewidth]{thesis_files/figure-latex/modintuition-1} 
+
+}
+
+\caption{Example of two new data points that we might be interested in testing our model on.}\label{fig:modintuition}
+\end{figure}
+Let's start with the left hand side of Figure \ref{fig:modintuition} that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent to zero by that classification model output.
+
+On the other hand, the right hand side of Figure \ref{fig:modintuition} has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
+
+Clearly the success of this strategy relies on the quality of the two individual models, but at least we can see how this method has the capacity to capture the zero-inflation data structure.
 
 \hypertarget{building-the-model}{%
 \subsection{Building the Model}\label{building-the-model}}
@@ -1385,6 +1398,10 @@ Interestingly, while we get close to 95\% coverage in all of our Bayesian models
 
 \hypertarget{general-remarks}{%
 \section{General Remarks}\label{general-remarks}}
+
+It would be relatively easy to look at these results and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis.
+
+It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value, which is often the case in the statistical modeling literature. The performance metrics of the each of the models in this thesis are indubitably interesting, but to present them as the only takeaway would be a huge disservice to the Bayesian models. For this reason we'll make some larger remarks about the performance metrics, but we'll also spend some time discussing
 
 \appendix
 
