@@ -1,0 +1,60 @@
+# Discussion {#conc}
+
+It would be relatively easy to look at the results from Chapter \@ref(res-sec) and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful. 
+
+It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value. To try to break out of this mold I will walk through some takeaways from the results themselves, but I will also talk more generally about the value and usefulness of the Bayesian models that exist outside of their performance metrics.
+
+## General Results Remarks
+
+As stated previously, in terms of metrics like RMSE, empirical bias, and empirical variance, most of the models that we employed performed relatively similarly. If we were approaching these simulation results with the goal of finding a method that was better than all the rest, this would be a pretty disappointing result. Luckily, we're not doing that and instead can appreciate the fact that the Bayesian and Frequentist methods, while very different in their approaches to, and conceptualizations of, the problem, ended up producing very similar results. 
+
+Perhaps the main worry when looking at the performance of the Bayesian model has to do with the model failures metric. After all, the Frequentist model never failed in any settings, while the failure rates of the Bayesian models in the $J=5$ settings were so high that they rendered the results unuseable. I'll push back on this a little bit as a segway into the next portion of our discussion. 
+
+There's certainly an argument to be made that Bayesian model convergence failures are a good safeguard against building bad models. What I mean by this is that in some cases if your Bayesian model is not properly specified or has another substantive problem with it's formulation it will fail to converge and leave you without a useable model. I want to stress that I am not generalizing this to all cases, but in some cases this is actually good behavior because it forces you to think about what your data looks like and why your model is failing to fit to it. The Frequentist models are often so robust that it takes a very serious specification problem for them to ever fail. The main point is this: having a model that never fails is not always a good thing when trying to build a good model. To make sense of why this is, we'll look at the RMSE of the Frequentist model in the $J = 5$ settings from our simulation in Chapter \@ref(sim-study). Recall that the Bayesian models struggled so much in these settings they had to be dropped entirely. Thus the argument could be made that the Frequentist models are better in these settings due to the fact that they never failed.
+
+```{r j5res, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Struggles for the Frequentist model in J = 5'}
+res_j5 <- read_csv(here("data", "J5_res.csv")) %>% 
+  filter(model == "f")
+
+all_res <- read_csv(here("data", "full_sim_res.csv"))
+
+rbind(res_j5, all_res) %>% 
+  separate(settings, into = c("n", "g"), sep = "_") %>% 
+  mutate(
+    n = parse_number(n),
+    g = parse_number(g)
+  ) %>% 
+  mutate(
+    n = paste0("n = ", n),
+    g = paste0("J = ", g)
+  ) %>% 
+  mutate(g = fct_relevel(g, c("J = 5", "J = 10", "J = 25", "J = 50"))) %>% 
+  ggplot(aes(x = n, y = rmse, group = model, color = model)) +
+    geom_point() +
+    geom_line() +
+    facet_wrap(~g, ncol = 4) +
+    scale_color_manual(
+      name = "Model",
+      labels = c("Frequentist", "Flat Priors, Normal", "Informative Priors, Gamma", "Informative Priors, Normal"),
+      values = c("#6b5829", "#e07a5f", "#4da5d1", "#81b29a")
+    ) + 
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    guides(color = guide_legend(nrow = 3, byrow = TRUE)) +
+  labs(
+    x = ""
+  )
+```
+
+
+Clearly, Figure \@ref(fig:j5res) gives us plenty of reason to worry about proceeding in this way. While the Frequentist model did not fail to converge, it clearly struggled mightily in those settings. Importantly, this is not a knock against Frequentist models in *all* modeling settings, but rather that in this situation it actually is advantageous that the Bayesian models are more sensitive to poor model specification. 
+
+This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
+
+## General Procedural Remarks
+
+One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part, MCMC is hard and writing code for bayesian models in `Stan` is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approacheable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, come variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified.
+
+Bayesian models are also oftentimes associated with a greater procedural and conceptual load. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where that parameter value might lie and how it might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that you are required to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. In my mind, the extra conceptual work required by Bayesian models adds value through ways that it can lead to greater intentionality in model building decisions.
+
+Hopefully these points have shed light on the ways that Bayesian models has value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.

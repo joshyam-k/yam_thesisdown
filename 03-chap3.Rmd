@@ -5,7 +5,7 @@ We now move into a thorough description of all of the methods employed in this t
 
 ## Notation
 
-Let $U$ denote a finite population with $N$ elements. $U$ is broken into $J$ meaningful domains $U_j$, $j = 1, 2, ..., J$, where each domain $U_j$ is defined as having $n_j$ sample observations. Let $p = 1, ..., P$ index the covariates. Each sample observation, $i$ in domain $j$ has auxiliary information $x_{ij}^p$ for covariate $p$, response value $y_{ij}$, and indicator for being non-zero $z_{ij}$.
+Let $U$ denote a finite population with $N$ elements. $U$ is broken into $J$ groups $U_j$, $j = 1, 2, ..., J$, where each group $U_j$ is defined as having $n_j$ sample observations. Let $p = 1, ..., P$ index the covariates. Each sample observation, $i$ in group $j$ has auxiliary information $x_{ij}^p$ for covariate $p$, response value $y_{ij}$, and indicator for being non-zero $z_{ij}$.
 
 $$
 z_{ij} =
@@ -22,28 +22,30 @@ We now introduce the modeling technique that will be the main focus of the thesi
 
 Let $Y$ represent the response variable and $X$ represent the covariates. We typically write $\mathbb{E}[Y \ | \ X]$ to denote the expected value of our response variable conditional on it's covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
 
-$$
-\begin{aligned}
+\begin{equation}
+\begin{split}
     E[ Y  \ | \ X = x] &= \underbrace{E[Y \ | \ X = x, Y = 0]}_{= \ 0}P(Y = 0 \ | \ X = x) + E[Y \ | \ X = x, \ Y > 0]P(Y> 0 \ | \ X = x) \\
     &= E[Y \ | \ X = x, \ Y > 0]P(Y > 0 \ | \ X = x) 
-\end{aligned}
-$$
+\end{split}
+(\#eq:intuition)
+\end{equation}
+
 
 Out of this equation comes a wonderful intuition for what our new modeling process will look like, what we end up with is something that is somewhat meta in that it doesn't tell us what the exact model will be, but rather it tells us what the structure of our model should look like. What we do know is that we should have one model that predicts our non-zero response using our covariates $E[Y \ | \ X = x, \ Y>0]$, and another that predicts whether our response is non-zero or not, again using the covariates $P(Y > 0 \ | \ X = x)$.
 
 Think back to the Introduction where we introduced the model as being:
 
 $$
-\text{final prediction} = \bigg(\text{regression model output}\bigg) \times \bigg(\text{how likely it is that that point is non-zero}\bigg)
+\text{Final Prediction} = \bigg(\text{Regression Model Output}\bigg) \times \bigg(\text{Classification Model Output}\bigg)
 $$
 
 all we've done above is provided a formal theoretical backing for this structure and strategy.
 
-We can imagine this structure functioning as follows: given a new data point we use a model that has been fit on the non-zero training data to predict the value of the response and then we weigh that first output by our predicted probability for whether that point is non-zero or not.
+Importantly, while Equation \@ref(eq:intuition) describes the broader two-part model strategy that will be employed by both the Frequentist and Bayesian versions of the model, the formulation can't technically be extended into the context of prediction for the Bayesian model. Equation \@ref(eq:intuition) does describe how prediction functions in the Frequentist case, but as we will get to later in the Bayesian setting everything is described by a probability distribution and so we aren't working with expected values anymore. That being said, this is just a small technicality that shouldn't take away from the really nice larger intuition that Equation \@ref(eq:intuition) holds for both models.
 
 ## Specific Models
 
-Although we could model these two parts however we wanted to, we will use a linear regression model for the first part and a logistic regression model for the second. Moreover, because the data we will be working with has a clustered structure (in the Forestry setting that comes from the ecologically homogenous domains), we attempt to capture that by including group-level random effects in both models. The precise models that we will be evaluating will be as follows.
+Although we could model these two parts however we wanted to, we will use a generalized linear regression model (that is non-logistic) for the first part and a logistic regression model for the second. Moreover, because the data we will be working with has a clustered structure we attempt to capture that by including group-level random effects in both models. The precise models that we will be evaluating will be as follows.
 
 We fit a generalized linear model with random intercepts to the **non-zero** portion of the data (the $*$ helps differentiate this model from our final model). The linear predictor is specified as follows
 
@@ -57,9 +59,9 @@ $$
 y^*_{ij} = g^{-1}(\mu_{ij})
 $$
 
-At this point we don't place a specific distributional assumption on the error term $\varepsilon_{ij}$, because this will vary with the specific generalized linear model being employed. To spoil the surprise, the two GLMs that we will look at will be one with identity link and Normal distribution (i.e normal linear regression), and one with the log link and a Gamma distribution. That being said, we keep the notation broad at this point so as to emphasize the fact that this portion of the model aims to capture the structure of the non-zero response, and even though we try to model it using various distributions, this is still the main goal.
+At this point we don't place a specific distributional assumption on the error term $\varepsilon_{ij}$ because this will vary with the specific generalized linear model being employed. To spoil the surprise, the two GLMs that we will look at will be one with identity link and Normal distribution (i.e normal linear regression), and one with the log link and a Gamma distribution. That being said, we keep the notation broad at this point so as to emphasize the fact that this portion of the model aims to capture the structure of the non-zero response, and even though we try to model it using various distributions, this is still the main goal.
 
-Here, $\mathbf{x}_{ij}^T = (x^1_{ij}, ..., x^P_{ij})$ is a $P\times 1$ vector of covariates, $\boldsymbol{\beta}$ is a $1\times P$ vector of fixed effects, and $u_j$ is the random effect associated with domain $j$. Finally, $\sigma^2_{u}$ is the between domain variance parameter. The distribution on $\varepsilon_{ij}$ will change depending on the specifics of the glm that we employ.
+Here, $\mathbf{x}_{ij}^T = (x^1_{ij}, ..., x^P_{ij})$ is a $P\times 1$ vector of covariates, $\boldsymbol{\beta}$ is a $1\times P$ vector of fixed effects, and $u_j$ is the random effect associated with group $j$. Finally, $\sigma^2_{u}$ is the between group variance parameter. The distribution on $\varepsilon_{ij}$ will change depending on the specifics of the glm that we employ.
 
 Next we fit a logistic regression random intercepts model to the full data set
 
@@ -67,7 +69,7 @@ $$
 P(z_{ij} = 1) = p_{ij} = \frac{1}{1 + e^{-(\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j)}} \qquad \text{where} \qquad v_j \sim \mathcal{N}(0, \sigma_{v}^2)
 $$
 
-Here $\boldsymbol{\gamma}$ is a $1\times P$ vector of fixed effects and $v_j$ is the random effect associated with domain $j$. Again, $\sigma^2_{v}$ is the between domain variance parameter.
+Here $\boldsymbol{\gamma}$ is a $1\times P$ vector of fixed effects and $v_j$ is the random effect associated with group $j$. Again, $\sigma^2_{v}$ is the between group variance parameter.
 
 We will get into how each of these model pieces are estimated in the next section, but once we have estimates for all of our coefficients, we get our final model by taking the product of these two estimated models.
 
@@ -75,7 +77,7 @@ $$
 \hat{y}_{ij} = \hat{y}^*_{ij}\cdot \hat{p}_{ij}
 $$
 
-And we get a prediction for a single domain by averaging the predictions over all samples in that domain
+And we get a prediction for a single group by averaging the predictions over all samples in that group.
 
 $$
 \hat{Y}_j = \frac{1}{n_j}\sum_{i \in n_j}\hat{y}^*_{ij}\cdot \hat{p}_{ij}
@@ -89,12 +91,14 @@ Importantly, while $y^*_{ij}$ is fit on only the non-zero data, and $p_{ij}$ is 
 
 As it is not the focus of this thesis, we will not go in depth into how these models are fit in a Frequentist setting. Still, it's important to at least provide a brief summary of how it is most often done. 
 
-In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. The main gist of what's happening here is that we are answering the question: under what fixed parameter values would we be most likely to see the data that we observed? And we can connect this back to \@ref(bayes-freq), where we talked about how Frequentists treat parameters as being fixed and the data as random. At it's core, MLE is doing just that.
+In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. The main gist of what's happening here is that we are answering the question: under what fixed parameter values would we be most likely to see the data that we observed? In the case of a statistical model this translates into: what parameter values maximize the likelihood that the process described by the model produced the data that were actually observed?
+
+We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \@ref(bayes-freq). By making an assumption about the model that best describes the process that generated the data, we are conceptualizing the data as being random. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
 
 
 ### Bayesian
 
-Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_{u}, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree treating our parameters as random and trying to quantify how they might vary.
+Before diving into the specifics of the Bayesian model fitting, recall that a Bayesian analysis proceeds by treating the data as fixed and the unknown parameters as random. Importantly we still are interested in estimating the posterior $p(\theta \ | \ \text{data})$, but now we have many parameters of interest $p(\beta_1, \beta_2, \sigma^2_{u}, ... \ \text{etc} \ | \ \text{data})$, and so the expressions get a bit more complicated. As we get into all of the specifics that we lay out below, always remember that at the core of this process, we aree= treating our parameters as random and trying to quantify how they might vary given our fixed data.
 
 We'll start by describing the logistic regression model, before moving on to the two different versions of the generalized linear regression component.
 
@@ -125,7 +129,7 @@ The prior parameters $m_p, s_p^2, r_1^2$ are real-valued numbers that center and
 
 An example of what the prior distributions look like across a few of their parameter values is shown below.
 
-```{r, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%"}
+```{r priors, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="Various parameter values for the prior distributions."}
 library(tidyverse)
 library(latex2exp)
 library(patchwork)
@@ -476,19 +480,35 @@ While it may not be immediately clear, these processes are really just mimicking
 
 ### Combining the Model Predictions
 
-Now that we have two sets which represent approximate the posterior predictive distribution for unit $i$ in domain $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. We might just match MCMC iteration $k$ from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up?
+Now that we have two sets which represent approximate the posterior predictive distribution for unit $i$ in group $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. We might just match MCMC iteration $k$ from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up?
 
-One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. Moreover, as the two models grow to be more complicated this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
+One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. That being said, as the two models grow to be more complicated, this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
 
 ## Simultaneous v.s Separate
 
+### Simultaneous Model Build
+
 As we just mentioned, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors **between** models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain^[@pfeffermann2008small].
 
-Finally, this result holds regardless of the particular models that we use, but for the sake of simplicity we'll use a logistic regression model with no random effects and a Normal linear regression model with no random effects.  With all of that in mind, in this setting our posterior for both models would be:
+Finally, this result holds regardless of the particular models that we use, but for the sake of simplicity we'll use a logistic regression model with no random effects and a Normal linear regression model with no random effects. As mentioned above, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
+
+$$
+z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j
+$$
+
+But then the two part process gets folded into the way that we set up the Normal linear regression model: 
+
+$$
+y_{ij} \sim \mathcal{N}\bigg(z_{ij}\cdot m_{ij} \ , \ \Big[z_{ij}\cdot\tau_1 + (1 - z_{ij})\tau_2\Big]\bigg) \qquad \text{where} \qquad m_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j
+$$
+
+Here $\tau_1$ represents the variance of $y_{ij}$ when $z_{ij} = 1$ and thus can be estimated, but $\tau_2$ is the variance of $y_{ij}$ when $z_{ij} = 0$ and so there's no practical way for it to be estimated by the MCMC algorithm. The solution is to just set $\tau_2$ as some small fixed number (i.e $0.001$) and approximate the posterior for all the other parameters.
+
+With all of that in mind, in this setting our posterior for both models would be:
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y}) &\propto p(\mathbf{y} \ | \boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2) 
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1\ | \ \mathbf{y}) &\propto p(\mathbf{y} \ | \boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1)p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1) 
 \end{aligned}
 $$
 
@@ -496,7 +516,7 @@ We can expand this by writing out the likelihood more fully based on whether $y$
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \tau_1)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1)\\
 \end{aligned}
 $$
 
@@ -506,7 +526,7 @@ But, there's important insight still to be found here. Let's group these terms b
 
 $$
 \begin{aligned}
-&= \Bigg[\Big(\prod_{i:y_i = 0}(1- p_i)\prod_{i: y_i > 0}p_i\Big)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2)\Bigg]\Bigg[\Big(\prod_{i:y_i > 0}p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\Big)p(\boldsymbol{\beta},\mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\Bigg]
+&= \Bigg[\Big(\prod_{i:y_i = 0}(1- p_i)\prod_{i: y_i > 0}p_i\Big)p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2)\Bigg]\Bigg[\Big(\prod_{i:y_i > 0}p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \tau_1)\Big)p(\boldsymbol{\beta},\mathbf{u}, \sigma_u^2, \tau_1)\Bigg]
 \end{aligned}
 $$
 
@@ -516,22 +536,22 @@ But now, if we look at this closely we can see that what we really have here is 
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y})  &\propto p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y}) \\
-  &= C\bigg[p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})\bigg]
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1\ | \ \mathbf{y})  &\propto p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \tau_1 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y}) \\
+  &= C\bigg[p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \tau_1 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})\bigg]
 \end{aligned}
 $$
 
 Finally, since these are all proper probability distributions we know that they should all integrate to 1 when integrated across all of their parameters. If we integrate both sides over all of the parameters from both models, its clear that the LHS would be one, and once we recall that there is no parameter dependence **between** the models, it is clear that the RHS does as well. And so we are left with the conclusion that $C = 1$ and thus that
 
 $$
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y})  = p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y}) 
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \tau_1\ | \ \mathbf{y})  = p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \tau_1 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y}) 
 $$
 
 So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that we can fit the models separately, and then combine the results at the end to get our posterior predictive distributions. In other words *as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.*. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each individual model.
 
 ### Practical Backing
 
-To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are nearly identical.
+To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are practically identical.
 
 ```{r, echo=F, message=F, warning=F, fig.align='center', out.width='80%'}
 library(here)
@@ -551,7 +571,7 @@ full_comp %>%
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
-Since we are interested in a making predictions for the average response in domain $j$ we obtain a set that approximates the posterior predictive distribution for each unit $i$ in domain $j$. For example, if we fix $j$ and let $n_j = 5$ we would have 5 sets:
+Since we are interested in a making predictions for the average response in group $j$ we obtain a set that approximates the posterior predictive distribution for each unit $i$ in group $j$. For example, if we fix $j$ and let $n_j = 5$ we would have 5 sets:
 
 $$
 \begin{aligned}
@@ -562,7 +582,7 @@ $$
 \end{aligned}
 $$
 
-To get the posterior predictive distribution for $\bar{y}_{j, \ new}$ we take averages across units in domain $j$ by indices of the MCMC draws. In other words we take the average of $\Big\{y_{1j, \ new}^{(k)}, y_{2j, \ new}^{(k)}, ... , y_{5j, \ new}^{(k)}\Big\}$ for each MCMC draw $k$. In full we end up with the set:
+To get the posterior predictive distribution for $\bar{y}_{j, \ new}$ we take averages across units in group $j$ by indices of the MCMC draws. In other words we take the average of $\Big\{y_{1j, \ new}^{(k)}, y_{2j, \ new}^{(k)}, ... , y_{5j, \ new}^{(k)}\Big\}$ for each MCMC draw $k$. In full we end up with the set:
 
 $$
 \begin{bmatrix}
@@ -579,7 +599,7 @@ $$
 \end{bmatrix}
 $$
 
-Which is an approximation of the posterior predictive distribution for the mean of the response in domain $j$.
+Which is an approximation of the posterior predictive distribution for the mean of the response in group $j$.
 
 
 ## Prediction Intervals

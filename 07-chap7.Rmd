@@ -1,0 +1,7 @@
+# Package Vignette {#vign}
+
+
+```{r}
+
+```
+

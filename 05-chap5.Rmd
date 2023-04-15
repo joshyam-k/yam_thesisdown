@@ -9,13 +9,22 @@ library(knitr)
 
 We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \@ref(metrics). Across all of these sections we will label simulation settings like $n = \cdot$ - $J = \cdot$. For example if we have $(n = 15, J = 10 )$ it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on $n\times J = 150$ data points.
 
+Additionally, since the logistic regression component remained the same across all of the Bayesian models, we will use the following syntax when refering to the bayesian models.
+
+- [Type of priors, distribution used to model the non-zero response]
+
+For example, [Flat Priors, Normal] refers to the Bayesian model that used flat priors and modeled the non-zero response using the Normal distribution.
+
 ## Expectations
 
 Before diving into the actual results, we'll first give a brief overview of what we were expecting to see. 
 
 One of the main expectations we had was that we'd see improvements of some kind when using Bayesian models with informative priors compared to Bayesian models with flat priors. At the very least, we hoped to see that the informative priors would assist in reducing the rate at which Bayesian models failed to converge in small sample size settings.
 
+Secondly, we expected to see slightly higher bias in the Bayesian models as compared to the Frequentist models. The reason for this is that our data was generated in a Frequentist way. The parameters were set as fixed constants and not as random variables as a Bayesian conceptualizes them to be. Therefore the Bayesian models should be slightly misspecified and thus should pick up some bias.
 
+
+With these expectations in mind, we'll now move to the actual results.
 
 
 ## Model Failures
@@ -195,8 +204,7 @@ make_res_plot <- function(data, var) {
 We begin by comparing the RMSE of our models. As a reminder, due to the high model failure rates, the settings with $g = 5$ are not included in theses evaluations. The performance metrics below are calculated over the simulation reps in which none of the models being evaluated failed to converge (although this is only drops results in the settings where $g = 10$ since we observed no model failures at larger values of $g$).
 
 ```{r, warning = F, message = F, echo = F}
-res <- read_csv(here("data", "full_sim_res.csv")) %>% 
-  filter(!(settings %in% c("n15_g5", "n30_g5", "n50_g5")))
+res <- read_csv(here("data", "full_sim_res.csv"))
 ```
 
 ```{r rmse, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Root Mean Squared Error'}
@@ -235,12 +243,12 @@ make_res_plot(res, E_bias) +
   )
 ```
 
-That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $g = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. I truly wish that I could take this plot and proclaim the Bayesian Normal model with informative priors to perform far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that initially were a bit befuddling in Figure \@ref(fig:bias).
+That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $g = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small. I truly wish that I could take this plot and proclaim the Bayesian Normal model with informative priors to perform far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that were initially a bit befuddling in Figure \@ref(fig:bias).
 
 
 ## Coverage
 
-And finally, we examine the coverage of the Bayesian models. Note that we do not include the frequentist model here.
+And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here.
 
 ```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
 res %>% 
@@ -274,14 +282,8 @@ res %>%
   )
 ```
 
-Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind is that our simulation data was generated in a Frequentist way. What I mean by that is that all of the parameters used to generate the data were fixed constants, and not random variables (as a Bayesian conceptualizes them to be). For this reason all of the Bayesian models are, at least slightly, misspecified. 
+Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
 
-
-## General Remarks
-
-It would be relatively easy to look at these results and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis.
-
-It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value, which is often the case in the statistical modeling literature. The performance metrics of the each of the models in this thesis are indubitably interesting, but to present them as the only takeaway would be a huge disservice to the Bayesian models. For this reason we'll make some larger remarks about the performance metrics, but we'll also spend some time discussing
 
 
 
