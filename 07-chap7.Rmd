@@ -1,7 +1,30 @@
-# Package Vignette {#vign}
+# Package Vignette {#vignette}
+
+## Forestry Data
+
+```{r, message=F, warning=F, echo= F}
+library(here)
+library(tidyverse)
+library(gt)
+data <- readRDS(here("data", "wa_plots_public.rds"))
+```
+
+In order to show off the functionality of the package that we wrote, we'll apply it to the Forestry data that we introduced all the way back in Chapter \@ref(intro-section). Recall that this forestry data is both zero-inflated and clustered making it a perfect setting for us to employ our models.
+
+The particular subset of Forestry data that we'll be looking at comes from the State of Washington and contains `r nrow(data)` observations across 49 Eco-Subsections (which define our clusters). The summary statistics of the number of observations per group are as follows:
+
+```{r, message=F, warning=F, echo=F}
+summary(data %>% count(ECOSUBCD) %>% pull(n)) 
+```
 
 
-```{r}
 
+
+
+We start by installing the developmental version of the package and loading it into our R session
+
+```{r, message=F, warning=F}
+devtools::install_github("joshyam-k/zinf")
+library(zinf)
 ```
 
