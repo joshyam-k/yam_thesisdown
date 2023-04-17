@@ -484,7 +484,7 @@ Now that we have two sets which represent approximate the posterior predictive d
 
 One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. That being said, as the two models grow to be more complicated, this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
 
-## Simultaneous v.s Separate
+## Simultaneous v.s Separate {#sepsim}
 
 ### Simultaneous Model Build
 

@@ -960,8 +960,8 @@ Now that we have two sets which represent approximate the posterior predictive d
 
 One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. That being said, as the two models grow to be more complicated, this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
 
-\hypertarget{simultaneous-v.s-separate}{%
-\section{Simultaneous v.s Separate}\label{simultaneous-v.s-separate}}
+\hypertarget{sepsim}{%
+\section{Simultaneous v.s Separate}\label{sepsim}}
 
 \hypertarget{simultaneous-model-build}{%
 \subsection{Simultaneous Model Build}\label{simultaneous-model-build}}
@@ -1187,8 +1187,8 @@ These parameters that require priors can be placed into 3 main groups: fixed eff
 In order to include no prior knowledge in your analysis, a flat prior can be used: \(p(\theta) \propto 1\). Recall that the posterior can be factored into a normalized product of the likelihood and the prior. Thus, to use a flat, non-informative, prior is to ``let the data speak for itself'' and utilize only the likelihood function in estimating the posterior. That being said prior distributions should still not cover parameter values that are impossible, and thus the flat priors will have supports that are restricted to the range of possible values that the parameter could take on. For the fixed effects parameters a support of \((-100, 100)\) was used and for the variance and shape parameters \((0, 100)\) was used.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
-\hypertarget{informative}{%
-\subsubsection{Informative}\label{informative}}
+\hypertarget{info}{%
+\subsubsection{Informative}\label{info}}
 
 Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
@@ -1197,7 +1197,7 @@ An examination of a scatterplot of the response and covariate leads us to believ
 
 On the other hand, we tweaked the scale of this prior for the logistic regression model since the response being modeled is on a different scale. At this point we don't have much of an idea of how the chance of being non-zero changes as the covariate changes, so we use a \(\mathcal{N}(1,1)\) prior for the fixed effects coefficients in the logistic regression model (this may seem like a tight distribution, but in the context of logistic regression slope coefficients it's really quite wide).
 
-Next, following the advice of Gelman 2013 the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
+Next, following the advice of \footnote{Gelman (2006)} the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-10-1} \end{center}
 
 Finally, since the non-zero portion of the response variable has a mean of 31.12, we can use the following ``back of the napkin'' calculation to get an idea for what the shape parameter should be centered on. Recall that a \(\text{Gamma}(\alpha, \beta)\) distribution has mean \(\alpha / \beta\) and variance \(\alpha / \beta^2\).
@@ -1481,13 +1481,198 @@ The particular subset of Forestry data that we'll be looking at comes from the S
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
       9      43      88     142     188     544 
 \end{verbatim}
-We start by installing the developmental version of the package and loading it into our R session
+The covariate that we will be using from the forestry data is called ``Tree Canopy Cover'' (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns \footnote{Toney, Shaw, \& Nelson (2008)}. This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
+
+The response variable that we will be using is called ``Dry Above Ground Biomass from Live Trees'' and is expressed in the units of per area density. This Dry Above Ground Biomass variable is one that is very important for understanding the health of forest ecosystems and plays a role in decisions regarding merchantable timber and fire hazard. For these reasons its vitally important for the FIA to be able to produce accurate estimates of this variable.
+
+The zero-inflation models presented in this thesis provide a reasonable approach for trying to do exactly that. That being said, no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models.
+
+\hypertarget{r-package-zinf}{%
+\section{R Package: zinf}\label{r-package-zinf}}
+
+We start by installing the developmental version of the package and loading it into our R session.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{devtools}\SpecialCharTok{::}\FunctionTok{install\_github}\NormalTok{(}\StringTok{"joshyam{-}k/zinf"}\NormalTok{)}
 \FunctionTok{library}\NormalTok{(zinf)}
 \end{Highlighting}
 \end{Shaded}
+The two main functions that \texttt{zinf} contains are \texttt{zinf\_bayes} and \texttt{zinf\_freq} which as the names suggest relate to the Frequentist and Bayesian versions of the zero-inflation models.
+
+The challenge of writing a software package for these zero-inflation models was truthfully a lot trickier than I initially thought it would be. There were two different possible structural versions that I considered to be viable:
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Write a function that takes as argument all the individual pieces needed to build each of the two models and internally build the two models and then define all of the neccessary functionality.
+\item
+  Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the neccessary functionality.
+\end{enumerate}
+On the one hand, version (1) is nice in that it ``does it all'' for the user. But the main problem with version (1) is that the functions \texttt{lme4::lmer} and \texttt{lme4::glmer} for Frequentist models and \texttt{rstanarm::stan\_lmer} and \texttt{rstanarm::stan\_glmer} for Bayesian models are already so popular and well developed and robust that it seems silly to to rely on that pre-existing software. After all, as we showed in Section \ref{sepsim}, the Bayesian models can be built separately and made as complex desired, and this is also certainly the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function arguments that those \texttt{lme4} and \texttt{rstanarm} functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\linewidth]{figure/v1v2} 
+
+}
+
+\caption{Two Software Versions}\label{fig:tbl2}
+\end{figure}
+In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the \texttt{lme4} functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the \texttt{zinf} functions still have enormous usefullness in that they define methods for producing a summary of the zero-inflation model and most importantly for predicting with the zero-inflation model.
+
+\hypertarget{application}{%
+\section{Application}\label{application}}
+
+The only data preparation we need to do is to create a data set that contains all of the data points and a data set that only contains data points with a non-zero response value.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{full\_data }\OtherTok{\textless{}{-}}\NormalTok{ data}
+\NormalTok{nonzero\_data }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\hypertarget{individual-frequentist-models}{%
+\subsection{Individual Frequentist models}\label{individual-frequentist-models}}
+
+We'll start by building the individual Frequentist models.
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(lme4)}
+
+\NormalTok{freq\_model1 }\OtherTok{\textless{}{-}} \FunctionTok{lmer}\NormalTok{(}
+\NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
+  \AttributeTok{data =}\NormalTok{ nonzero\_data}
+\NormalTok{  )}
+
+\NormalTok{freq\_model2 }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(}
+\NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{!=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
+  \AttributeTok{family =}\NormalTok{ binomial,}
+  \AttributeTok{data =}\NormalTok{ full\_data}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+The key characteristics of these models are the specification of the covariates and the response, the random intercept term for the Ecosubsection (ECOSUBCD), and the use of the non-zero data set to fit the first model.
+
+\hypertarget{individual-bayesian-models}{%
+\subsection{Individual bayesian models}\label{individual-bayesian-models}}
+
+\hypertarget{logistic-regression-model}{%
+\subsubsection{Logistic Regression Model}\label{logistic-regression-model}}
+
+Next we'll build the individual Bayesian models. We'll start with the logistic regression model that requires priors for
+\begin{itemize}
+\tightlist
+\item
+  The fixed effect slope (for tcc)
+\item
+  The fixed effect intercept
+\item
+  The variance of the random intercepts
+\end{itemize}
+The prior fixed effect slope should reflect our vague sense for how the probability of Dry Above Ground Biomass from Live Trees being non-zero changes with Tree Canopy Cover. With limited knowledge of how forest attributes interact we'll assume that the slope is positive and centered somewhere around 0.5, so we'll use a prior of \(\mathcal{N}(0.5, 0.25^2)\).
+
+The fixed effect intercept that \texttt{rstanarm::stan\_glmer} asks for is actually the centered intercept. This can be conceptualized as our guess for the probability of being non-zero for an average plot. Given that the response variable is zero in around 40\% of the plots in our data set we'll guess that this probability is around 0.4. We have to be careful here, since logistic regression employs a logit link, we actually want to set the prior mean to be on the log-odds scale, so we use \(\log{(0.4/(1-0.4))} = -0.4\) as the center. We might guess that the range of the propbability of being non-zero for an average plot might range from 0.1 to 0.7 which translates to a log odds range of \((-2.2, 0.85)\). Thus the prior for the centered fixed effect intercept will thus be \(\mathcal{N}(-0.4, 0.7^2)\).
+
+Finally, the variance of the random intercepts is not really a parameter that we can use the data to get a great guess for, so we'll utilize a weakly informative prior of Exponential\((1)\). In \texttt{rstanarm::stan\_glmer} this is written slightly differently using a function called \texttt{decov} but in this setting that is just the Exponential\((1)\) prior that we want.
+
+We'll stick with the default MCMC settings and build the model as follows
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{library}\NormalTok{(rstanarm)}
+\NormalTok{bayes\_model1 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
+\NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
+  \AttributeTok{data =}\NormalTok{ full\_data,}
+  \AttributeTok{family =}\NormalTok{ binomial,}
+  \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.25}\NormalTok{),}
+  \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.4}\NormalTok{, }\FloatTok{0.7}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{),}
+  \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\hypertarget{glm-1-normal-with-identity-link}{%
+\subsubsection{GLM 1: Normal with Identity link}\label{glm-1-normal-with-identity-link}}
+
+We now turn to the two versions of the generalized linear model. We'll start with the model that uses a Normal distribution and the identity link- i.e Normal linear regression. This time the parameters that need priors are all the same as from the previous one, except now we also need a prior for the variance of the error term.
+
+We can examine a scatter plot of Tree Canopy Cover on Dry Above Ground Biomass from Live Trees to choose our prior for the fixed effect slope. We can do some rise-over-run calculations to end up with a guess that the fixed effect slope is around 2 and probably doesn't go outside of the range (0.5, 5). Thus we'll use a \(\mathcal{N}(2, 1^2)\) prior here.
+\begin{figure}
+
+{\centering \includegraphics[width=0.9\linewidth]{thesis_files/figure-latex/nzdata-1} 
+
+}
+
+\caption{Relationship between Tree Canopy Cover and Dry Above Ground Biomass from Live Trees}\label{fig:nzdata}
+\end{figure}
+Again we can refer back to Figure \ref{fig:nzdata} to get our guess for the the centered intercept. At an average value of tcc (say 50), the value of the response looks to be around 100, but this could plausibly range anywhere between 20 and 180, so we'll use a \(\mathcal{N}(100, 40^2)\) prior for the centered intercept.
+
+Finally we'll stick with an Exponential\((1)\) prior for the two variance parameters since we don't know enough to say more about them. We can plug all of this in to \texttt{rstanarm::stan\_lmer} as follows.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_model2 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_lmer}\NormalTok{(}
+\NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
+  \AttributeTok{data =}\NormalTok{ nonzero\_data,}
+  \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{),}
+  \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\DecValTok{100}\NormalTok{, }\DecValTok{40}\NormalTok{),}
+  \AttributeTok{prior\_aux =} \FunctionTok{cauchy}\NormalTok{(}\DecValTok{1}\NormalTok{),}
+  \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+\hypertarget{glm-2-gamma-with-log-link}{%
+\subsubsection{GLM 2: Gamma with log link}\label{glm-2-gamma-with-log-link}}
+
+We'll stick with the same priors for the fixed effects as before except we'll put all of the parameter values on a log scale due to the fact that we're using a log link function.
+\begin{itemize}
+\tightlist
+\item
+  fixed effect slope: \(\mathcal{N}(0.7, 0.1^2)\)
+\item
+  fixed effect intercept: \(\mathcal{N}(4.6, 3.6^2)\)
+\end{itemize}
+Similarly we'll keep our weakly informative prior for the variance of the random intercepts, and so all that's left is to decide what prior we should use for the shape parameter of the Gamma distribution. We'll follow the logic employed in Section \ref{info} to do this. The estimation simply relies on the fact that the mean of a Gamma\((\alpha, \beta)\) distribution is \(\alpha/\beta\) and the variance is \(\alpha/\beta^2\). Here \(\bar{y}\) and \(s^2\) represent the sample mean and variance of Dry Above Ground Biomass from Live Trees.
+\begin{equation}
+\bar{y} = 80.45 \approx \frac{\alpha}{\beta}\qquad \text{and} \qquad s^2 = 6029 \approx \frac{\alpha}{\beta^2}
+\label{eq:first}
+\end{equation}
+but now,
+\begin{equation}
+\frac{\bar{y}}{s^2} = 0.013 \approx \frac{\alpha / \beta}{\alpha / \beta^2} = \beta 
+\end{equation}
+and if we put our estimate for \(\beta\) back into \eqref{eq:first} to get
+\begin{equation}
+\frac{\alpha}{0.013} \approx 80.45 \implies \alpha \approx 1.04
+\end{equation}
+We aren't positive about this guess but we know that the actuall parameter has to be non-negative so we'll use a Half-Cauchy\((1, 1)\) prior here. Note that \texttt{rstanarm::stan\_glmer} assumes all \texttt{prior\_aux} parameters are positive so we don't have to specify that it's a bounded Cauchy distribution.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_model3 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
+\NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
+  \AttributeTok{data =}\NormalTok{ nonzero\_data,}
+  \AttributeTok{family =} \FunctionTok{Gamma}\NormalTok{(}\AttributeTok{link =} \StringTok{"log"}\NormalTok{),}
+  \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\FloatTok{0.7}\NormalTok{, }\FloatTok{0.1}\NormalTok{),}
+  \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\FloatTok{4.6}\NormalTok{, }\FloatTok{3.6}\NormalTok{),}
+  \AttributeTok{prior\_aux =} \FunctionTok{cauchy}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{),}
+  \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+Again, just from the length of these Bayesian model building sections compared to the Frequentist sections, it's clear how much extra work is required if you want to use informative priors. That being said, I hope it's clear how going through this process does force you to understand the dynamics of the data and know how to connect them back to the model, which in my mind is a very positive thing.
+
+\hypertarget{using-zinf}{%
+\subsection{Using zinf}\label{using-zinf}}
+
+In order to turn our individual models into a zero-inflation model we simply feed them into the appropriate \texttt{zinf\_*} function.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{frequentist\_zi\_mod }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_freq}\NormalTok{(freq\_model1, freq\_model2)}
+\NormalTok{bayesian\_zi\_mod\_normal }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_model1, bayes\_model2)}
+\NormalTok{bayesian\_zi\_mod\_gamma }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_model1, bayes\_model3)}
+\end{Highlighting}
+\end{Shaded}
+If we examine the class of these objects we'll find that they're of class \texttt{zinf\_freq} and \texttt{zinf\_bayes} respectively. At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines methods for generic functions like \texttt{summary()} and \texttt{predict()} on these new zero-inflation model objects. In particular prediction can be an incredibly cumbersome task in Bayesian modeling, so there's enormous usefulness in abstracting away all of that work.
+
 \backmatter
 
 \hypertarget{references}{%
@@ -1522,6 +1707,9 @@ McConville, K. S., Moisen, G. G., \& Frescino, T. S. (2020). A tutorial on model
 
 \leavevmode\vadjust pre{\hypertarget{ref-pfeffermann2008small}{}}%
 Pfeffermann, D., Terryn, B., \& Moura, F. A. (2008). Small area estimation under a two-part random effects model with application to estimation of literacy in developing countries. \emph{Survey Methodology}, \emph{34}(2), 235--249.
+
+\leavevmode\vadjust pre{\hypertarget{ref-toney2008stem}{}}%
+Toney, C., Shaw, J. D., \& Nelson, M. D. (2008). A stem-map model for predicting tree canopy cover of forest inventory and analysis (FIA) plots. In \emph{Forest inventory and analysis symposium}.
 
 \end{CSLReferences}
 
