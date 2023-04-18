@@ -208,6 +208,9 @@ Second paragraph of abstract starts here.
 }
 
 	\usepackage{setspace}\onehalfspacing
+	\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{longtable}
 % End of CII addition
 %%
 %% End Preamble
@@ -1522,11 +1525,19 @@ In the Frequentist setting, version (1) doesn't seem that bad, especially since 
 \hypertarget{application}{%
 \section{Application}\label{application}}
 
-The only data preparation we need to do is to create a data set that contains all of the data points and a data set that only contains data points with a non-zero response value.
+We'll start by setting aside a small amount of the data set to make predictions on. In particular, Ecosubsections M242Ba and M242Db have quite a few data points so we'll sample 100 points from each one to test our model on. The only other data preparation we need to do is to create a training data set that only contains training data points with a non-zero response value.
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{full\_data }\OtherTok{\textless{}{-}}\NormalTok{ data}
-\NormalTok{nonzero\_data }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} 
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{5}\NormalTok{)}
+\NormalTok{test }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{filter}\NormalTok{(ECOSUBCD }\SpecialCharTok{\%in\%} \FunctionTok{c}\NormalTok{(}\StringTok{"M242Ba"}\NormalTok{, }\StringTok{"M242Db"}\NormalTok{)) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{group\_by}\NormalTok{(ECOSUBCD) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{slice\_sample}\NormalTok{(}\AttributeTok{n =} \DecValTok{100}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ungroup}\NormalTok{()}
+
+\NormalTok{train }\OtherTok{\textless{}{-}} \FunctionTok{anti\_join}\NormalTok{(data, test)}
+
+\NormalTok{nonzero\_train }\OtherTok{\textless{}{-}}\NormalTok{ train }\SpecialCharTok{\%\textgreater{}\%} 
   \FunctionTok{filter}\NormalTok{(DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -1538,15 +1549,15 @@ We'll start by building the individual Frequentist models.
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(lme4)}
 
-\NormalTok{freq\_model1 }\OtherTok{\textless{}{-}} \FunctionTok{lmer}\NormalTok{(}
+\NormalTok{freq\_reg }\OtherTok{\textless{}{-}} \FunctionTok{lmer}\NormalTok{(}
 \NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
-  \AttributeTok{data =}\NormalTok{ nonzero\_data}
+  \AttributeTok{data =}\NormalTok{ nonzero\_train}
 \NormalTok{  )}
 
-\NormalTok{freq\_model2 }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(}
+\NormalTok{freq\_log\_reg }\OtherTok{\textless{}{-}} \FunctionTok{glmer}\NormalTok{(}
 \NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{!=} \DecValTok{0} \SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
   \AttributeTok{family =}\NormalTok{ binomial,}
-  \AttributeTok{data =}\NormalTok{ full\_data}
+  \AttributeTok{data =}\NormalTok{ train}
 \NormalTok{  )}
 \end{Highlighting}
 \end{Shaded}
@@ -1578,14 +1589,15 @@ We'll stick with the default MCMC settings and build the model as follows
 \begin{Shaded}
 \begin{Highlighting}[]
 \FunctionTok{library}\NormalTok{(rstanarm)}
-\NormalTok{bayes\_model1 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
+\NormalTok{bayes\_log\_reg }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
 \NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
-  \AttributeTok{data =}\NormalTok{ full\_data,}
+  \AttributeTok{data =}\NormalTok{ train,}
   \AttributeTok{family =}\NormalTok{ binomial,}
   \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\FloatTok{0.5}\NormalTok{, }\FloatTok{0.25}\NormalTok{),}
   \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\SpecialCharTok{{-}}\FloatTok{0.4}\NormalTok{, }\FloatTok{0.7}\SpecialCharTok{\^{}}\DecValTok{2}\NormalTok{),}
   \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
-  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}\NormalTok{,}
+  \AttributeTok{cores =}\NormalTok{ parallel}\SpecialCharTok{::}\FunctionTok{detectCores}\NormalTok{()}
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -1608,14 +1620,15 @@ Again we can refer back to Figure \ref{fig:nzdata} to get our guess for the the 
 Finally we'll stick with an Exponential\((1)\) prior for the two variance parameters since we don't know enough to say more about them. We can plug all of this in to \texttt{rstanarm::stan\_lmer} as follows.
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{bayes\_model2 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_lmer}\NormalTok{(}
+\NormalTok{bayes\_normal\_reg }\OtherTok{\textless{}{-}} \FunctionTok{stan\_lmer}\NormalTok{(}
 \NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
-  \AttributeTok{data =}\NormalTok{ nonzero\_data,}
+  \AttributeTok{data =}\NormalTok{ nonzero\_train,}
   \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\DecValTok{2}\NormalTok{, }\DecValTok{1}\NormalTok{),}
   \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\DecValTok{100}\NormalTok{, }\DecValTok{40}\NormalTok{),}
-  \AttributeTok{prior\_aux =} \FunctionTok{cauchy}\NormalTok{(}\DecValTok{1}\NormalTok{),}
+  \AttributeTok{prior\_aux =} \FunctionTok{exponential}\NormalTok{(}\DecValTok{1}\NormalTok{),}
   \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
-  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}\NormalTok{,}
+  \AttributeTok{cores =}\NormalTok{ parallel}\SpecialCharTok{::}\FunctionTok{detectCores}\NormalTok{()}
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -1646,15 +1659,16 @@ and if we put our estimate for \(\beta\) back into \eqref{eq:first} to get
 We aren't positive about this guess but we know that the actuall parameter has to be non-negative so we'll use a Half-Cauchy\((1, 1)\) prior here. Note that \texttt{rstanarm::stan\_glmer} assumes all \texttt{prior\_aux} parameters are positive so we don't have to specify that it's a bounded Cauchy distribution.
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{bayes\_model3 }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
+\NormalTok{bayes\_gamma\_reg }\OtherTok{\textless{}{-}} \FunctionTok{stan\_glmer}\NormalTok{(}
 \NormalTok{  DRYBIO\_AG\_TPA\_live\_ADJ }\SpecialCharTok{\textasciitilde{}}\NormalTok{ tcc }\SpecialCharTok{+}\NormalTok{ (}\DecValTok{1} \SpecialCharTok{|}\NormalTok{ ECOSUBCD),}
-  \AttributeTok{data =}\NormalTok{ nonzero\_data,}
+  \AttributeTok{data =}\NormalTok{ nonzero\_train,}
   \AttributeTok{family =} \FunctionTok{Gamma}\NormalTok{(}\AttributeTok{link =} \StringTok{"log"}\NormalTok{),}
   \AttributeTok{prior =} \FunctionTok{normal}\NormalTok{(}\FloatTok{0.7}\NormalTok{, }\FloatTok{0.1}\NormalTok{),}
   \AttributeTok{prior\_intercept =} \FunctionTok{normal}\NormalTok{(}\FloatTok{4.6}\NormalTok{, }\FloatTok{3.6}\NormalTok{),}
   \AttributeTok{prior\_aux =} \FunctionTok{cauchy}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{1}\NormalTok{),}
   \AttributeTok{prior\_covariance =} \FunctionTok{decov}\NormalTok{(}\AttributeTok{reg =} \DecValTok{1}\NormalTok{, }\AttributeTok{conc =} \DecValTok{1}\NormalTok{, }\AttributeTok{shape =} \DecValTok{1}\NormalTok{, }\AttributeTok{scale =} \DecValTok{1}\NormalTok{),}
-  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}
+  \AttributeTok{chains =} \DecValTok{4}\NormalTok{, }\AttributeTok{iter =} \DecValTok{2000}\NormalTok{, }\AttributeTok{seed =} \DecValTok{84735}\NormalTok{,}
+  \AttributeTok{cores =}\NormalTok{ parallel}\SpecialCharTok{::}\FunctionTok{detectCores}\NormalTok{()}
 \NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
@@ -1666,12 +1680,117 @@ Again, just from the length of these Bayesian model building sections compared t
 In order to turn our individual models into a zero-inflation model we simply feed them into the appropriate \texttt{zinf\_*} function.
 \begin{Shaded}
 \begin{Highlighting}[]
-\NormalTok{frequentist\_zi\_mod }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_freq}\NormalTok{(freq\_model1, freq\_model2)}
-\NormalTok{bayesian\_zi\_mod\_normal }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_model1, bayes\_model2)}
-\NormalTok{bayesian\_zi\_mod\_gamma }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_model1, bayes\_model3)}
+\NormalTok{frequentist\_zi\_mod }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_freq}\NormalTok{(freq\_reg, freq\_log\_reg)}
+\NormalTok{bayesian\_zi\_mod\_normal }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_normal\_reg, bayes\_log\_reg)}
+\NormalTok{bayesian\_zi\_mod\_gamma }\OtherTok{\textless{}{-}} \FunctionTok{zinf\_bayes}\NormalTok{(bayes\_gamma\_reg, bayes\_log\_reg)}
 \end{Highlighting}
 \end{Shaded}
-If we examine the class of these objects we'll find that they're of class \texttt{zinf\_freq} and \texttt{zinf\_bayes} respectively. At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines methods for generic functions like \texttt{summary()} and \texttt{predict()} on these new zero-inflation model objects. In particular prediction can be an incredibly cumbersome task in Bayesian modeling, so there's enormous usefulness in abstracting away all of that work.
+If we examine the class of these objects we'll find that they're of class \texttt{zinf\_freq} and \texttt{zinf\_bayes} respectively.
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(frequentist\_zi\_mod)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+[1] "zinf_freq"
+\end{verbatim}
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{class}\NormalTok{(bayesian\_zi\_mod\_normal)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+[1] "zinf_bayes"
+\end{verbatim}
+At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines \texttt{zinf\_bayes} and \texttt{zinf\_freq} as S3 generics. In R ``the job of an S3 generic is to perform method dispatch, i.e.~find the specific implementation for a class.''\footnote{Wickham (2019)}. So what \texttt{zinf} is really doing is defining methods like \texttt{predict()} and \texttt{summary()} for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
+
+And as we can see below, making predictions on the test dataset using our Frequentist zero-inflation model is a very familiar process. Since the estimand we're interested in is the Ecosubsection level mean and our test data set included two Ecosubsections, we get an output with two rows.
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{predict}\NormalTok{(frequentist\_zi\_mod, }\AttributeTok{newdata =}\NormalTok{ test)}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+# A tibble: 2 x 2
+  ECOSUBCD prediction
+  <chr>         <dbl>
+1 M242Ba         88.5
+2 M242Db         71.0
+\end{verbatim}
+While the output will look slightly different for the Bayesian model, the process of getting the predictions is exactly the same. We'll start by looking at the Bayesian model where the GLM component assumes a Normal response
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_preds\_normal }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(bayesian\_zi\_mod\_normal, }\AttributeTok{newdata =}\NormalTok{ test)}
+\end{Highlighting}
+\end{Shaded}
+The object returned by running \texttt{predict} on one of the Bayesian zero-inflation models is a list that contains two items:
+\begin{itemize}
+\tightlist
+\item
+  A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group
+\item
+  A data frame containing the raw posterior predictive distributions for each group
+\end{itemize}
+If we examine the first item we see a very similar result to that of the direct output of the Frequentist predictions, except now we also have upper and lower bounds for 95\% prediction intervals.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_preds\_normal}\SpecialCharTok{$}\NormalTok{posterior\_predictive\_centers}
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+   group post_pred_centers    lower    upper
+1 M242Ba          106.2013 90.15569 122.2236
+2 M242Db           73.8619 59.18316  88.3780
+\end{verbatim}
+But since Bayesian predictions are distributions themselves, you can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_preds\_normal}\SpecialCharTok{$}\NormalTok{posterior\_predictive\_distribution }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{head}\NormalTok{(}\DecValTok{5}\NormalTok{) }
+\end{Highlighting}
+\end{Shaded}
+\begin{verbatim}
+# A tibble: 5 x 2
+      x group 
+  <dbl> <chr> 
+1  99.1 M242Ba
+2 100.  M242Ba
+3 119.  M242Ba
+4  97.7 M242Ba
+5 108.  M242Ba
+\end{verbatim}
+With this we can actually plot the posterior predictive distributions for each group.
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{bayes\_preds\_normal}\SpecialCharTok{$}\NormalTok{posterior\_predictive\_distribution }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x, }\AttributeTok{fill =}\NormalTok{ group)) }\SpecialCharTok{+}
+  \FunctionTok{geom\_density}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.5}\NormalTok{, }\AttributeTok{color =} \ConstantTok{NA}\NormalTok{) }\SpecialCharTok{+}
+  \FunctionTok{theme\_bw}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+\begin{figure}
+
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-30-1} 
+
+}
+
+\caption{Posterior Predictive Distributions for the two groups in our test dataset}\label{fig:unnamed-chunk-30}
+\end{figure}
+Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and look at how the models compared.
+\begin{longtable}{ccccc}
+\toprule
+group & Bayes Gamma & Bayes Normal & Frequentist & True Mean \\ 
+\midrule
+M242Ba & $98.50$ & $106.20$ & $88.55$ & $95.73$ \\ 
+M242Db & $75.80$ & $73.86$ & $70.99$ & $80.12$ \\ 
+\bottomrule
+\end{longtable}
+It's nice to see that the Bayesian model where the non-zero response was modeled using a Gamma distribution performed the best, but again this is just an example about how to use the package and we shouldn't read too much into these short results.
+
+\hypertarget{next-steps}{%
+\section{Next Steps}\label{next-steps}}
+
+Right now the package is fairly limited in that it can primarily only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common, zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like \texttt{zinf} that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
 
 \backmatter
 
@@ -1710,6 +1829,9 @@ Pfeffermann, D., Terryn, B., \& Moura, F. A. (2008). Small area estimation under
 
 \leavevmode\vadjust pre{\hypertarget{ref-toney2008stem}{}}%
 Toney, C., Shaw, J. D., \& Nelson, M. D. (2008). A stem-map model for predicting tree canopy cover of forest inventory and analysis (FIA) plots. In \emph{Forest inventory and analysis symposium}.
+
+\leavevmode\vadjust pre{\hypertarget{ref-wickham2019advanced}{}}%
+Wickham, H. (2019). \emph{Advanced r}. CRC press.
 
 \end{CSLReferences}
 

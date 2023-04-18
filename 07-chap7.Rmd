@@ -53,11 +53,19 @@ In the Frequentist setting, version (1) doesn't seem that bad, especially since 
 
 ## Application
 
-The only data preparation we need to do is to create a data set that contains all of the data points and a data set that only contains data points with a non-zero response value.
+We'll start by setting aside a small amount of the data set to make predictions on. In particular, Ecosubsections M242Ba and M242Db have quite a few data points so we'll sample 100 points from each one to test our model on. The only other data preparation we need to do is to create a training data set that only contains training data points with a non-zero response value.
 
-```{r}
-full_data <- data
-nonzero_data <- data %>% 
+```{r, message=F, warning=F}
+set.seed(5)
+test <- data %>% 
+  filter(ECOSUBCD %in% c("M242Ba", "M242Db")) %>% 
+  group_by(ECOSUBCD) %>% 
+  slice_sample(n = 100) %>% 
+  ungroup()
+
+train <- anti_join(data, test)
+
+nonzero_train <- train %>% 
   filter(DRYBIO_AG_TPA_live_ADJ > 0)
 ```
 
@@ -69,15 +77,15 @@ We'll start by building the individual Frequentist models.
 ```{r, message=F, warning = F}
 library(lme4)
 
-freq_model1 <- lmer(
+freq_reg <- lmer(
   DRYBIO_AG_TPA_live_ADJ ~ tcc + (1 | ECOSUBCD),
-  data = nonzero_data
+  data = nonzero_train
   )
 
-freq_model2 <- glmer(
+freq_log_reg <- glmer(
   DRYBIO_AG_TPA_live_ADJ != 0 ~ tcc + (1 | ECOSUBCD),
   family = binomial,
-  data = full_data
+  data = train
   )
 ```
 
@@ -102,16 +110,17 @@ Finally, the variance of the random intercepts is not really a parameter that we
 
 We'll stick with the default MCMC settings and build the model as follows
 
-```{r, warning = F, message=F, eval = F}
+```{r, warning = F, message=F, results='hide', cache = T}
 library(rstanarm)
-bayes_model1 <- stan_glmer(
+bayes_log_reg <- stan_glmer(
   DRYBIO_AG_TPA_live_ADJ > 0 ~ tcc + (1 | ECOSUBCD),
-  data = full_data,
+  data = train,
   family = binomial,
   prior = normal(0.5, 0.25),
   prior_intercept = normal(-0.4, 0.7^2),
   prior_covariance = decov(reg = 1, conc = 1, shape = 1, scale = 1),
-  chains = 4, iter = 2000, seed = 84735
+  chains = 4, iter = 2000, seed = 84735,
+  cores = parallel::detectCores()
 )
 ```
 
@@ -123,10 +132,10 @@ We now turn to the two versions of the generalized linear model. We'll start wit
 We can examine a scatter plot of Tree Canopy Cover on Dry Above Ground Biomass from Live Trees to choose our prior for the fixed effect slope. We can do some rise-over-run calculations to end up with a guess that the fixed effect slope is around 2 and probably doesn't go outside of the range (0.5, 5). Thus we'll use a $\mathcal{N}(2, 1^2)$ prior here.
 
 ```{r nzdata, echo=F, message=F, warning=F, fig.align='center', out.width='90%', fig.cap="Relationship between Tree Canopy Cover and Dry Above Ground Biomass from Live Trees"}
-nonzero_data %>% 
+nonzero_train %>% 
   mutate(ratio = floor(DRYBIO_AG_TPA_live_ADJ/tcc)) %>% 
   filter(ratio > 0) %>% 
-  mutate(DRYBIO_AG_TPA_live_ADJ = DRYBIO_AG_TPA_live_ADJ + rnorm(1851, 0, 20)) %>% 
+  mutate(DRYBIO_AG_TPA_live_ADJ = DRYBIO_AG_TPA_live_ADJ + rnorm(1752, 0, 20)) %>% 
   filter(DRYBIO_AG_TPA_live_ADJ > 0) %>% 
   ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
   geom_point(alpha = 0.5, size = 2) +
@@ -142,15 +151,16 @@ Again we can refer back to Figure \@ref(fig:nzdata) to get our guess for the the
 
 Finally we'll stick with an Exponential$(1)$ prior for the two variance parameters since we don't know enough to say more about them. We can plug all of this in to `rstanarm::stan_lmer` as follows.
 
-```{r, eval = F}
-bayes_model2 <- stan_lmer(
+```{r, warning = F, message=F, results='hide', cache = T}
+bayes_normal_reg <- stan_lmer(
   DRYBIO_AG_TPA_live_ADJ ~ tcc + (1 | ECOSUBCD),
-  data = nonzero_data,
+  data = nonzero_train,
   prior = normal(2, 1),
   prior_intercept = normal(100, 40),
-  prior_aux = cauchy(1),
+  prior_aux = exponential(1),
   prior_covariance = decov(reg = 1, conc = 1, shape = 1, scale = 1),
-  chains = 4, iter = 2000, seed = 84735
+  chains = 4, iter = 2000, seed = 84735,
+  cores = parallel::detectCores()
 )
 ```
 
@@ -184,16 +194,17 @@ and if we put our estimate for $\beta$ back into \@ref(eq:first) to get
 
 We aren't positive about this guess but we know that the actuall parameter has to be non-negative so we'll use a Half-Cauchy$(1, 1)$ prior here. Note that `rstanarm::stan_glmer` assumes all `prior_aux` parameters are positive so we don't have to specify that it's a bounded Cauchy distribution.
 
-```{r, eval = F}
-bayes_model3 <- stan_glmer(
+```{r, warning = F, message=F, results='hide', cache = T}
+bayes_gamma_reg <- stan_glmer(
   DRYBIO_AG_TPA_live_ADJ ~ tcc + (1 | ECOSUBCD),
-  data = nonzero_data,
+  data = nonzero_train,
   family = Gamma(link = "log"),
   prior = normal(0.7, 0.1),
   prior_intercept = normal(4.6, 3.6),
   prior_aux = cauchy(1, 1),
   prior_covariance = decov(reg = 1, conc = 1, shape = 1, scale = 1),
-  chains = 4, iter = 2000, seed = 84735
+  chains = 4, iter = 2000, seed = 84735,
+  cores = parallel::detectCores()
 )
 ```
 
@@ -204,12 +215,108 @@ Again, just from the length of these Bayesian model building sections compared t
 
 In order to turn our individual models into a zero-inflation model we simply feed them into the appropriate `zinf_*` function.
 
-```{r, eval = F}
-frequentist_zi_mod <- zinf_freq(freq_model1, freq_model2)
-bayesian_zi_mod_normal <- zinf_bayes(bayes_model1, bayes_model2)
-bayesian_zi_mod_gamma <- zinf_bayes(bayes_model1, bayes_model3)
-
+```{r, warning= F, message=F}
+frequentist_zi_mod <- zinf_freq(freq_reg, freq_log_reg)
+bayesian_zi_mod_normal <- zinf_bayes(bayes_normal_reg, bayes_log_reg)
+bayesian_zi_mod_gamma <- zinf_bayes(bayes_gamma_reg, bayes_log_reg)
 ```
 
-If we examine the class of these objects we'll find that they're of class `zinf_freq` and `zinf_bayes` respectively. At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines methods for generic functions like `summary()` and `predict()` on these new zero-inflation model objects. In particular prediction can be an incredibly cumbersome task in Bayesian modeling, so there's enormous usefulness in abstracting away all of that work.
+If we examine the class of these objects we'll find that they're of class `zinf_freq` and `zinf_bayes` respectively.
 
+```{r}
+class(frequentist_zi_mod)
+class(bayesian_zi_mod_normal)
+```
+
+
+At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines `zinf_bayes` and `zinf_freq` as S3 generics. In R "the job of an S3 generic is to perform method dispatch, i.e. find the specific implementation for a class."^[@wickham2019advanced]. So what `zinf` is really doing is defining methods like `predict()` and `summary()` for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
+
+And as we can see below, making predictions on the test dataset using our Frequentist zero-inflation model is a very familiar process. Since the estimand we're interested in is the Ecosubsection level mean and our test data set included two Ecosubsections, we get an output with two rows.
+
+
+```{r}
+predict(frequentist_zi_mod, newdata = test)
+```
+
+While the output will look slightly different for the Bayesian model, the process of getting the predictions is exactly the same. We'll start by looking at the Bayesian model where the GLM component assumes a Normal response
+
+```{r, message=F, warning=F, cache=T}
+bayes_preds_normal <- predict(bayesian_zi_mod_normal, newdata = test)
+```
+
+The object returned by running `predict` on one of the Bayesian zero-inflation models is a list that contains two items:
+
+- A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group
+- A data frame containing the raw posterior predictive distributions for each group
+
+
+If we examine the first item we see a very similar result to that of the direct output of the Frequentist predictions, except now we also have upper and lower bounds for 95% prediction intervals.
+
+```{r}
+bayes_preds_normal$posterior_predictive_centers
+```
+
+But since Bayesian predictions are distributions themselves, you can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
+
+```{r, message=F, warning=F}
+bayes_preds_normal$posterior_predictive_distribution %>% 
+  head(5) 
+```
+
+With this we can actually plot the posterior predictive distributions for each group.
+
+```{r, fig.align='center', out.width='85%', fig.cap="Posterior Predictive Distributions for the two groups in our test dataset"}
+bayes_preds_normal$posterior_predictive_distribution %>% 
+  ggplot(aes(x = x, fill = group)) +
+  geom_density(alpha = 0.5, color = NA) +
+  theme_bw()
+```
+
+Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and look at how the models compared.
+
+```{r, echo=F}
+bayes_preds_gamma <- predict(bayesian_zi_mod_gamma, newdata = test)
+```
+
+```{r, message = F, warning=F, echo=F}
+bayes_gam <- bayes_preds_gamma$posterior_predictive_centers %>% 
+  rename(bayes_gamma = post_pred_centers) %>% 
+  select(-c(lower, upper))
+
+bayes_norm <- bayes_preds_normal$posterior_predictive_centers %>% 
+  rename(bayes_normal = post_pred_centers) %>% 
+  select(-c(lower, upper))
+
+freq_norm <- predict(frequentist_zi_mod, newdata = test) %>% 
+  rename(frequentist = prediction,
+         group = ECOSUBCD)
+
+true <- test %>% 
+  group_by(ECOSUBCD) %>% 
+  summarise(true_mean = mean(DRYBIO_AG_TPA_live_ADJ)) %>% 
+  select(true_mean) %>% 
+  pull()
+  
+
+left_join(bayes_gam, bayes_norm) %>% 
+  left_join(freq_norm) %>% 
+  mutate(true_mean = true) %>% 
+  gt() %>% 
+  cols_align(align = "center") %>% 
+  fmt_number(
+    columns = -group,
+    decimals = 2
+  ) %>% 
+  cols_label(
+    bayes_gamma = "Bayes Gamma",
+    bayes_normal = "Bayes Normal",
+    frequentist = "Frequentist",
+    true_mean = "True Mean"
+  )
+```
+
+It's nice to see that the Bayesian model where the non-zero response was modeled using a Gamma distribution performed the best, but again this is just an example about how to use the package and we shouldn't read too much into these short results.
+
+## Next Steps
+
+Right now the package is fairly limited in that it can primarily only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common,  zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like `zinf` that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.

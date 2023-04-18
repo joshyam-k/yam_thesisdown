@@ -12,3 +12,10 @@ forcats
 here
 gt
 patchwork
+latex2exp
+knitr
+zinf
+Matrix
+lme4
+Rcpp
+rstanarm
