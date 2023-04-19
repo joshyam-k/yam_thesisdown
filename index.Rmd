@@ -5,8 +5,6 @@ date: 'May 2023'
 institution: 'Reed College'
 division: 'Mathematics and Natural Sciences'
 advisor: 'Leonard Wainstein'
-# If you have more two advisors, un-silence line 7
-#altadvisor: 'Your Other Advisor'
 department: 'Mathematics & Statistics'
 degree: 'Bachelor of Arts'
 knit: bookdown::render_book
@@ -26,7 +24,6 @@ params:
 # Can only choose one at a time.
 output:
   thesisdown::thesis_pdf: default 
-
 # If you are creating a PDF you'll need to write your preliminary content 
 # (e.g., abstract, acknowledgements) below or use code similar to line 25-26 
 # for the .RMD files. If you are NOT producing a PDF, delete or silence
@@ -37,7 +34,7 @@ abstract: |
 # like below, use a command like that for the abstract above.  Note that a tab 
 # is needed on the line after the `|`.
 acknowledgements: |
-  I want to thank a few people.
+  `r if(knitr:::is_latex_output()) paste(readLines(here::here("prelims", "00--prelim.Rmd")), collapse = "\n   ")`
 # Specify the location of the bibliography below
 bibliography: bib/thesis.bib
 # Download your specific csl file and refer to it in the line below.
@@ -97,7 +94,6 @@ version automatically by inputting them in the YAML at the top of this file.
 Alternatively, you can put that content in files like 00--prelim.Rmd and
 00-abstract.Rmd like done below.
 -->
-
 
 
 ```{r eval=!knitr::is_latex_output(), child=here::here("prelims", "00--prelim.Rmd")}

@@ -6,7 +6,7 @@ In this thesis, I will concerned with modeling a response variable from various 
 
 As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
 
-```{r ziex, echo=F, message=F, warning=F, fig.align='center', out.width='80%', fig.cap="Zero-Inflated data"}
+```{r ziex, echo=F, message=F, warning=F, fig.align='center', out.width='85%', fig.cap="Zero-Inflated data"}
 set.seed(6)
 library(tidyverse)
 library(here)
@@ -55,7 +55,7 @@ For example, going back to the fishing in a lake example. If we looked at data o
 
 ## Forestry Setting
 
-One specific setting that exhibits both of these data features is data on the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory & Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: "The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems."^[@mcconville2020tutorial].
+One specific setting that exhibits both of these data features is data on the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory & Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: "The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems."[@mcconville2020tutorial].
 
 These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes is remote sensed data. The remote sensed data typically includes climate metrics (e.g. temperature and precipitation), geomorphological measures (e.g. elevation and eastness), as well as metrics like tree canopy cover which can be measured from a satellite.
 
@@ -140,7 +140,9 @@ Let's think back to Figure \@ref(fig:scatterzi) to unpack why this is a reasonab
 set.seed(19)
 data_samp <- data %>% 
   slice_sample(n = 1000) %>% 
-  filter(DRYBIO_AG_TPA_live_ADJ < 250)
+  filter(DRYBIO_AG_TPA_live_ADJ < 250) %>% 
+  mutate(ratio = DRYBIO_AG_TPA_live_ADJ/tcc) %>% 
+  filter(ratio > 0.1 | ratio == 0) 
 
 p1 <- data_samp %>% 
   ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +

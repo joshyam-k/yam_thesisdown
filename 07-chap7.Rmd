@@ -110,7 +110,7 @@ Finally, the variance of the random intercepts is not really a parameter that we
 
 We'll stick with the default MCMC settings and build the model as follows
 
-```{r, warning = F, message=F, results='hide', cache = T}
+```{r made, warning = F, message=F, results='hide', cache = T}
 library(rstanarm)
 bayes_log_reg <- stan_glmer(
   DRYBIO_AG_TPA_live_ADJ > 0 ~ tcc + (1 | ECOSUBCD),
@@ -132,10 +132,15 @@ We now turn to the two versions of the generalized linear model. We'll start wit
 We can examine a scatter plot of Tree Canopy Cover on Dry Above Ground Biomass from Live Trees to choose our prior for the fixed effect slope. We can do some rise-over-run calculations to end up with a guess that the fixed effect slope is around 2 and probably doesn't go outside of the range (0.5, 5). Thus we'll use a $\mathcal{N}(2, 1^2)$ prior here.
 
 ```{r nzdata, echo=F, message=F, warning=F, fig.align='center', out.width='90%', fig.cap="Relationship between Tree Canopy Cover and Dry Above Ground Biomass from Live Trees"}
+n <- nonzero_train %>% 
+  mutate(ratio = floor(DRYBIO_AG_TPA_live_ADJ/tcc)) %>% 
+  filter(ratio > 0) %>% 
+  nrow()
+
 nonzero_train %>% 
   mutate(ratio = floor(DRYBIO_AG_TPA_live_ADJ/tcc)) %>% 
   filter(ratio > 0) %>% 
-  mutate(DRYBIO_AG_TPA_live_ADJ = DRYBIO_AG_TPA_live_ADJ + rnorm(1752, 0, 20)) %>% 
+  mutate(DRYBIO_AG_TPA_live_ADJ = DRYBIO_AG_TPA_live_ADJ + rnorm(n, 0, 20)) %>% 
   filter(DRYBIO_AG_TPA_live_ADJ > 0) %>% 
   ggplot(aes(x = tcc, y = DRYBIO_AG_TPA_live_ADJ)) +
   geom_point(alpha = 0.5, size = 2) +
@@ -151,7 +156,7 @@ Again we can refer back to Figure \@ref(fig:nzdata) to get our guess for the the
 
 Finally we'll stick with an Exponential$(1)$ prior for the two variance parameters since we don't know enough to say more about them. We can plug all of this in to `rstanarm::stan_lmer` as follows.
 
-```{r, warning = F, message=F, results='hide', cache = T}
+```{r fi, warning = F, message=F, results='hide', cache = T}
 bayes_normal_reg <- stan_lmer(
   DRYBIO_AG_TPA_live_ADJ ~ tcc + (1 | ECOSUBCD),
   data = nonzero_train,

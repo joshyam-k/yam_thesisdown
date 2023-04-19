@@ -1,9 +1,9 @@
 # Methods {#methods-sec}
 
-We now move into a thorough description of all of the methods employed in this thesis. In subsections 3.1-3.3 the necessary notation and model structure are introduced. While the rest of the subsections intermittently mention the Frequentist model, they are primarily focused on the Bayesian models. In particilar, 3.4 describes how the Bayesian models are fit, 3.5 describes what prediction with a Bayesian model looks like, 3.6 presents a theoretical backing for why the components of the Bayesian two-part model can be fit separately, and finally 3.7 wraps everything up.
+We now move into a thorough description of all of the methods employed in this thesis. In subsections \@ref(notation)-\@ref(specificmods) the necessary notation and model structure are introduced. While the rest of the subsections intermittently mention the Frequentist model, they are primarily focused on the Bayesian models. In particilar, \@ref(twofits) describes how the Bayesian models are fit, \@ref(bayespred) describes what prediction with a Bayesian model looks like, \@ref(sepsim) presents a theoretical backing for why the components of the Bayesian two-part model can be fit separately, and finally \@ref(wrapone) and \@ref(wraptwo) wrap everything up.
 
 
-## Notation
+## Notation {#notation}
 
 Let $U$ denote a finite population with $N$ elements. $U$ is broken into $J$ groups $U_j$, $j = 1, 2, ..., J$, where each group $U_j$ is defined as having $n_j$ sample observations. Let $p = 1, ..., P$ index the covariates. Each sample observation, $i$ in group $j$ has auxiliary information $x_{ij}^p$ for covariate $p$, response value $y_{ij}$, and indicator for being non-zero $z_{ij}$.
 
@@ -43,7 +43,7 @@ all we've done above is provided a formal theoretical backing for this structure
 
 Importantly, while Equation \@ref(eq:intuition) describes the broader two-part model strategy that will be employed by both the Frequentist and Bayesian versions of the model, the formulation can't technically be extended into the context of prediction for the Bayesian model. Equation \@ref(eq:intuition) does describe how prediction functions in the Frequentist case, but as we will get to later in the Bayesian setting everything is described by a probability distribution and so we aren't working with expected values anymore. That being said, this is just a small technicality that shouldn't take away from the really nice larger intuition that Equation \@ref(eq:intuition) holds for both models.
 
-## Specific Models
+## Specific Models {#specificmods}
 
 Although we could model these two parts however we wanted to, we will use a generalized linear regression model (that is non-logistic) for the first part and a logistic regression model for the second. Moreover, because the data we will be working with has a clustered structure we attempt to capture that by including group-level random effects in both models. The precise models that we will be evaluating will be as follows.
 
@@ -85,7 +85,7 @@ $$
 
 Importantly, while $y^*_{ij}$ is fit on only the non-zero data, and $p_{ij}$ is fit on the entire data, when we make predictions on new data, both models are applied to the entire new data set.
 
-## Model Fitting: Two Ways
+## Model Fitting: Two Ways {#twofits}
 
 ### Frequentist
 
@@ -357,7 +357,7 @@ $$
 
 Hopefully at this point the repetitiveness of this process and of these formulations has helped to drill home the Bayesian method of model fitting. We've seen it in three different flavors: Logistic regression, Normal regression, and Gamma regression, but all that's really changed at each step has been the link function and the priors and parameters used.
 
-## Evaluation of the Bayesian Model: Posterior Predictive Distribution
+## Evaluation of the Bayesian Model: Posterior Predictive Distribution {#bayespred}
 
 In the Frequentist frame the model parameters are treated as fixed but unknown and so once we obtain estimates for them, we simply use those point estimates to make predictions.
 
@@ -375,9 +375,9 @@ But in the Bayesian frame our model parameters are no longer fixed values, but a
 
 2.  Posterior variability of the model parameters: we shouldn't go through all the trouble of constructing posterior distributions for our parameters to just throw out that information when it comes time to make predictions, rather we incorporate the variability in our posterior distributions into our predictions.
 
-Within the Bayesian frame, these two sources of variability are combined to produce what is called a posterior predictive distribution.
+Within the Bayesian frame, these two sources of variability are combined to produce what is called a posterior predictive distribution [@johnson2022bayes].
 
-To get a feel for how this works, I'll just focus on constructing a posterior predictive distribution for a new point $y_{ij, \ new}$ using each model separately.
+To get a feel for how this works, I'll start by just focusing on constructing a posterior predictive distribution for a new point, $y_{ij, \ new}$, using each model separately.
 
 ### Theoretical version
 
@@ -567,7 +567,7 @@ full_comp %>%
   theme(legend.position = "bottom")
 ```
 
-## Posterior Predictive Distribution Finalized
+## Posterior Predictive Distribution Finalized {#wrapone}
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
@@ -602,7 +602,7 @@ $$
 Which is an approximation of the posterior predictive distribution for the mean of the response in group $j$.
 
 
-## Prediction Intervals
+## Prediction Intervals {#wraptwo}
 
 In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \@ref(bayes-freq) provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
 

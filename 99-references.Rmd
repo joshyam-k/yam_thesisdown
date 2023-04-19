@@ -33,5 +33,5 @@ This is just for testing with more citations for the bibliography at the end.  A
 
 ---
 nocite: | 
-  @angel2000, @angel2001, @angel2002a
+  @krieg2016small, @dreassi2014small, @chandra2012small, @white2021hierarchical, @gelman2006data, @rao2015small, @datta1991bayesian
 ...
