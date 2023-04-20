@@ -278,11 +278,9 @@ For example, going back to the fishing in a lake example. If we looked at data o
 
 One specific setting that exhibits both of these data features is data on the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory \& Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: ``The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems.''(McConville, Moisen, \& Frescino, 2020).
 
-These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like tree canopy cover which can be measured from a satellite.
+The FIA employs a quasi-systematic sampling design to determine which locations to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
 
 While the main use of the additional remote sensed data sources are to increase the accuracy of the estimators that the FIA builds, they are also used to make rational decisions about the aforementioned plot-level data collection. Before sending a crew out to a given sampled location, the FIA will first look at the remote sensed data for that location. If that location happens to be in a place where there is clearly no forest, for example in the middle of a parking lot, the FIA will not send a crew out and instead will mark all forest attributes for that location as being zero. As you might imagine, this happens quite a bit, and so an interesting characteristic of many forest attribute variables collected by the FIA is that they are zero-inflated. Importantly, this is an example of where the data is zero-inflated because of the data collection process.
-
-Importantly, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
 
 If we look at the distribution of the FIA collected forest attribute ``Dry Above Ground Biomass From live Trees'', we can see that it is indeed quite zero-inflated.
 \begin{figure}
@@ -293,6 +291,8 @@ If we look at the distribution of the FIA collected forest attribute ``Dry Above
 
 \caption{Zero-Inflated Forestry data.}\label{fig:forestrydata}
 \end{figure}
+Importantly, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
+
 Not only is the FIA data a good real life example of when we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
 
 \hypertarget{immediate-modeling-struggles}{%
@@ -339,9 +339,9 @@ Let's think back to Figure \ref{fig:scatterzi} to unpack why this is a reasonabl
 
 \caption{Example of two new data points that we might be interested in testing our model on.}\label{fig:modintuition}
 \end{figure}
-Let's start with the left hand side of Figure \ref{fig:modintuition} that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent to zero by that classification model output.
+Let's start with the left hand side of Figure \ref{fig:modintuition} that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent close to zero by that classification model output.
 
-On the other hand, the right hand side of Figure \ref{fig:modintuition} has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
+On the other hand, the right hand side of Figure \ref{fig:modintuition} has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a likely non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
 
 Clearly the success of this strategy relies on the quality of the two individual models, but at least we can see how this method has the capacity to capture the zero-inflation data structure.
 
@@ -362,13 +362,13 @@ In order to introduce, study, and implement these models I will structure the re
 \item
   Chapter \ref{bayes-freq} gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 \item
-  Chapter \ref{methods-sec} gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally.
+  Chapter \ref{methods-sec} gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Cluster Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally.
 \item
   Chapter \ref{semsim} walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
 \item
   Chapter \ref{sim-study} sets up the simulation study that serves as the main process by which we evaluate the various models.
 \item
-  Chapter \ref{res-sec} showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
+  Chapter \ref{res-sec} showcases the results of each model's performance in the simulation study. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 \item
   Chapter \ref{vignette} gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 \item
@@ -396,9 +396,9 @@ It's not important to understand what this is saying right now, but I include it
 At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter \(\theta\)
 \begin{itemize}
 \item
-  Frequentists treat the observed data as random and the parameter as fixed. Thus they aim to quantify how the data might vary around the fixed (but unknown) parameter value.
+  Frequentists treat the parameter as fixed and aim to quantify how the data might vary around the fixed (but unknown) parameter value.
 \item
-  Bayesians treat the observed data as fixed and the parameter as random. Thus they try to quantify how the parameter might vary based on the fixed observed data.
+  Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data
 \end{itemize}
 With this in mind, we now turn to a simple inference example.
 
@@ -407,7 +407,7 @@ Suppose we are interested in estimating the average weight of squirrels in a giv
 \hypertarget{frequentist-version}{%
 \subsection{Frequentist Version}\label{frequentist-version}}
 
-We choose \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 \[
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
@@ -444,17 +444,17 @@ With this new understanding, we can unpack why it's incorrect to interpret Equat
 \hypertarget{revisiting-the-cryptic-definitions}{%
 \subsubsection{Revisiting the Cryptic Definitions}\label{revisiting-the-cryptic-definitions}}
 
-Before moving on to exploring how a Bayesian would tackle this inference problem, think back to the beginning of the section where we described how an internet search might tell you that a Frequentists conceptualize probability in terms of frequency of related events. While this statement is largely unhelpful on it's own, it actually becomes quite helpful when taken together with the example that we've just walked through. Through a Frequentist lense, the probability statement in Equation \eqref{eq:freq-ci} must be conceptualized in terms of frequenct of related events, which in this case is hypothetical resampling of the data.
+Before moving on to exploring how a Bayesian would tackle this inference problem, think back to the beginning of the section where we described how an internet search might tell you that Frequentists conceptualize probability in terms of frequency of related events. While this statement is largely unhelpful on it's own, it actually becomes quite helpful when taken together with the example that we've just walked through. Through a Frequentist lense, the probability statement in Equation \eqref{eq:freq-ci} must be conceptualized in terms of frequency of related events, which in this case is hypothetical resampling of the data.
 
 What's more, while it's still overly complicated in it's language, Gelman's statement that Frequentist inference is ``based on a retrospective evaluation of the procedure used to estimate \(\theta\) over the distribution of possible {[}x{]} values conditional on the true unknown value of \(\theta\)'' (Gelman et al., 1995), can at least partially be understood. Each of these pieces are things ideas that we've developed through our example:
 \begin{itemize}
 \tightlist
 \item
-  The retrospective evaluation of the procedure used to estimate \(\theta\): In the example this was the resampling of our data
+  ``The retrospective evaluation of the procedure used to estimate \(\theta\)'': In the example this was the resampling of our data
 \item
-  over the distribution of possible {[}x{]} values: In our example this involved using the Central Limit Theorem to place a distribution on our data
+  ``over the distribution of possible {[}x{]} values'': In our example this involved using the Central Limit Theorem to place a distribution on our data
 \item
-  conditional on the true unknown value of \(\theta\): Treating \(\theta\) as fixed but unknown.
+  ``conditional on the true unknown value of \(\theta\)'': Treating \(\theta\) as fixed but unknown.
 \end{itemize}
 While these definitions are still found to be lacking when trying to absorb them on their own, in the context of our example, we can start to understand and appreciate the things that they are saying.
 
@@ -466,9 +466,9 @@ Instead of first describing the nuts and bolts of how we estimate both the param
 \hypertarget{general-form}{%
 \subsubsection{General Form}\label{general-form}}
 
-A good place to start whenever performing a Bayesian analysis is to remember that ``the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution.'' (Gelman et al., 1995). In the context of inference where we're interested in an unknown parameter \(\theta\), a Bayesian describes all of their knowledge about \(\theta\) using a probability distribution. In particular, Bayesians use a specific distribution to do so- the posterior distribution. The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the fixed observed data: \(p(\theta \ | \ x)\).
+A good place to start whenever performing a Bayesian analysis is to remember that ``the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution.'' (Gelman et al., 1995). In the context of inference where we're interested in an unknown parameter \(\theta\), a Bayesian describes all of their knowledge about \(\theta\) using a probability distribution. In particular, Bayesians use a specific distribution to do so- \emph{the posterior distribution.} The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the observed data: \(p(\theta \ | \ x)\).
 
-Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about \(\theta\) using a distribution we are already doing something very different form in the Frequentist version. Here we are treating our observed data as fixed and our parameter of interest as random. In particular, we make conclusions about the distribution of \(\theta\), a.k.a how it varies, conditional on our observed data which we treat as fixed. For a Bayesian, this distribution holds all of the available information about \(\theta\) and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the \emph{true} mean weight might vary conditional on the fixed observed data.
+Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about \(\theta\) using a distribution we are already doing something very different form in the Frequentist version.In particular, we make conclusions about the distribution of \(\theta\), a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about \(\theta\) and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the \emph{true} mean weight might vary conditional on the set observed data.
 
 Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval \(C\) such that,
 
@@ -495,13 +495,13 @@ Now that we've explained the gist of Bayesian analysis at a high level, we'll di
 \hypertarget{building-an-estimate}{%
 \subsubsection{Building an Estimate}\label{building-an-estimate}}
 
-So how do we actually calculate and estimate \(p(\theta \ | \ x)\)? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quanitfy the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces.
+So how do we actually calculate and estimate \(p(\theta \ | \ x)\)? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quantify the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces.
 
 \[
 p(\theta \ | \ x) =  \frac{p(x \ | \ \theta)p(\theta)}{p(x)}
 \]
 
-So the problem of quantifying \(p(\theta \ | \ x)\) is really a problem of quantifying these three other pieces. Traditionally \(p(x \ | \ \theta)\) is referred to as the likelihood function, which is treated as being a function of \(\theta\), and we can think of it capturing how likely it would be for us to observe the sample data \(x\) given a certain realization of \(\theta\). Next, \(p(\theta)\) describes our belief about \(\theta\) \emph{before} we have performed any analysis, and thus it is aptly named the prior. \(p(x)\) is just a function of the data and thus is referred to as, and treated like, a normalizing constant. Because of this we usually just ignore it and write,
+So the problem of quantifying \(p(\theta \ | \ x)\) is really a problem of quantifying these three other pieces. Traditionally \(p(x \ | \ \theta)\) is referred to as the likelihood function, which is treated as being a function of \(\theta\), and we can think of it capturing how likely it would be for us to observe the sample data \(x\) given a certain realization of \(\theta\). Next, \(p(\theta)\) describes our belief about \(\theta\) \emph{before} we have performed any analysis, and thus it is aptly named the prior. \(p(x)\) is just a function of the observed data and thus is referred to as, and treated like, a normalizing constant. Because of this we usually just ignore it and write,
 
 \[
 p(\theta \ | \ x) \propto p(x \ | \ \theta)p(\theta)
@@ -509,13 +509,13 @@ p(\theta \ | \ x) \propto p(x \ | \ \theta)p(\theta)
 
 In plain English, we can imagine a Bayesian approach progressing in the following way. First we supply a prior belief about the unknown parameter. Then, once we observe the data we can generate an expression for the likelihood and can update our belief by multiplying our prior by that likelihood to get our posterior \(p(\theta \ | \ x)\).
 
-Importantly, while the likelihood function, \(p(x \ | \ \theta)\), is a function of \(\theta\), it comes directly from the data, meaning that there isn't any flexibility in how we represent that term. But perhaps the largest, and most contentious, consequence of describing \(\theta\) by a probability distribution conditioned on \(x\) is that Bayes Theorem forces us to supply a prior distribution \(p(\theta)\) ourselves. The reality is that Bayes theorem places almost no restrictions on what \(p(\theta)\) could be and this means that in certain cases, drastically different priors can lead to very different posterior distributions. There is a whole body of literature that talks about this ``subjective'' aspect of a Bayesian analysis, but as we will show later in this thesis, these priors can actually be very powerful in their ability to regularize our analysis. If we have some prior information about \(\theta\) it makes sense to try to utilize it, and the prior distribution gives us a way to do so.
+Importantly, while the likelihood function, \(p(x \ | \ \theta)\), is a function of \(\theta\), it comes directly from the data and reflects our assumed model of that data. But perhaps the largest, and most contentious, consequence of describing \(\theta\) by a probability distribution conditioned on \(x\) is that Bayes Theorem forces us to supply a prior distribution \(p(\theta)\) ourselves. The reality is that Bayes theorem places almost no restrictions on what \(p(\theta)\) could be and this means that in certain cases, drastically different priors can lead to very different posterior distributions. There is a whole body of literature that talks about this ``subjective'' aspect of a Bayesian analysis, but as we will show later in this thesis, these priors do have the capacity to regularize an analysis. If we have some prior information about \(\theta\) it makes sense to try to utilize it, and the prior distribution gives us a way to do so.
 
 To clear up what all of this looks like in practice, we'll now walk through our squirrel weights example in this Bayesian setting. As we walk through this process, just remember that at the end of the day, all we're really doing is choosing a prior, computing the likelihood, and multiplying the prior by the likelihood.
 
-We might start by guessing that squirrels might weight around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be \(f(\theta) = \mathcal{N}(1.5,10)\). While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that was strictly positive to emphasize the fact that \(\theta\) is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
+Recall that each individual \(X\) is distributed \(\mathcal{N}(\theta, 1)\) so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be \(f(\theta) = \mathcal{N}(1.5,10)\). While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that \(\theta\) is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
 
-Next we use Bayes Theorem to combine our prior with the observed data:
+Next we use Bayes Theorem to combine our prior with the likelihood:
 
 \[
 \begin{aligned}

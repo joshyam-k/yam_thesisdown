@@ -23,9 +23,9 @@ It's not important to understand what this is saying right now, but I include it
 
 At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter $\theta$
 
--   Frequentists treat the observed data as random and the parameter as fixed. Thus they aim to quantify how the data might vary around the fixed (but unknown) parameter value.
+-   Frequentists treat the parameter as fixed and aim to quantify how the data might vary around the fixed (but unknown) parameter value.
 
--   Bayesians treat the observed data as fixed and the parameter as random. Thus they try to quantify how the parameter might vary based on the fixed observed data.
+-   Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data
 
 
 With this in mind, we now turn to a simple inference example.
@@ -34,7 +34,7 @@ Suppose we are interested in estimating the average weight of squirrels in a giv
 
 ###  Frequentist Version
 
-We choose $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 $$
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
@@ -110,13 +110,13 @@ With this new understanding, we can unpack why it's incorrect to interpret Equat
 
 #### Revisiting the Cryptic Definitions
 
-Before moving on to exploring how a Bayesian would tackle this inference problem, think back to the beginning of the section where we described how an internet search might tell you that a Frequentists conceptualize probability in terms of frequency of related events. While this statement is largely unhelpful on it's own, it actually becomes quite helpful when taken together with the example that we've just walked through. Through a Frequentist lense, the probability statement in Equation \@ref(eq:freq-ci) must be conceptualized in terms of frequenct of related events, which in this case is hypothetical resampling of the data.
+Before moving on to exploring how a Bayesian would tackle this inference problem, think back to the beginning of the section where we described how an internet search might tell you that Frequentists conceptualize probability in terms of frequency of related events. While this statement is largely unhelpful on it's own, it actually becomes quite helpful when taken together with the example that we've just walked through. Through a Frequentist lense, the probability statement in Equation \@ref(eq:freq-ci) must be conceptualized in terms of frequency of related events, which in this case is hypothetical resampling of the data.
 
 What's more, while it's still overly complicated in it's language, Gelman's statement that Frequentist inference is "based on a retrospective evaluation of the procedure used to estimate $\theta$ over the distribution of possible [x] values conditional on the true unknown value of $\theta$" [@gelman1995bayesian], can at least partially be understood. Each of these pieces are things ideas that we've developed through our example:
 
-- The retrospective evaluation of the procedure used to estimate $\theta$: In the example this was the resampling of our data 
-- over the distribution of possible [x] values: In our example this involved using the Central Limit Theorem to place a distribution on our data
-- conditional on the true unknown value of $\theta$: Treating $\theta$ as fixed but unknown.
+- "The retrospective evaluation of the procedure used to estimate $\theta$": In the example this was the resampling of our data 
+- "over the distribution of possible [x] values": In our example this involved using the Central Limit Theorem to place a distribution on our data
+- "conditional on the true unknown value of $\theta$": Treating $\theta$ as fixed but unknown.
 
 While these definitions are still found to be lacking when trying to absorb them on their own, in the context of our example, we can start to understand and appreciate the things that they are saying.
 
@@ -126,9 +126,9 @@ Instead of first describing the nuts and bolts of how we estimate both the param
 
 ####  General Form
 
-A good place to start whenever performing a Bayesian analysis is to remember that "the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution." [@gelman1995bayesian]. In the context of inference where we're interested in an unknown parameter $\theta$, a Bayesian describes all of their knowledge about $\theta$ using a probability distribution. In particular, Bayesians use a specific distribution to do so- the posterior distribution. The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the fixed observed data: $p(\theta \ | \ x)$.
+A good place to start whenever performing a Bayesian analysis is to remember that "the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution." [@gelman1995bayesian]. In the context of inference where we're interested in an unknown parameter $\theta$, a Bayesian describes all of their knowledge about $\theta$ using a probability distribution. In particular, Bayesians use a specific distribution to do so- *the posterior distribution.* The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the observed data: $p(\theta \ | \ x)$.
 
-Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about $\theta$ using a distribution we are already doing something very different form in the Frequentist version. Here we are treating our observed data as fixed and our parameter of interest as random. In particular, we make conclusions about the distribution of $\theta$, a.k.a how it varies, conditional on our observed data which we treat as fixed. For a Bayesian, this distribution holds all of the available information about $\theta$ and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the *true* mean weight might vary conditional on the fixed observed data.
+Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about $\theta$ using a distribution we are already doing something very different form in the Frequentist version.In particular, we make conclusions about the distribution of $\theta$, a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about $\theta$ and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the *true* mean weight might vary conditional on the set observed data.
 
 Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval $C$ such that,
 
@@ -155,13 +155,13 @@ Now that we've explained the gist of Bayesian analysis at a high level, we'll di
 
 ####  Building an Estimate
 
-So how do we actually calculate and estimate $p(\theta \ | \ x)$? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quanitfy the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces. 
+So how do we actually calculate and estimate $p(\theta \ | \ x)$? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quantify the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces. 
 
 $$
 p(\theta \ | \ x) =  \frac{p(x \ | \ \theta)p(\theta)}{p(x)}
 $$
 
-So the problem of quantifying $p(\theta \ | \ x)$ is really a problem of quantifying these three other pieces. Traditionally $p(x \ | \ \theta)$ is referred to as the likelihood function, which is treated as being a function of $\theta$, and we can think of it capturing how likely it would be for us to observe the sample data $x$ given a certain realization of $\theta$. Next, $p(\theta)$ describes our belief about $\theta$ *before* we have performed any analysis, and thus it is aptly named the prior. $p(x)$ is just a function of the data and thus is referred to as, and treated like, a normalizing constant. Because of this we usually just ignore it and write,
+So the problem of quantifying $p(\theta \ | \ x)$ is really a problem of quantifying these three other pieces. Traditionally $p(x \ | \ \theta)$ is referred to as the likelihood function, which is treated as being a function of $\theta$, and we can think of it capturing how likely it would be for us to observe the sample data $x$ given a certain realization of $\theta$. Next, $p(\theta)$ describes our belief about $\theta$ *before* we have performed any analysis, and thus it is aptly named the prior. $p(x)$ is just a function of the observed data and thus is referred to as, and treated like, a normalizing constant. Because of this we usually just ignore it and write,
 
 $$
 p(\theta \ | \ x) \propto p(x \ | \ \theta)p(\theta)
@@ -169,14 +169,13 @@ $$
 
 In plain English, we can imagine a Bayesian approach progressing in the following way. First we supply a prior belief about the unknown parameter. Then, once we observe the data we can generate an expression for the likelihood and can update our belief by multiplying our prior by that likelihood to get our posterior $p(\theta \ | \ x)$.
 
-Importantly, while the likelihood function, $p(x \ | \ \theta)$, is a function of $\theta$, it comes directly from the data, meaning that there isn't any flexibility in how we represent that term. But perhaps the largest, and most contentious, consequence of describing $\theta$ by a probability distribution conditioned on $x$ is that Bayes Theorem forces us to supply a prior distribution $p(\theta)$ ourselves. The reality is that Bayes theorem places almost no restrictions on what $p(\theta)$ could be and this means that in certain cases, drastically different priors can lead to very different posterior distributions. There is a whole body of literature that talks about this "subjective" aspect of a Bayesian analysis, but as we will show later in this thesis, these priors can actually be very powerful in their ability to regularize our analysis. If we have some prior information about $\theta$ it makes sense to try to utilize it, and the prior distribution gives us a way to do so.
-
+Importantly, while the likelihood function, $p(x \ | \ \theta)$, is a function of $\theta$, it comes directly from the data and reflects our assumed model of that data. But perhaps the largest, and most contentious, consequence of describing $\theta$ by a probability distribution conditioned on $x$ is that Bayes Theorem forces us to supply a prior distribution $p(\theta)$ ourselves. The reality is that Bayes theorem places almost no restrictions on what $p(\theta)$ could be and this means that in certain cases, drastically different priors can lead to very different posterior distributions. There is a whole body of literature that talks about this "subjective" aspect of a Bayesian analysis, but as we will show later in this thesis, these priors do have the capacity to regularize an analysis. If we have some prior information about $\theta$ it makes sense to try to utilize it, and the prior distribution gives us a way to do so.
 
 To clear up what all of this looks like in practice, we'll now walk through our squirrel weights example in this Bayesian setting. As we walk through this process, just remember that at the end of the day, all we're really doing is choosing a prior, computing the likelihood, and multiplying the prior by the likelihood.
 
-We might start by guessing that squirrels might weight around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be $f(\theta) = \mathcal{N}(1.5,10)$. While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that was strictly positive to emphasize the fact that $\theta$ is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
+Recall that each individual $X$ is distributed $\mathcal{N}(\theta, 1)$ so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be $f(\theta) = \mathcal{N}(1.5,10)$. While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that $\theta$ is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
 
-Next we use Bayes Theorem to combine our prior with the observed data:
+Next we use Bayes Theorem to combine our prior with the likelihood:
 
 $$
 \begin{aligned}
