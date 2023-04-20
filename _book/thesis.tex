@@ -362,13 +362,17 @@ In order to introduce, study, and implement these models I will structure the re
 \item
   Chapter \ref{bayes-freq} gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 \item
-  Chapter \ref{methods-sec} gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
+  Chapter \ref{methods-sec} gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally.
+\item
+  Chapter \ref{semsim} walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
 \item
   Chapter \ref{sim-study} sets up the simulation study that serves as the main process by which we evaluate the various models.
 \item
   Chapter \ref{res-sec} showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 \item
-  Chapter 6 gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
+  Chapter \ref{vignette} gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
+\item
+  Finally, Chapter @\ref(conc) provides some concluding thoughts and describes possible extensions.
 \end{itemize}
 \hypertarget{bayes-freq}{%
 \chapter{Frequentists and Bayesians}\label{bayes-freq}}
@@ -959,13 +963,64 @@ While it may not be immediately clear, these processes are really just mimicking
 
 Now that we have two sets which represent approximate the posterior predictive distribution for unit \(i\) in group \(j\) for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, So we certainly need a posterior predictive distribution of \(y_{ij, \ new} = y_{ij, \ new}^*p_{ij, \ new}\), but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. We might just match MCMC iteration \(k\) from each model together, but what makes this matching more correct than shuffling the iterations and then matching them up?
 
-One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. That being said, as the two models grow to be more complicated, this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. In the next section we walk through a nice theoretical finding that offers a solution to this problem.
+One solution to this conundrum of combining the distributions is to simply build the models simultaneously. In practice this relies on a few tricks and definitely increases the complexity when actually writing code for it, but it can be done and it does allow us to avoid this problem. That being said, as the two models grow to be more complicated, this process of building them simultaneously grows much more difficult and so it isn't a very robust solution to the problem. But, it turns out that with a few minimal assumptions, we can show that the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. What this means in practice is that we can actually fit the models separately (as we have been doing) and then combine them at the end, and the result will be exactly the same as if we fit the models simultaneously.
+
+We thought that the proof and description of this finding deserved it's own chapter, so it is located in Chapter \ref{sepsim}. That being said, we'll use the result to finish up this section on prediction.
+
+\hypertarget{wrapone}{%
+\subsection{Posterior Predictive Distribution Finalized}\label{wrapone}}
+
+Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
+
+Since we are interested in a making predictions for the average response in group \(j\) we obtain a set that approximates the posterior predictive distribution for each unit \(i\) in group \(j\). For example, if we fix \(j\) and let \(n_j = 5\) we would have 5 sets:
+
+\[
+\begin{aligned}
+&\Big\{y_{1j , \ new}^{(1)}, \ y_{1j, \ new}^{(2)}, ..., \ y_{1j, \ new}^{(2000)}\Big\} \\
+&\Big\{y_{2j , \ new}^{(1)}, \ y_{2j, \ new}^{(2)}, ...,  \ y_{2j, \ new}^{(2000)}\Big\} \\
+& \qquad \qquad \qquad \ \   \vdots \\
+&\Big\{y_{5j , \ new}^{(1)}, \ y_{5j, \ new}^{(2)}, ..., \ y_{5j, \ new}^{(2000)}\Big\}
+\end{aligned}
+\]
+
+To get the posterior predictive distribution for \(\bar{y}_{j, \ new}\) we take averages across units in group \(j\) by indices of the MCMC draws. In other words we take the average of \(\Big\{y_{1j, \ new}^{(k)}, y_{2j, \ new}^{(k)}, ... , y_{5j, \ new}^{(k)}\Big\}\) for each MCMC draw \(k\). In full we end up with the set:
+
+\[
+\begin{bmatrix}
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(1)} \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2)} \\
+\vdots \\
+\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2000)}
+\end{bmatrix} \qquad = \qquad 
+\begin{bmatrix}
+\hat{Y}_{j, \ new}^{(1)} \\
+\hat{Y}_{j, \ new}^{(2)} \\
+\vdots \\
+\hat{Y}_{j, \ new}^{(2000)}
+\end{bmatrix}
+\]
+
+Which is an approximation of the posterior predictive distribution for the mean of the response in group \(j\).
+
+\hypertarget{wraptwo}{%
+\subsection{Prediction Intervals}\label{wraptwo}}
+
+In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \ref{bayes-freq} provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
+
+Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are predictions themselves, these prediction intervals are baked right into the prediction process.
+
+Unfortunately it is far less straightforward in the Frequentist setting. While prediction intervals are straightforward to generate for singular regression models, things get a lot more complicated with a two part model like ours. The reality is that we spent a good amount of time trying to construct a bootstrap procedure to generate these prediction intervals and beyond being very computationally intensive, we also couldn't find one that actually worked correctly. While this was certainly frustrating, the struggle to try to develop a process for generating these prediction intervals for the Frequentist models, really highlighted how nice it is that you get them for free in the Bayesian model.
+
+\hypertarget{a-note-of-caution}{%
+\subsubsection{A note of caution}\label{a-note-of-caution}}
+
+While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals will only be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estiamtes for free, but a 95\% prediction interval will likely not get 95\% coverage, thus indicating that the intervals themselves are also incorrect.
 
 \hypertarget{sepsim}{%
-\section{Simultaneous v.s Separate}\label{sepsim}}
+\chapter{Simultaneous v.s Separate}\label{sepsim}}
 
 \hypertarget{simultaneous-model-build}{%
-\subsection{Simultaneous Model Build}\label{simultaneous-model-build}}
+\section{Simultaneous Model Build}\label{simultaneous-model-build}}
 
 As we just mentioned, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. The one major assumption that we will have here is that there is no dependence in the priors \textbf{between} models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain\footnote{Pfeffermann, Terryn, \& Moura (2008)}.
 
@@ -1033,55 +1088,6 @@ So the full posterior for the model built simultaneously is equal to the product
 
 To test our theoretical work above, we fit simpler versions of the two models with no random effects. And indeed, when we fit the models simultaneously and also fit them separately making use of MCMC to simulate samples from their approximate posteriors, we find that they are practically identical.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-3-1} \end{center}
-
-\hypertarget{wrapone}{%
-\section{Posterior Predictive Distribution Finalized}\label{wrapone}}
-
-Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
-
-Since we are interested in a making predictions for the average response in group \(j\) we obtain a set that approximates the posterior predictive distribution for each unit \(i\) in group \(j\). For example, if we fix \(j\) and let \(n_j = 5\) we would have 5 sets:
-
-\[
-\begin{aligned}
-&\Big\{y_{1j , \ new}^{(1)}, \ y_{1j, \ new}^{(2)}, ..., \ y_{1j, \ new}^{(2000)}\Big\} \\
-&\Big\{y_{2j , \ new}^{(1)}, \ y_{2j, \ new}^{(2)}, ...,  \ y_{2j, \ new}^{(2000)}\Big\} \\
-& \qquad \qquad \qquad \ \   \vdots \\
-&\Big\{y_{5j , \ new}^{(1)}, \ y_{5j, \ new}^{(2)}, ..., \ y_{5j, \ new}^{(2000)}\Big\}
-\end{aligned}
-\]
-
-To get the posterior predictive distribution for \(\bar{y}_{j, \ new}\) we take averages across units in group \(j\) by indices of the MCMC draws. In other words we take the average of \(\Big\{y_{1j, \ new}^{(k)}, y_{2j, \ new}^{(k)}, ... , y_{5j, \ new}^{(k)}\Big\}\) for each MCMC draw \(k\). In full we end up with the set:
-
-\[
-\begin{bmatrix}
-\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(1)} \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2)} \\
-\vdots \\
-\frac{1}{n_j} \sum_{i = 1}^{n_j}\hat{y}_{ij, \ new}^{(2000)}
-\end{bmatrix} \qquad = \qquad 
-\begin{bmatrix}
-\hat{Y}_{j, \ new}^{(1)} \\
-\hat{Y}_{j, \ new}^{(2)} \\
-\vdots \\
-\hat{Y}_{j, \ new}^{(2000)}
-\end{bmatrix}
-\]
-
-Which is an approximation of the posterior predictive distribution for the mean of the response in group \(j\).
-
-\hypertarget{wraptwo}{%
-\section{Prediction Intervals}\label{wraptwo}}
-
-In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \ref{bayes-freq} provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
-
-Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are predictions themselves, these prediction intervals are baked right into the prediction process.
-
-Unfortunately it is far less straightforward in the Frequentist setting. While prediction intervals are straightforward to generate for singular regression models, things get a lot more complicated with a two part model like ours. The reality is that we spent a good amount of time trying to construct a bootstrap procedure to generate these prediction intervals and beyond being very computationally intensive, we also couldn't find one that actually worked correctly. While this was certainly frustrating, the struggle to try to develop a process for generating these prediction intervals for the Frequentist models, really highlighted how nice it is that you get them for free in the Bayesian model.
-
-\hypertarget{a-note-of-caution}{%
-\subsubsection{A note of caution}\label{a-note-of-caution}}
-
-While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals will only be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estiamtes for free, but a 95\% prediction interval will likely not get 95\% coverage, thus indicating that the intervals themselves are also incorrect.
 
 \hypertarget{sim-study}{%
 \chapter{Simulation Study}\label{sim-study}}
@@ -1433,15 +1439,15 @@ And finally, we examine the coverage of the Bayesian models. Note that we do not
 
 Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
 
-\hypertarget{conc}{%
-\chapter{Discussion}\label{conc}}
+\hypertarget{general-remarks}{%
+\section{General Remarks}\label{general-remarks}}
 
 It would be relatively easy to look at the results from Chapter \ref{res-sec} and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful.
 
 It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value. To try to break out of this mold I will walk through some takeaways from the results themselves, but I will also talk more generally about the value and usefulness of the Bayesian models that exist outside of their performance metrics.
 
-\hypertarget{general-results-remarks}{%
-\section{General Results Remarks}\label{general-results-remarks}}
+\hypertarget{results-discussion}{%
+\subsection{Results Discussion}\label{results-discussion}}
 
 As stated previously, in terms of metrics like RMSE, empirical bias, and empirical variance, most of the models that we employed performed relatively similarly. If we were approaching these simulation results with the goal of finding a method that was better than all the rest, this would be a pretty disappointing result. Luckily, we're not doing that and instead can appreciate the fact that the Bayesian and Frequentist methods, while very different in their approaches to, and conceptualizations of, the problem, ended up producing very similar results.
 
@@ -1460,12 +1466,12 @@ Clearly, Figure \ref{fig:j5res} gives us plenty of reason to worry about proceed
 
 This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
 
-\hypertarget{general-procedural-remarks}{%
-\section{General Procedural Remarks}\label{general-procedural-remarks}}
+\hypertarget{procedural-discussion}{%
+\subsection{Procedural Discussion}\label{procedural-discussion}}
 
 One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part, MCMC is hard and writing code for Bayesian models in \texttt{Stan} is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approachable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, come variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified. That being said, regardless of how interesting and useful Bayesian modeling is, the computational burden will likely continue to keep people from utilizing it. Even with packages like \texttt{rstanarm} and \texttt{R2WinBUGS} which really streamline the process, I certainly want to acknowledge that this aspect of Bayesian modeling is still a sizeable barrier to entry.
 
-Another way in which Bayesian models are perhaps more unattractive has to do with the procedural and conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where that parameter value might lie and how it might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that you are required to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the \texttt{lm} function in R and getting a reasonable output, but it can sometimes become to easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. In my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions.
+Another way in which Bayesian models are perhaps more unattractive has to do with the conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where that parameter value might lie and how it might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that you are required to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the \texttt{lm} function in R and getting a reasonable output, but it can sometimes become to easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. In my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions.
 
 Hopefully these points have shed light on the ways that Bayesian models has value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.
 
@@ -1789,6 +1795,9 @@ It's nice to see that the Bayesian model where the non-zero response was modeled
 \section{Next Steps}\label{next-steps}}
 
 Right now the package is fairly limited in that it can primarily only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common, zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like \texttt{zinf} that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
+
+\hypertarget{conc}{%
+\chapter{Conclusion}\label{conc}}
 
 \backmatter
 

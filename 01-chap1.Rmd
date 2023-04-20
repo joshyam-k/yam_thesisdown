@@ -193,13 +193,17 @@ In order to introduce, study, and implement these models I will structure the re
 
 -   Chapter \@ref(bayes-freq) gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 
--   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. Finally, a mathematical proof is presented to justify building each part of the Bayesian two part model separately.
+-   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. 
+
+- Chapter \@ref(semsim) walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
 
 -   Chapter \@ref(sim-study) sets up the simulation study that serves as the main process by which we evaluate the various models.
 
 -   Chapter \@ref(res-sec) showcases the results of each model's performance. Beyond comparing the performance metrics of each model, I also describe the challenges associated with making comparisons between Bayesian and Frequentist models in a complex setting like this one.
 
--   Chapter 6 gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
+-   Chapter \@ref(vignette) gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
+
+- Finally, Chapter @\ref(conc) provides some concluding thoughts and describes possible extensions.
 
 
 
