@@ -1,9 +1,9 @@
 # Conclusion {#conc}
 
-In this thesis I have gone in depth into the methodology and results of cluster zero-inflation models built in a Bayesian framework. The work departed from that of a traditional statistical modeling paper in that it was just as concerned with understanding and appreciating the procedural aspects of the method as it was with the results. 
+In this thesis I have gone in depth into the methodology and results of cluster zero-inflation models built in a Bayesian framework. The work departed from that of a traditional statistical modeling paper in that it was just as concerned with understanding and appreciating the procedural aspects of the method as it was with the results. Within the suite of Bayesian models we found that informative priors do have the capacity to prevent model failures although this trend was not as strong as we initially expected it to be. When comparing the suite of Bayesian models to the Frequentist one we found that they performed very similarly in terms of traditional performance metrics like RMSE, bias, and variance. Although this may feel like a null result, there's certainly reassurance in seeing that the two methods produce very similar results and moreover it allows us to think critically about other sources of value and usefulness in each model building process.
+
 
 ## Limitations
 
-I now consider the scope of the research done in this thesis. 
-
+Ultimately we may have seen some lack of separation between the results of the models due to the fact that the data was generated in a Frequentist way, thus automatically making our Bayesian models a little bit misspecified. 
 
