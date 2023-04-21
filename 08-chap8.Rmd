@@ -1,2 +1,9 @@
 # Conclusion {#conc}
 
+In this thesis I have gone in depth into the methodology and results of cluster zero-inflation models built in a Bayesian framework. The work departed from that of a traditional statistical modeling paper in that it was just as concerned with understanding and appreciating the procedural aspects of the method as it was with the results. 
+
+## Limitations
+
+I now consider the scope of the research done in this thesis. 
+
+

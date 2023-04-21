@@ -1,6 +1,6 @@
 # Introduction {#intro-section}
 
-In this thesis, I will concerned with modeling a response variable from various explanatory variables in data that exhibits two distinctive features: (i) the response variable that is "zero-inflated", and (ii) the data is "clustered".
+In this thesis, I will be concerned with modeling a response variable from various explanatory variables in data that exhibit two distinctive features: (i) the response variable is "zero-inflated", and (ii) the data is "clustered".
 
 ## Zero-Inflated Data
 

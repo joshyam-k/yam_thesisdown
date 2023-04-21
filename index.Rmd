@@ -1,5 +1,5 @@
 ---
-title: 'Bayesian Hierarchical Zero-Inflation Models'
+title: 'Bayesian Hierarchical Cluster Zero-Inflation Models'
 author: 'Josh Yamamoto'
 date: 'May 2023'
 institution: 'Reed College'
