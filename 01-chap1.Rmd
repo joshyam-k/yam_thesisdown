@@ -131,7 +131,7 @@ The defining characteristic of the model is that it is a two-part model. Instead
 To get a final prediction for a data point we take the prediction from model (1) and multiply it by the prediction from model (2).
 
 $$
-\text{Final Prediction} = \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} \times \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}}
+\text{Final Prediction} =  \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}} \times \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} 
 $$
 
 Let's think back to Figure \@ref(fig:scatterzi) to unpack why this is a reasonable strategy.
