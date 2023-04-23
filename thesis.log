@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.4.22)  23 APR 2023 14:22
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.4.22)  23 APR 2023 16:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -772,7 +772,7 @@ Overfull \hbox (19.41867pt too wide) in paragraph at lines 1237--1238
 ]
 Chapter 6.
 [51]
-<thesis_files/figure-latex/failures-1.pdf, id=923, 453.695pt x 313.17pt>
+<thesis_files/figure-latex/failures-1.pdf, id=924, 453.695pt x 313.17pt>
 File: thesis_files/figure-latex/failures-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/failures-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/failures-1.pdf  used on input line 1325.
@@ -781,7 +781,7 @@ Package pdftex.def Info: thesis_files/figure-latex/failures-1.pdf  used on input
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [52]
-<figure/tb1.png, id=930, 1043.9pt x 664.4825pt>
+<figure/tb1.png, id=932, 1043.9pt x 664.4825pt>
 File: figure/tb1.png Graphic file (type png)
 <use figure/tb1.png>
 Package pdftex.def Info: figure/tb1.png  used on input line 1336.
@@ -790,7 +790,7 @@ Package pdftex.def Info: figure/tb1.png  used on input line 1336.
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [53 <./thesis_files/figure-latex/failures-1.pdf>]
-<thesis_files/figure-latex/keep-1.pdf, id=944, 445.665pt x 313.17pt>
+<thesis_files/figure-latex/keep-1.pdf, id=947, 445.665pt x 313.17pt>
 File: thesis_files/figure-latex/keep-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/keep-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/keep-1.pdf  used on input line 1345.
@@ -799,7 +799,7 @@ Package pdftex.def Info: thesis_files/figure-latex/keep-1.pdf  used on input lin
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [54 <./figure/tb1.png>]
-<thesis_files/figure-latex/regularization-1.pdf, id=950, 459.7175pt x 305.14pt>
+<thesis_files/figure-latex/regularization-1.pdf, id=954, 459.7175pt x 305.14pt>
 File: thesis_files/figure-latex/regularization-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/regularization-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/regularization-1.pdf  used on input line 1359.
@@ -808,19 +808,22 @@ Package pdftex.def Info: thesis_files/figure-latex/regularization-1.pdf  used on
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [55 <./thesis_files/figure-latex/keep-1.pdf>]
-<thesis_files/figure-latex/rmse-1.pdf, id=967, 459.7175pt x 305.14pt>
+<thesis_files/figure-latex/rmse-1.pdf, id=970, 459.7175pt x 305.14pt>
 File: thesis_files/figure-latex/rmse-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/rmse-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/rmse-1.pdf  used on input line 1373.
 (pdftex.def)             Requested size: 368.57964pt x 244.66173pt.
 [56 <./thesis_files/figure-latex/regularization-1.pdf>]
-<thesis_files/figure-latex/variance-1.pdf, id=980, 459.7175pt x 305.14pt>
+<thesis_files/figure-latex/variance-1.pdf, id=983, 459.7175pt x 305.14pt>
 File: thesis_files/figure-latex/variance-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/variance-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/variance-1.pdf  used on input line 1387.
 (pdftex.def)             Requested size: 368.57964pt x 244.66173pt.
+
+Underfull \vbox (badness 6063) has occurred while \output is active []
+
 [57 <./thesis_files/figure-latex/rmse-1.pdf>]
-<thesis_files/figure-latex/bias-1.pdf, id=993, 459.7175pt x 305.14pt>
+<thesis_files/figure-latex/bias-1.pdf, id=996, 459.7175pt x 305.14pt>
 File: thesis_files/figure-latex/bias-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/bias-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/bias-1.pdf  used on input line 1401.
@@ -829,7 +832,7 @@ Package pdftex.def Info: thesis_files/figure-latex/bias-1.pdf  used on input lin
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
 [58 <./thesis_files/figure-latex/variance-1.pdf>]
-<thesis_files/figure-latex/unnamed-chunk-13-1.pdf, id=1007, 457.71pt x 305.14pt>
+<thesis_files/figure-latex/unnamed-chunk-13-1.pdf, id=1010, 457.71pt x 305.14pt>
 File: thesis_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/unnamed-chunk-13-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/unnamed-chunk-13-1.pdf  used on input line 1413.
@@ -838,42 +841,39 @@ Package pdftex.def Info: thesis_files/figure-latex/unnamed-chunk-13-1.pdf  used 
 Underfull \vbox (badness 6063) has occurred while \output is active []
 
 [59 <./thesis_files/figure-latex/bias-1.pdf>] [60 <./thesis_files/figure-latex/unnamed-chunk-13-1.pdf>]
-<thesis_files/figure-latex/j5res-1.pdf, id=1035, 457.71pt x 283.0575pt>
+<thesis_files/figure-latex/j5res-1.pdf, id=1038, 459.7175pt x 283.0575pt>
 File: thesis_files/figure-latex/j5res-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/j5res-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/j5res-1.pdf  used on input line 1434.
-(pdftex.def)             Requested size: 368.57964pt x 227.94502pt.
+(pdftex.def)             Requested size: 368.57964pt x 226.95595pt.
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
+Underfull \vbox (badness 1629) has occurred while \output is active []
 
 [61] [62 <./thesis_files/figure-latex/j5res-1.pdf>] [63] [64
 
 ]
 Chapter 7.
 [65]
-<figure/v1v2.png, id=1074, 907.39pt x 295.1025pt>
+<figure/v1v2.png, id=1076, 907.39pt x 295.1025pt>
 File: figure/v1v2.png Graphic file (type png)
 <use figure/v1v2.png>
-Package pdftex.def Info: figure/v1v2.png  used on input line 1496.
+Package pdftex.def Info: figure/v1v2.png  used on input line 1482.
 (pdftex.def)             Requested size: 390.25534pt x 126.91861pt.
-[66] [67 <./figure/v1v2.png>] [68]
-Underfull \vbox (badness 7238) has occurred while \output is active []
+[66 <./figure/v1v2.png>] [67]
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
-[69]
-<thesis_files/figure-latex/nzdata-1.pdf, id=1101, 459.7175pt x 315.1775pt>
+[68] [69]
+<thesis_files/figure-latex/nzdata-1.pdf, id=1104, 459.7175pt x 315.1775pt>
 File: thesis_files/figure-latex/nzdata-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/nzdata-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/nzdata-1.pdf  used on input line 1591.
 (pdftex.def)             Requested size: 390.25534pt x 267.5703pt.
 [70 <./thesis_files/figure-latex/nzdata-1.pdf>] [71] [72] [73]
-<thesis_files/figure-latex/unnamed-chunk-26-1.pdf, id=1142, 453.695pt x 313.17pt>
+<thesis_files/figure-latex/unnamed-chunk-26-1.pdf, id=1146, 453.695pt x 313.17pt>
 File: thesis_files/figure-latex/unnamed-chunk-26-1.pdf Graphic file (type pdf)
 <use thesis_files/figure-latex/unnamed-chunk-26-1.pdf>
 Package pdftex.def Info: thesis_files/figure-latex/unnamed-chunk-26-1.pdf  used on input line 1752.
 (pdftex.def)             Requested size: 368.57964pt x 254.42131pt.
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
 [74] [75 <./thesis_files/figure-latex/unnamed-chunk-26-1.pdf>] [76]
 Chapter 8.
 [77
@@ -895,7 +895,7 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 LaTeX Warning: There were undefined references.
 
 Package rerunfilecheck Info: File `thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 7B2C779B20F55B35AA6203C72F53A81D;9576.
+(rerunfilecheck)             Checksum: 42FDFA8515C2F1D32DF911244F95924F;9576.
  ) 
 Here is how much of TeX's memory you used:
  13520 strings out of 477961
@@ -904,12 +904,12 @@ Here is how much of TeX's memory you used:
  33157 multiletter control sequences out of 15000+600000
  601972 words of font info for 100 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,22n,76p,1824b,557s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,22n,76p,1825b,557s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx6.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmib10.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmmib7.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr7.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmri12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmro12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt12.pfb></Users/joshuayamamoto/Library/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on thesis.pdf (94 pages, 1007969 bytes).
+Output written on thesis.pdf (94 pages, 1009168 bytes).
 PDF statistics:
- 1373 PDF objects out of 1440 (max. 8388607)
- 1140 compressed objects within 12 object streams
+ 1377 PDF objects out of 1440 (max. 8388607)
+ 1144 compressed objects within 12 object streams
  296 named destinations out of 1000 (max. 500000)
  616 words of extra memory for PDF output out of 10000 (max. 10000000)
 
