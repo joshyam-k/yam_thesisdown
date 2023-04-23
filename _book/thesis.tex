@@ -1067,7 +1067,7 @@ And indeed, when we fit the models simultaneously and also fit them separately m
 \hypertarget{sim-study}{%
 \chapter{Simulation Study}\label{sim-study}}
 
-We now introduce and the set up for the simulation study that will be the main avenue through which we evaluate the various models.
+We now introduce the set up for the simulation study that will be the main avenue through which we evaluate the various models.
 
 \hypertarget{aims}{%
 \section{Aims}\label{aims}}
@@ -1117,30 +1117,30 @@ y_{ij} &=z_{ij}\cdot y^*_{ij}
 
 Where \(X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\), \(v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\) and \(u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\)
 
-This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response \(Y\) and a covariate \(X\). For example if we examine the generated population data we see the following.
+This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response \(Y\) and a covariate \(X\). For example in Figure \ref{fig:simdataplot} we examine the generated population data and see the following.
 
 The response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
+\begin{figure}
+
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/simdataplot-1} 
+
+}
+
+\caption{The distribution of the response variable in the population that we generated for our simulation.}\label{fig:simdataplot}
+\end{figure}
+If we examine the correlation between \(X\) and \(Y\) we get 0.305 for the entire data set. And indeed when we examine the plot of \(Y\) against \(X\) we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
 \begin{figure}
 
 {\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-5-1} 
 
 }
 
-\caption{The distribution of the response variable in the population that we generated for our simulation.}\label{fig:unnamed-chunk-5}
-\end{figure}
-If we examine the correlation between \(X\) and \(Y\) we get 0.305, for the entire data set. And indeed when we examine the plot of \(Y\) against \(X\) we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
-\begin{figure}
-
-{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-6-1} 
-
-}
-
-\caption{Scatterplot of the main covariate against the response variable in Group 1 of our generated population data.}\label{fig:unnamed-chunk-6}
+\caption{Scatterplot of the main covariate against the response variable in Group 1 of our generated population data.}\label{fig:unnamed-chunk-5}
 \end{figure}
 \hypertarget{dials}{%
 \subsection{Dials}\label{dials}}
 
-The exact levels of the dials for number of groups and number of observations per group will be
+The exact levels of the dials for the number of groups and number of observations per group will be
 \begin{itemize}
 \tightlist
 \item
@@ -1148,7 +1148,7 @@ The exact levels of the dials for number of groups and number of observations pe
 \item
   J = \(\{5, 10, 25, 50\}\)
 \end{itemize}
-We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how ``small'' the data is. In order to generate data sets for these settings we first sampled \(J\) groups from the population, and then within those groups we sampled \(n\) observations. Importantly, because we were always predicting on group 1, we always forced that group into each simulation iteration. For each of the 12 individual settings we ran 400 total iterations of the simulation.
+Note that these levels reflect the number of \textbf{sampled} groups and observations per group. We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how ``small'' the data is. In order to generate data sets for these settings we first sampled \(J\) groups from the population, and then within those groups we sampled \(n\) observations. Importantly, because we were always predicting on group 1, we always forced that group into each simulation iteration. For each of the 12 individual settings we ran 400 total iterations of the simulation.
 
 Next, within each \((n,\ J)\) combination we built the Bayesian models with two types of priors: Non-Informative and Informative. Note that across our models we have a variety of parameters that require priors.
 \begin{itemize}
@@ -1167,20 +1167,20 @@ These parameters that require priors can be placed into 3 main groups: fixed eff
 \subsubsection{Non-Informative}\label{non-informative}}
 
 In order to include no prior knowledge in your analysis, a flat prior can be used: \(p(\theta) \propto 1\). Recall that the posterior can be factored into a normalized product of the likelihood and the prior. Thus, to use a flat, non-informative, prior is to ``let the data speak for itself'' and utilize only the likelihood function in estimating the posterior. That being said prior distributions should still not cover parameter values that are impossible, and thus the flat priors will have supports that are restricted to the range of possible values that the parameter could take on. For the fixed effects parameters a support of \((-100, 100)\) was used and for the variance and shape parameters \((0, 100)\) was used.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-8-1} \end{center}
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-6-1} \end{center}
 
 \hypertarget{info}{%
 \subsubsection{Informative}\label{info}}
 
-Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
+Next, the goal with our informative priors was to add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
-An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small \emph{positive} numbers between the range of 0 to 10 and thus the prior \(\mathcal{N}(5, 3^2)\) was used.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-9-1} \end{center}
+An examination of a scatterplot of the response and covariates leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small \emph{positive} numbers between the range of 0 to 10 and thus the prior \(\mathcal{N}(5, 3^2)\) was used.
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-7-1} \end{center}
 
 On the other hand, we tweaked the scale of this prior for the logistic regression model since the response being modeled is on a different scale. At this point we don't have much of an idea of how the chance of being non-zero changes as the covariate changes, so we use a \(\mathcal{N}(1,1)\) prior for the fixed effects coefficients in the logistic regression model (this may seem like a tight distribution, but in the context of logistic regression slope coefficients it's really quite wide).
 
-Next, following the advice of \footnote{Gelman (2006)} the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-10-1} \end{center}
+Next, following the advice of (Gelman, 2006) the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
 Finally, since the non-zero portion of the response variable has a mean of 31.12, we can use the following ``back of the napkin'' calculation to get an idea for what the shape parameter should be centered on. Recall that a \(\text{Gamma}(\alpha, \beta)\) distribution has mean \(\alpha / \beta\) and variance \(\alpha / \beta^2\).
 
@@ -1201,7 +1201,7 @@ but now plugging in our approximate value for \(\beta\) gives us
 \]
 
 And so we might guess that the shape parameter is around 3. Obviously this calculation will vary quite a bit depending on the sample that we generate, so we use the scale parameter of 5 to emphasize our uncertainty in that estimate. Thus the complete prior used was \(\text{Half-Cauchy}(3, 5)\).
-\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-11-1} \end{center}
+\begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-9-1} \end{center}
 
 \hypertarget{methods}{%
 \section{Methods}\label{methods}}
@@ -1216,7 +1216,7 @@ There will be 3 different models run throughout the simulation.
   \item
     Linear Random Effects Model (\texttt{lme4::lmer})
   \item
-    Logistic regression Random Effects Model (\texttt{lme4::glmer})
+    Logistic Regression Random Effects Model (\texttt{lme4::glmer})
   \end{itemize}
 \item
   Bayesian two-part \#1
@@ -1225,16 +1225,16 @@ There will be 3 different models run throughout the simulation.
   \item
     Bayesian Linear Random Effects Model (\texttt{rstanarm::stan\_lmer})
   \item
-    Bayesian Generalized Linear Random Effects Model (Binomial) (\texttt{rstanarm::stan\_glmer})
+    Bayesian Logistic Regression Random Effects Model (\texttt{rstanarm::stan\_glmer})
   \end{itemize}
 \item
   Bayesian two-part \#2
   \begin{itemize}
   \tightlist
   \item
-    Bayesian Generalized Linear Random Effects Model (Gamma) (\texttt{rstanarm::stan\_glmer})
+    Bayesian Gamma Regression Random Effects Model (\texttt{rstanarm::stan\_glmer})
   \item
-    Bayesian Generalized Linear Random Effects Model (Binomial) (\texttt{rstanarm::stan\_glmer})
+    Bayesian Logistic Regression Random Effects Model (\texttt{rstanarm::stan\_glmer})
   \end{itemize}
 \end{itemize}
 \hypertarget{metrics}{%
@@ -1245,34 +1245,34 @@ Importantly, due to the fact that our data has a clustered structure, we chose t
 The most broadly used and expected performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is computed as follows:
 
 \[
-\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{\mu}^y_{j, s} - Y_{j}\bigg)^2}
+\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{Y}_{j, s} - Y_{j}\bigg)^2}
 \]
 
-Where \(S\) is the total number of simulation reps, \(\hat{\mu}_{j, s}\) is the estimated mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\), and \(\mu_{j, s}\) is the true mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\).
+Where \(S\) is the total number of simulation reps, \(\hat{\mu}_{j, s}\) is the estimated mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\), and \(Y_{j}\) is the true mean of the response variable \(y\) in domain \(j\). Since we get this true value from our generated population, it does not vary by simulation rep.
 
 Next we will be examining the Empirical Bias of each model:
 
 \[
-\text{Empirical Bias}_j = E[\hat{\mu}_j] - Y_{j} \qquad \text{where} \qquad E[\hat{\mu}_j] = \frac{1}{S}\sum_{s = 1}^S\hat{\mu}_{j, s}
+\text{Empirical Bias}_j = E[\hat{Y}_j] - Y_{j} \qquad \text{where} \qquad E[\hat{\mu}_j] = \frac{1}{S}\sum_{s = 1}^S\hat{Y}_{j, s}
 \]
 
 As well as the Empirical Variance of each model:
 
 \[
-\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{\mu}_{j,s} - E[\hat{\mu}_j]\Big)
+\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{Y}_{j,s} - E[\hat{Y}_j]\Big)^2
 \]
 
 We will look at Predictive Interval (PI) coverage at a 95\% confidence level for the Bayesian Models:
 
 \[
-\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(Y_{j} \in \text{PI}(\hat{\mu}_{j, s}))
+\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(Y_{j} \in \text{PI}(\hat{Y}_{j, s}))
 \]
 
 And finally we will look at the total number of model failures.
 \begin{itemize}
 \tightlist
 \item
-  For the Frequentist models, a model failure was registered whenever one of the ``Model failed to converge'' warnings from \texttt{lme4}, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
+  For the Frequentist models, a model failure was registered whenever one of the ``Model failed to converge'' warnings from \texttt{lme4} was returned, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
 \item
   For the Bayesian models, a model failure was registered whenever the MCMC algorithm failed one or more of the diagnostics that indicate that the algorithm has converged and is stable. The Stan programming language is robust enough that you should never trust the results when one of these warnings are administered, and so while potentially overly harsh in some cases, we chose to count any convergence warning as a model failure.
 \end{itemize}
@@ -1410,7 +1410,7 @@ That being said, we do see that the the Bayesian Normal model with informative p
 \section{Coverage}\label{coverage}}
 
 And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here.
-\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-15-1} \end{center}
+\begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
 Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
 
@@ -1749,11 +1749,11 @@ With this we can actually plot the posterior predictive distributions for each g
 \end{Shaded}
 \begin{figure}
 
-{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-28-1} 
+{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-26-1} 
 
 }
 
-\caption{Posterior Predictive Distributions for the two groups in our test dataset}\label{fig:unnamed-chunk-28}
+\caption{Posterior Predictive Distributions for the two groups in our test dataset}\label{fig:unnamed-chunk-26}
 \end{figure}
 Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and look at how the models compared.
 \begin{longtable}{ccccc}

@@ -7,7 +7,7 @@ library(gt)
 library(patchwork)
 ```
 
-We now introduce and the set up for the simulation study that will be the main avenue through which we evaluate the various models. 
+We now introduce the set up for the simulation study that will be the main avenue through which we evaluate the various models. 
 
 ## Aims
 
@@ -47,11 +47,11 @@ $$
 
 Where $X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$, $v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$ and $u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$
 
-This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response $Y$ and a covariate $X$. For example if we examine the generated population data we see the following.
+This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response $Y$ and a covariate $X$. For example in Figure \@ref(fig:simdataplot) we examine the generated population data and see the following.
 
 The response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
 
-```{r, warning = F, message = F, echo=F, fig.align='center', out.width='80%', fig.cap='The distribution of the response variable in the population that we generated for our simulation.'}
+```{r simdataplot, warning = F, message = F, echo=F, fig.align='center', out.width='80%', fig.cap='The distribution of the response variable in the population that we generated for our simulation.'}
 DGP <- function(N, g) {
   
   # Generate X
@@ -98,7 +98,7 @@ ggplot(data, aes(x = Y)) +
   theme_bw()
 ```
 
-If we examine the correlation between $X$ and $Y$ we get `r round(cor(data$X, data$Y), 3 )`, for the entire data set. And indeed when we examine the plot of $Y$ against $X$ we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
+If we examine the correlation between $X$ and $Y$ we get `r round(cor(data$X, data$Y), 3 )` for the entire data set. And indeed when we examine the plot of $Y$ against $X$ we do see a relationship. Here we just plot points from a single group so as not to overclutter the plot.
 
 ```{r, warning = F, message = F, echo=F, fig.align='center', out.width='80%', fig.cap='Scatterplot of the main covariate against the response variable in Group 1 of our generated population data.'}
 data %>% 
@@ -111,12 +111,12 @@ data %>%
 
 ### Dials
 
-The exact levels of the dials for number of groups and number of observations per group will be
+The exact levels of the dials for the number of groups and number of observations per group will be
 
 -   n = $\{15, 30, 50\}$
 -   J = $\{5, 10, 25, 50\}$
 
-We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how "small" the data is. In order to generate data sets for these settings we first sampled $J$ groups from the population, and then within those groups we sampled $n$ observations. Importantly, because we were always predicting on group 1, we always forced that group into each simulation iteration. For each of the 12 individual settings we ran 400 total iterations of the simulation.
+Note that these levels reflect the number of **sampled** groups and observations per group. We ran a simulation for each combination of those levels, for a total of 12 runs, to get a full sense of how the models perform across each of these measures of how "small" the data is. In order to generate data sets for these settings we first sampled $J$ groups from the population, and then within those groups we sampled $n$ observations. Importantly, because we were always predicting on group 1, we always forced that group into each simulation iteration. For each of the 12 individual settings we ran 400 total iterations of the simulation.
 
 Next, within each $(n,\ J)$ combination we built the Bayesian models with two types of priors: Non-Informative and Informative. Note that across our models we have a variety of parameters that require priors.
 
@@ -134,7 +134,7 @@ These parameters that require priors can be placed into 3 main groups: fixed eff
 
 In order to include no prior knowledge in your analysis, a flat prior can be used: $p(\theta) \propto 1$. Recall that the posterior can be factored into a normalized product of the likelihood and the prior. Thus, to use a flat, non-informative, prior is to "let the data speak for itself" and utilize only the likelihood function in estimating the posterior. That being said prior distributions should still not cover parameter values that are impossible, and thus the flat priors will have supports that are restricted to the range of possible values that the parameter could take on. For the fixed effects parameters a support of $(-100, 100)$ was used and for the variance and shape parameters $(0, 100)$ was used.
 
-```{r, echo = F, warning=F, message=F}
+```{r flatpriors, echo = F, warning=F, message=F, fig.cap = 'Plots showing what flat prior distributions look like for each parameter.'}
 fixed_eff <- ggplot(data.frame(x = c(-100, 100)), aes(x)) +
   xlim(-100, 100) + 
   ylim(0, 1/(100)) +
@@ -182,9 +182,9 @@ fixed_eff + variance + shape
 
 #### Informative {#info}
 
-Next, the goal with our informative priors was add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
+Next, the goal with our informative priors was to add more information by choosing to center and scale the prior distributions with the observed data in mind. Naturally, since we know the exact process that generated the data it might be tempting to center the priors exactly on the correct parameter values, but to do so would certainly be both unfair and unrealistic. Instead exploratory data analysis was utilized to make the decisions.
 
-An examination of a scatterplot of the response and covariate leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small *positive* numbers between the range of 0 to 10 and thus the prior $\mathcal{N}(5, 3^2)$ was used.
+An examination of a scatterplot of the response and covariates leads us to believe that the fixed effects coefficients for the models fitting the non-zero portion of the response are small *positive* numbers between the range of 0 to 10 and thus the prior $\mathcal{N}(5, 3^2)$ was used.
 
 ```{r, warning = F, message = F, echo=F, fig.align='center', out.width='80%'}
 ggplot(data.frame(x = c(-10, 20)), aes(x)) +
@@ -201,7 +201,7 @@ ggplot(data.frame(x = c(-10, 20)), aes(x)) +
 
 On the other hand, we tweaked the scale of this prior for the logistic regression model since the response being modeled is on a different scale. At this point we don't have much of an idea of how the chance of being non-zero changes as the covariate changes, so we use a $\mathcal{N}(1,1)$ prior for the fixed effects coefficients in the logistic regression model (this may seem like a tight distribution, but in the context of logistic regression slope coefficients it's really quite wide).
 
-Next, following the advice of ^[@gelman2006prior] the scale parameter of $2.5$ was used to parametrize the Cauchy prior put on all variance parameters. In full the $\text{Half-Cauchy}(0, 2.5)$ prior was utilized.
+Next, following the advice of [@gelman2006prior] the scale parameter of $2.5$ was used to parametrize the Cauchy prior put on all variance parameters. In full the $\text{Half-Cauchy}(0, 2.5)$ prior was utilized.
 
 ```{r, warning = F, message = F, echo=F, fig.align='center', out.width='80%'}
 ggplot(data.frame(x = c(0, 20)), aes(x)) +
@@ -261,13 +261,13 @@ There will be 3 different models run throughout the simulation.
 
 -   Frequentist two-part:
     -   Linear Random Effects Model (`lme4::lmer`)
-    -   Logistic regression Random Effects Model (`lme4::glmer`)
+    -   Logistic Regression Random Effects Model (`lme4::glmer`)
 -   Bayesian two-part #1
     -   Bayesian Linear Random Effects Model (`rstanarm::stan_lmer`)
-    -   Bayesian Generalized Linear Random Effects Model (Binomial) (`rstanarm::stan_glmer`)
+    -   Bayesian Logistic Regression Random Effects Model (`rstanarm::stan_glmer`)
 -   Bayesian two-part #2
-    -   Bayesian Generalized Linear Random Effects Model (Gamma) (`rstanarm::stan_glmer`)
-    -   Bayesian Generalized Linear Random Effects Model (Binomial) (`rstanarm::stan_glmer`)
+    -   Bayesian Gamma Regression Random Effects Model (`rstanarm::stan_glmer`)
+    -   Bayesian Logistic Regression Random Effects Model (`rstanarm::stan_glmer`)
 
 ## Performance metrics {#metrics}
 
@@ -276,32 +276,32 @@ Importantly, due to the fact that our data has a clustered structure, we chose t
 The most broadly used and expected performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is computed as follows:
 
 $$
-\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{\mu}^y_{j, s} - Y_{j}\bigg)^2}
+\text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{Y}_{j, s} - Y_{j}\bigg)^2}
 $$
 
-Where $S$ is the total number of simulation reps, $\hat{\mu}_{j, s}$ is the estimated mean of the response variable $y$ in domain $j$ for simulation rep $s$, and $\mu_{j, s}$ is the true mean of the response variable $y$ in domain $j$ for simulation rep $s$.
+Where $S$ is the total number of simulation reps, $\hat{\mu}_{j, s}$ is the estimated mean of the response variable $y$ in domain $j$ for simulation rep $s$, and $Y_{j}$ is the true mean of the response variable $y$ in domain $j$. Since we get this true value from our generated population, it does not vary by simulation rep.
 
 Next we will be examining the Empirical Bias of each model:
 
 $$
-\text{Empirical Bias}_j = E[\hat{\mu}_j] - Y_{j} \qquad \text{where} \qquad E[\hat{\mu}_j] = \frac{1}{S}\sum_{s = 1}^S\hat{\mu}_{j, s}
+\text{Empirical Bias}_j = E[\hat{Y}_j] - Y_{j} \qquad \text{where} \qquad E[\hat{\mu}_j] = \frac{1}{S}\sum_{s = 1}^S\hat{Y}_{j, s}
 $$
 
 As well as the Empirical Variance of each model:
 
 $$
-\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{\mu}_{j,s} - E[\hat{\mu}_j]\Big)
+\text{Empirical Var}_j  = \frac{1}{(S-1)}\sum_{s = 1}^S\Big(\hat{Y}_{j,s} - E[\hat{Y}_j]\Big)^2
 $$
 
 We will look at Predictive Interval (PI) coverage at a 95% confidence level for the Bayesian Models:
 
 $$
-\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(Y_{j} \in \text{PI}(\hat{\mu}_{j, s}))
+\text{Coverage}_j = \frac{1}{S}\sum_{s = 1}^S \mathbb{I}(Y_{j} \in \text{PI}(\hat{Y}_{j, s}))
 $$
 
 And finally we will look at the total number of model failures.
 
--   For the Frequentist models, a model failure was registered whenever one of the "Model failed to converge" warnings from `lme4`, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
+-   For the Frequentist models, a model failure was registered whenever one of the "Model failed to converge" warnings from `lme4` was returned, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
 -   For the Bayesian models, a model failure was registered whenever the MCMC algorithm failed one or more of the diagnostics that indicate that the algorithm has converged and is stable. The Stan programming language is robust enough that you should never trust the results when one of these warnings are administered, and so while potentially overly harsh in some cases, we chose to count any convergence warning as a model failure.
 
 Importantly, one solution to combating MCMC convergence issues is to bump up the number of iterations that the algorithm progresses through. That being said, this is not a sure fire solution, and always comes at the cost of longer computation time. The default number of iterations is 2000 and is considered a reasonable number of iterations for most models. Because the models we are fitting are fairly complex, ran a few tests to guage how many iterations we should use in order to try to minimize model failures while keeping model run-times reasonable. We saw good improvements up to 5000 iterations and then diminishing returns afterwards, so we used 5000 iterations for all of our Bayesian models.
