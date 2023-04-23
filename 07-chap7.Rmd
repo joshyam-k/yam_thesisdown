@@ -1,5 +1,34 @@
 # Package Vignette {#vignette}
 
+This thesis so far has spent a great deal of time explaining why these cluster zero-inflation models are interesting and useful, but no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models. We will start by describing the motivation for the package and it's structure, before returning to the forestry data from Chapter \@ref(intro-section) to show how it can be used.
+
+## R Package: zinf
+
+We can start by installing the developmental version of the package and loading it into our R session.
+
+```{r, message=F, warning=F}
+devtools::install_github("joshyam-k/zinf")
+library(zinf)
+```
+
+
+The two main functions that `zinf` contains are `zinf_bayes` and `zinf_freq` which as the names suggest relate to the Frequentist and Bayesian versions of the zero-inflation models.
+
+The challenge of writing a software package for these zero-inflation models was truthfully a lot trickier than I initially thought it would be. There were two different possible structural versions that I considered to be viable:
+
+1. Write a function that takes as argument all the individual pieces needed to build each of the two models and internally builds the two models and then define all of the necessary functionality (i.e prediction).
+2. Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the necessary functionality.
+
+On the one hand, version (1) is nice in that it "does it all" for the user. But the main problem with version (1) is that the functions `lme4::lmer` and `lme4::glmer` for Frequentist models and `rstanarm::stan_lmer` and `rstanarm::stan_glmer` for Bayesian models are already so popular and well developed and robust that it seems silly not to rely on that pre-existing software. After all, as we showed in Section \@ref(sepsim), the Bayesian models can be built separately and made as complex as desired, and this is also certainly the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function argument that those `lme4` and `rstanarm` functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
+
+```{r tbl2, echo=F, warning=F, message=F, fig.cap="Two Software Versions", out.width="90%", fig.align="center"}
+include_graphics(path = "figure/v1v2.png")
+```
+
+
+In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the `lme4` functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the `zinf` functions still have enormous usefulness in that they define methods for producing a summary of the zero-inflation model and most importantly for predicting with the zero-inflation model.
+
+
 ## Forestry Data
 
 ```{r, message=F, warning=F, echo= F}
@@ -19,36 +48,7 @@ summary(data %>% count(ECOSUBCD) %>% pull(n))
 
 The covariate that we will be using from the forestry data is called "Tree Canopy Cover" (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns ^[@toney2008stem]. This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
 
-The response variable that we will be using is called "Dry Above Ground Biomass from Live Trees" and is expressed in the units of per area density. This Dry Above Ground Biomass variable is one that is very important for understanding the health of forest ecosystems and plays a role in decisions regarding merchantable timber and fire hazard. For these reasons its vitally important for the FIA to be able to produce accurate estimates of this variable. 
-
-The zero-inflation models presented in this thesis provide a reasonable approach for trying to do exactly that. That being said, no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models.
-
-
-## R Package: zinf
-
-We start by installing the developmental version of the package and loading it into our R session.
-
-```{r, message=F, warning=F}
-devtools::install_github("joshyam-k/zinf")
-library(zinf)
-```
-
-
-The two main functions that `zinf` contains are `zinf_bayes` and `zinf_freq` which as the names suggest relate to the Frequentist and Bayesian versions of the zero-inflation models.
-
-The challenge of writing a software package for these zero-inflation models was truthfully a lot trickier than I initially thought it would be. There were two different possible structural versions that I considered to be viable:
-
-1. Write a function that takes as argument all the individual pieces needed to build each of the two models and internally build the two models and then define all of the neccessary functionality.
-2. Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the neccessary functionality.
-
-On the one hand, version (1) is nice in that it "does it all" for the user. But the main problem with version (1) is that the functions `lme4::lmer` and `lme4::glmer` for Frequentist models and `rstanarm::stan_lmer` and `rstanarm::stan_glmer` for Bayesian models are already so popular and well developed and robust that it seems silly to to rely on that pre-existing software. After all, as we showed in Section \@ref(sepsim), the Bayesian models can be built separately and made as complex desired, and this is also certainly the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function arguments that those `lme4` and `rstanarm` functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
-
-```{r tbl2, echo=F, warning=F, message=F, fig.cap="Two Software Versions", out.width="90%", fig.align="center"}
-include_graphics(path = "figure/v1v2.png")
-```
-
-
-In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the `lme4` functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the `zinf` functions still have enormous usefullness in that they define methods for producing a summary of the zero-inflation model and most importantly for predicting with the zero-inflation model.
+The response variable that we will be using is called "Dry Above Ground Biomass from Live Trees" and is expressed in the units of per area density. This Dry Above Ground Biomass variable is one that is very important for understanding the health of forest ecosystems and plays a role in decisions regarding merchantable timber and fire hazard. For these reasons its vitally important for the FIA to be able to produce accurate estimates of this variable. The zero-inflation models presented in this thesis provide a reasonable approach for trying to do exactly that, and the software package `zinf` provides an early stage version of a tool to do so.
 
 
 ## Application
@@ -104,7 +104,7 @@ Next we'll build the individual Bayesian models. We'll start with the logistic r
 
 The prior fixed effect slope should reflect our vague sense for how the probability of Dry Above Ground Biomass from Live Trees being non-zero changes with Tree Canopy Cover. With limited knowledge of how forest attributes interact we'll assume that the slope is positive and centered somewhere around 0.5, so we'll use a prior of $\mathcal{N}(0.5, 0.25^2)$.
 
-The fixed effect intercept that `rstanarm::stan_glmer` asks for is actually the centered intercept. This can be conceptualized as our guess for the probability of being non-zero for an average plot. Given that the response variable is zero in around 40% of the plots in our data set we'll guess that this probability is around 0.4. We have to be careful here, since logistic regression employs a logit link, we actually want to set the prior mean to be on the log-odds scale, so we use $\log{(0.4/(1-0.4))} = -0.4$ as the center. We might guess that the range of the propbability of being non-zero for an average plot might range from 0.1 to 0.7 which translates to a log odds range of $(-2.2, 0.85)$. Thus the prior for the centered fixed effect intercept will thus be $\mathcal{N}(-0.4, 0.7^2)$.
+The fixed effect intercept that `rstanarm::stan_glmer` asks for is actually the centered intercept. This can be conceptualized as our guess for the probability of being non-zero for an average plot. Given that the response variable is non-zero in around 40% of the plots in our data set we'll guess that this probability is around 0.4. We have to be careful here, since logistic regression employs a logit link, we actually want to set the prior mean to be on the log-odds scale, so we use $\log{(0.4/(1-0.4))} = -0.4$ as the center. We might guess that the probability of being non-zero for an average plot might range from 0.1 to 0.7 which translates to a log odds range of $(-2.2, 0.85)$. Thus the prior for the centered fixed effect intercept will thus be $\mathcal{N}(-0.4, 0.7^2)$.
 
 Finally, the variance of the random intercepts is not really a parameter that we can use the data to get a great guess for, so we'll utilize a weakly informative prior of Exponential$(1)$. In `rstanarm::stan_glmer` this is written slightly differently using a function called `decov` but in this setting that is just the Exponential$(1)$ prior that we want.
 
@@ -127,7 +127,7 @@ bayes_log_reg <- stan_glmer(
 
 #### GLM 1: Normal with Identity link
 
-We now turn to the two versions of the generalized linear model. We'll start with the model that uses a Normal distribution and the identity link- i.e Normal linear regression. This time the parameters that need priors are all the same as from the previous one, except now we also need a prior for the variance of the error term.
+We now turn to the two versions of the generalized linear model for the non-zero response. We'll start with the model that uses a Normal distribution and the identity link- i.e Normal linear regression. This time the parameters that need priors are all the same as from the previous one, except now we also need a prior for the variance of the error term.
 
 We can examine a scatter plot of Tree Canopy Cover on Dry Above Ground Biomass from Live Trees to choose our prior for the fixed effect slope. We can do some rise-over-run calculations to end up with a guess that the fixed effect slope is around 2 and probably doesn't go outside of the range (0.5, 5). Thus we'll use a $\mathcal{N}(2, 1^2)$ prior here.
 
@@ -197,7 +197,7 @@ and if we put our estimate for $\beta$ back into \@ref(eq:first) to get
 \frac{\alpha}{0.013} \approx 80.45 \implies \alpha \approx 1.04
 \end{equation}
 
-We aren't positive about this guess but we know that the actuall parameter has to be non-negative so we'll use a Half-Cauchy$(1, 1)$ prior here. Note that `rstanarm::stan_glmer` assumes all `prior_aux` parameters are positive so we don't have to specify that it's a bounded Cauchy distribution.
+We aren't positive about this guess but we know that the actual parameter has to be non-negative so we'll use a Half-Cauchy$(1, 1)$ prior here. Note that `rstanarm::stan_glmer` assumes all `prior_aux` parameters are positive so we don't have to specify that it's a bounded Cauchy distribution.
 
 ```{r, warning = F, message=F, results='hide', cache = T}
 bayes_gamma_reg <- stan_glmer(
@@ -243,7 +243,7 @@ And as we can see below, making predictions on the test dataset using our Freque
 predict(frequentist_zi_mod, newdata = test)
 ```
 
-While the output will look slightly different for the Bayesian model, the process of getting the predictions is exactly the same. We'll start by looking at the Bayesian model where the GLM component assumes a Normal response
+While the output will look slightly different for the Bayesian model, the process of getting the predictions with code is exactly the same. We'll start by looking at the Bayesian model where the GLM component assumes a Normal response
 
 ```{r, message=F, warning=F, cache=T}
 bayes_preds_normal <- predict(bayesian_zi_mod_normal, newdata = test)
@@ -320,7 +320,7 @@ left_join(bayes_gam, bayes_norm) %>%
   )
 ```
 
-It's nice to see that the Bayesian model where the non-zero response was modeled using a Gamma distribution performed the best, but again this is just an example about how to use the package and we shouldn't read too much into these short results.
+It's nice to see that the models performed similarly, as we saw in our simulation study, but again this is just an example about how to use the package and we shouldn't read too much into these short results.
 
 ## Next Steps
 
