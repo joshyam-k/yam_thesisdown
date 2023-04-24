@@ -1,9 +1,23 @@
 # Conclusion {#conc}
 
-In this thesis I have gone in depth into the methodology and results of cluster zero-inflation models built in a Bayesian framework. The work departed from that of a traditional statistical modeling paper in that it was just as concerned with understanding and appreciating the procedural aspects of the method as it was with the results. Within the suite of Bayesian models we found that informative priors do have the capacity to prevent model failures although this trend was not as strong as we initially expected it to be. When comparing the suite of Bayesian models to the Frequentist one we found that they performed very similarly in terms of traditional performance metrics like RMSE, bias, and variance. Although this may feel like a null result, there's certainly reassurance in seeing that the two methods produce very similar results and moreover it allows us to think critically about other sources of value and usefulness in each model building process.
+In this thesis I have gone in depth into the methodology and results of cluster zero-inflation models built in a Bayesian framework. The work departed from that of a traditional statistical modeling paper in that it was just as concerned with understanding and appreciating the procedural aspects of the method as it was with the results. Within the suite of Bayesian models that we explored we found that informative priors do have the capacity to prevent model failures although this trend was not as strong as we initially expected it to be. When comparing the suite of Bayesian models to an analogous Frequentist one we found that they performed very similarly in terms of traditional performance metrics like RMSE, bias, and variance. Although this may feel like a null result, there's certainly reassurance in seeing that the two methods produce very similar results. Moreover, it allows us to think critically about other sources of value and usefulness in each model building process. I argue that in the case of the Bayesian models, the extra conceptual work required to build them can actually be a positive aspect of the model building process. 
+
+That being said, the realm of modeling software is still lacking in it's current ability to ease the computational intensity of running Bayesian models. The aim of this thesis was not to tackle a problem of this magnitude, but it did try to contribute with an R software package that abstracts many of the most cumbersome aspects of prediction in Bayesian zero-inflation modeling.
 
 
-## Limitations
+## Future Work
 
-Ultimately we may have seen some lack of separation between the results of the models due to the fact that the data was generated in a Frequentist way, thus automatically making our Bayesian models a little bit misspecified. 
+Ultimately there remains much to be done in this area of research on zero-inflation models. While the Bayesian models that we employed were well suited for the particular setting we were working in, these models could be extended in a couple of ways that would make them more robust to a wider variety of settings. For starters, the models could be enhanced by allowing for random slopes instead of only utilizing random intercepts. Secondly, in the Normal regression models we assumed constant variance of the errors, but it might make more sense to treat that variance as heteroskedastic. Additionally, while the zero-inflated setting where the non-zero portion of the response belongs to a positive continuous distribution is a relatively common one, it would be worthwhile to build models for discrete settings and settings in which the response is bounded.
+
+It would also be interesting to compare the performance of these zero-inflation models to simpler models. For example, a singular simple linear regression model or a model that first takes the average of each group and fits a model to these aggregated data points. While we'd expect the zero-inflation models to broadly outperform these models, it would be interesting to quantify to what degree they do so, and to try to understand how the characteristics of the data set play into this.
+
+Additionally, while we were unable to figure out how to boostrap the prediction errors for the Frequentist zero-inflation model, such a process would be extremely important to this area of research. Not only would it allow for comparisons between the coverage metrics of each model, but it would provide the tooling necessary to run a speed test between the Bayesian and Frequentist processes. It's true that for the models used in this thesis, the Bayesian ones took much longer to run than the Frequentist ones, but bootstrapping is not generally an especially quick process and so a more fair comparison could be made if the Frequentist models were generating prediction intervals as well.
+
+
+
+
+
+
+
+
 
