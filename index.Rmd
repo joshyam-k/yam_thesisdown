@@ -34,7 +34,7 @@ abstract: |
 # like below, use a command like that for the abstract above.  Note that a tab 
 # is needed on the line after the `|`.
 acknowledgements: |
-  I would like to thank 
+  `r if(knitr:::is_latex_output()) paste(readLines(here::here("prelims", "00--prelim.Rmd")), collapse = "\n  ")`
 # Specify the location of the bibliography below
 bibliography: bib/thesis.bib
 # Download your specific csl file and refer to it in the line below.
