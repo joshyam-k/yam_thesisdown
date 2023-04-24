@@ -195,7 +195,7 @@ In order to introduce, study, and implement these models I will structure the re
 
 -   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Cluster Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. 
 
-- Chapter \@ref(semsim) walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
+- Chapter \@ref(sepsim) walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
 
 -   Chapter \@ref(sim-study) sets up the simulation study that serves as the main process by which we evaluate the various models.
 
@@ -203,7 +203,7 @@ In order to introduce, study, and implement these models I will structure the re
 
 -   Chapter \@ref(vignette) gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 
-- Finally, Chapter @\ref(conc) provides some concluding thoughts and describes possible extensions.
+- Finally, Chapter \@ref(conc) provides some concluding thoughts and describes possible extensions.
 
 
 
