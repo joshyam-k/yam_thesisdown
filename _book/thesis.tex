@@ -188,19 +188,7 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \Acknowledgements{
-\textbf{Lenny Wainstein}
-\newline
-\newline
-\textbf{Kelly McConville}
-\newline
-\newline
-\textbf{Jonathan Wells}
-\newline
-\newline
-\textbf{Grayson White} and \textbf{Simon Couch}
-\newline
-\newline
-\textbf{Kristin Bott}
+I'd like to thank my advisors Lenny Wainstein and Kelly McConville for their significant support, insight, and kindness throughout this thesis process. I'm also extremely grateful for the guidance and mentorship of Jonathan Wells, Kristin Bott, Simon Couch, and Grayson White who were each uniquely integral to my time studying Statistics at Reed.
 }
 
 \Dedication{
@@ -232,19 +220,7 @@ This thesis considers modeling situations where the data exhibits two distinctiv
 \frontmatter % this stuff will be roman-numbered
 \pagestyle{empty} % this removes page numbers from the frontmatter
   \begin{acknowledgements}
-    \textbf{Lenny Wainstein}
-    \newline
-    \newline
-    \textbf{Kelly McConville}
-    \newline
-    \newline
-    \textbf{Jonathan Wells}
-    \newline
-    \newline
-    \textbf{Grayson White} and \textbf{Simon Couch}
-    \newline
-    \newline
-    \textbf{Kristin Bott}
+    I'd like to thank my advisors Lenny Wainstein and Kelly McConville for their significant support, insight, and kindness throughout this thesis process. I'm also extremely grateful for the guidance and mentorship of Jonathan Wells, Kristin Bott, Simon Couch, and Grayson White who were each uniquely integral to my time studying Statistics at Reed.
   \end{acknowledgements}
 
 
@@ -1802,10 +1778,12 @@ In this thesis I have gone in depth into the methodology and results of cluster 
 
 That being said, the realm of modeling software is still lacking in it's current ability to ease the computational intensity of running Bayesian models. The aim of this thesis was not to tackle a problem of this magnitude, but it did try to contribute with an R software package that abstracts many of the most cumbersome aspects of prediction in Bayesian zero-inflation modeling.
 
+Overall I see zero-inflation models having enormous usefulness in applied settings. In particular, the Bayesian models that we employed provide an intuitive way to balance prior information with the structure of the observed data. Moreover, in settings where uncertainty estimates of any kind are desired, a properly specified Bayesian model provides these at no extra cost. In forestry settings standard errors for predictions are often especially important, so the ability to easily and accurately estimate these is an incredibly valuable tool.
+
 \hypertarget{future-work}{%
 \section{Future Work}\label{future-work}}
 
-Ultimately there remains much to be done in this area of research on zero-inflation models. While the Bayesian models that we employed were well suited for the particular setting we were working in, these models could be extended in a couple of ways that would make them more robust to a wider variety of settings. For starters, the models could be enhanced by allowing for random slopes instead of only utilizing random intercepts. Secondly, in the Normal regression models we assumed constant variance of the errors, but it might make more sense to treat that variance as heteroskedastic. Additionally, while the zero-inflated setting where the non-zero portion of the response belongs to a positive continuous distribution is a relatively common one, it would be worthwhile to build models for discrete settings and settings in which the response is bounded.
+Ultimately there remains much to be done in this area of research on zero-inflation models. While the Bayesian models that we employed were well suited for the particular setting we were working in, these models could be extended in a couple of ways that would make them more robust to a wider variety of settings. For starters, the models could be enhanced by allowing for random slopes instead of only utilizing random intercepts. Secondly, in the Normal regression models we assumed constant variance of the errors, but it might make more sense to treat that variance as heteroskedastic. Additionally, while the zero-inflated setting where the non-zero portion of the response belongs to a positive continuous distribution is a relatively common one, it would be worthwhile to build models for discrete settings and settings in which the response is bounded. Finally, taking a step back, it would be interesting to utilize different types of classification and regression models in the two-part model. For example more advanced statistical models like random forests and support vector machines could be used to try to more accurately classify points as being zero or not and some kind of a nonparametric regression model could be used to model the nonzero response. While these ideas were outside of the scope of this thesis, I think that each one has the capacity to substantially enhance these zero-inflation models.
 
 It would also be interesting to compare the performance of these zero-inflation models to simpler models. For example, a singular simple linear regression model or a model that first takes the average of each group and fits a model to these aggregated data points. While we'd expect the zero-inflation models to broadly outperform these models, it would be interesting to quantify to what degree they do so, and to try to understand how the characteristics of the data set play into this.
 
