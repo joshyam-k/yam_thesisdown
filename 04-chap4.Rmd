@@ -2,9 +2,9 @@
 
 ## Simultaneous Model Build
 
-As we mentioned in \@ref(comb), to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. But, as we will show in this section, under a few assumptions we actually don't have to do this simulataneous build, and are justified in just building the two models separately and combining them at the end. The one major assumption that we will have here is that there is no dependence in the priors **between** models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain [@pfeffermann2008small].
+As we mentioned in \@ref(comb), to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. But, as we will show in this section, under a few assumptions we actually don't have to do this simulataneous build, and are justified in just building the two models separately and combining them at the end. The one major assumption that we will have here is that there is no dependence in the priors *between* models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain [@pfeffermann2008small].
 
-This result holds regardless of the particular models that we use, but for the sake of simplicity and relevance we'll use a logistic regression model with random intercepts and a Normal linear regression model with random intercepts. In this setting our posterior for both models would be:
+This result holds regardless of the particular models that we use, but for the sake of simplicity and relevance we'll use a logistic regression model with random intercepts and a Normal linear regression model with random intercepts. In this setting our full posterior for both models would be:
 
 $$
 \begin{aligned}
@@ -16,7 +16,7 @@ We can expand this by writing out the likelihood more fully based on whether $y$
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  \\ & \ \ \ \ \  \ p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
 \end{aligned}
 $$
 
@@ -30,7 +30,7 @@ $$
 \end{aligned}
 $$
 
-Again, we are able to split the joint prior in this way because we are assuming that there is no dependence in the priors **between** models.
+Again, we are able to split the joint prior in this way because we are assuming that there is no dependence in the priors *between* models.
 
 But now, if we look at this closely we can see that what we really have here is a full separation into the posteriors for the individual models for $z$ and $y^*$ as seen in our derivation in the section \@ref(bayeslog). This means that we can write:
 
@@ -41,20 +41,20 @@ p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \
 \end{aligned}
 $$
 
-Finally, since these are all proper probability distributions we know that they should all integrate to 1 when integrated across all of their parameters. If we integrate both sides over all of the parameters from both models, its clear that the LHS would be one, and once we recall that there is no parameter dependence **between** the models, it is clear that the RHS does as well. And so we are left with the conclusion that $C = 1$ and thus that
+Finally, since these are all proper probability distributions we know that they should all integrate to 1 when integrated across all of their parameters. If we integrate both sides over all of the parameters from both models, its clear that the LHS is 1, and once we recall that there is no parameter dependence *between* the models, it is clear that the RHS is as well. And so we are left with the conclusion that $C = 1$ and thus we can say that,
 
 \begin{equation}
 p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y})  = p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})
 (\#eq:sepsimeq)
 \end{equation}
 
-So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that *as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.*. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each individual model. 
+So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that *as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.*. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually. 
 
 Practically speaking, if our MCMC algorithm properly converges, then we can interpret the MCMC output as a random sample from the approximate posterior distribution. Because of this it actually doesn't really matter how we match up the indices of the posterior predictive distributions from the models for $y^*$ and $z$. That being said, for the sake of consistency, in all of our work we'll match the posterior predictive distributions by MCMC index.
 
-### Practical Backing
+## Practical Backing
 
-We'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
+We'll now show that this holds in practice, with a simple example and we'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
 
 $$
 z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j

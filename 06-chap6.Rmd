@@ -7,13 +7,13 @@ library(gt)
 library(knitr)
 ```
 
-We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \@ref(metrics). Across all of these sections we will label simulation settings like $n = \cdot$ - $J = \cdot$. For example if we have $(n = 15, J = 10 )$ it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on $n\times J = 150$ data points.
+We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \@ref(metrics). Across all of these sections we will label simulation settings like $n = \cdot$ - $J = \cdot$. For example if we have $(n = 15, J = 10 )$ then this means that the data sets used in that simulation setting had 10 groups with 15 observations each, and thus the models were trained on $n\times J = 150$ data points.
 
-Additionally, since the logistic regression component remained the same across all of the Bayesian models, we will use the following syntax when refering to the bayesian models.
+Additionally, since the logistic regression component remained the same across all of the Bayesian models, we will refer to each distinct Bayesian model by describing what the GLM used to model the non-zero response was. We use the following syntax:
 
 - [Type of priors, distribution used to model the non-zero response]
 
-For example, [Flat Priors, Normal] refers to the Bayesian model that used flat priors and modeled the non-zero response using the Normal distribution.
+For example, [Flat Priors, Normal] refers to the Bayesian model that used flat priors and modeled the non-zero response using a Normal distribution.
 
 ## Expectations
 
@@ -87,16 +87,16 @@ model_fails %>%
 
 Perhaps the most notable takeaway from Figure \@ref(fig:failures) is that the number of groups seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from $J = 10$ to $J = 5$ that is quite alarming.
 
-Importantly, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table \@ref(fig:tbl) we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
+Importantly, in order to avoid biasing our results, whenever we evaluate the models we do so only across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table \@ref(fig:tbl) we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 
-```{r tbl, echo=F, warning=F, message=F, fig.cap="Results Excerpt Example", out.width="95%", fig.align="center"}
+```{r tbl, echo=F, warning=F, message=F, fig.cap="Results Excerpt Example", out.width="80%", fig.align="center"}
 include_graphics(path = "figure/tb1.png")
 ```
 
 
 Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, in Figure \@ref(fig:keep), we show what percent of the simulation results we'd be able to retain in each setting.
 
-```{r keep, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Percent of Results we would get to use if we only included simulation iterations where none of the models failed.'}
+```{r keep, warning = F, message = F, echo = F, fig.align='center', out.width='80%', fig.cap='Percent of Results we would get to use if we only included simulation iterations where none of the models failed.'}
 
 levs <- c("(n = 15, J = 5)", "(n = 30, J = 5)", "(n = 50, J = 5)",
           "(n = 15, J = 10)", "(n = 30, J = 10)", "(n = 50, J = 10)", 
@@ -132,7 +132,7 @@ Clearly the Bayesian models fail far too much for any trustworthy and meaningful
 
 ### Model Regularization through Informative Priors
 
-If we only compare the "Flat Priors, Normal" and "Informative Priors, Normal" failure rates, we are able to get a sense for the role that the prior distributions play here. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
+If we only compare the "Flat Priors, Normal" and "Informative Priors, Normal" failure rates, we are able to get a sense for the role that the prior distributions play. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
 
 ```{r regularization, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Model Failure Rate comparison between the Bayesian Normal model with flat priors and with informative priors.'}
 model_fails %>% 
@@ -216,7 +216,7 @@ make_res_plot(res, rmse) +
   )
 ```
 
-As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to "learn" the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors. The only setting in which they are outperformed is when $J = 10$ where they are marginally outperformed by the Frequentist model. Note that the true value of the response for group one was $23.7$ which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, it would be a little unfair to cite these differences as substantive improvements between the Bayesian and Frequentist models.
+As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to "learn" the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors. The only setting in which they are outperformed is when $J = 10$ where they are marginally outperformed by the Frequentist model. That being said, the true value of the response for group 1 was $23.7$ which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, it would be a little unfair to cite these differences as substantive improvements between the Bayesian and Frequentist models.
 
 ## Empirical Variance
 
@@ -230,7 +230,7 @@ make_res_plot(res, E_var) +
   )
 ```
 
-Again we see the decrease in variance as $n$ and $J$ increase that we'd expect to see. And besides small amounts of separation between the models in the setting $(n = 15, \ J = 10)$, they all seem to perform very similarly.
+Again we see the decrease in variance as $n$ and $J$ increase that we'd expect to see. But besides small amounts of separation between the models in the setting $(n = 15, \ J = 10)$, they all seem to perform very similarly.
 
 ## Empirical Bias
 
@@ -244,12 +244,12 @@ make_res_plot(res, E_bias) +
   )
 ```
 
-That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $J = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small and the true value of the response is $23.7$. I truly wish that I could take this plot and proclaim that the Bayesian Normal model with informative priors performs far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that were initially a bit befuddling in Figure \@ref(fig:bias).
+That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where $J = 10$ due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small and again the true value of the response is $23.7$. I truly wish that I could take this plot and proclaim that the Bayesian Normal model with informative priors performs far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that were initially a bit befuddling.
 
 
 ## Coverage
 
-And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here.
+And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here due to the fact that we found no good method for estimating prediction intervals for this type of model.
 
 ```{r, warning = F, message = F, echo = F, fig.align='center', out.width='85%'}
 res %>% 
@@ -283,13 +283,13 @@ res %>%
   )
 ```
 
-Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
+Interestingly, while we get close to 95% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
 
 
 
 ## General Remarks
 
-It would be relatively easy to look at the results from Chapter \@ref(res-sec) and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful. 
+It would be relatively easy to look at the results from Chapter \@ref(res-sec) and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational and conceptual work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful. 
 
 It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value. To try to break out of this mold I will walk through some takeaways from the results themselves, but I will also talk more generally about the value and usefulness of the Bayesian models that exist outside of their performance metrics.
 
@@ -299,7 +299,7 @@ As stated previously, in terms of metrics like RMSE, empirical bias, and empiric
 
 Perhaps the main worry when looking at the performance of the Bayesian model has to do with the model failures metric. After all, the Frequentist model never failed in any settings, while the failure rates of the Bayesian models in the $J=5$ settings were so high that they rendered the results unuseable. I'll push back on this a little bit as a segway into the next portion of our discussion. 
 
-There's certainly an argument to be made that Bayesian model convergence failures are a good safeguard against building bad models. What I mean by this is that in some cases if your Bayesian model is not properly specified or has another substantive problem with its formulation it will fail to converge and leave you without a useable model. I want to stress that I am not generalizing this to all cases, but in some cases this is actually good behavior because it forces you to think about what your data looks like and why your model is failing to fit to it. The Frequentist models are often so robust that it takes a very serious specification problem for them to ever fail. The main point is this: having a model that never fails is not always a good thing when trying to build a good model. To make sense of why this is, we'll look at the RMSE of the Frequentist model in the $J = 5$ settings from our simulation in Chapter \@ref(sim-study). In these settings, the argument could be made that the Frequentist models are better in these settings due to the fact that they never failed. But if we look at the RMSE performance of the Frequentist models across **all** simulation reps in these settings we see something pretty alarming.
+There's an argument to be made that Bayesian model convergence failures are a good safeguard against building bad models. What I mean by this is that in some cases if your Bayesian model is not properly specified or has another substantive problem with its formulation it will fail to converge and leave you without a useable model. I want to stress that I am not generalizing this to all cases, but in some cases this is actually good behavior because it forces you to think about what your data looks like and why your model is failing to fit to it. Conversely, the Frequentist models are often so robust that it takes a very serious specification problem for them to ever fail. The main point is this: having a model that never fails is not always a good thing when trying to build a good model. To make sense of why this is, we'll look at the RMSE of the Frequentist model in the $J = 5$ settings from our simulation in Chapter \@ref(sim-study). In these settings, the argument could be made that the Frequentist models are better due to the fact that they never failed. But if we look at the RMSE performance of the Frequentist models across *all* simulation reps in these settings we see something pretty alarming.
 
 ```{r j5res, warning = F, message = F, echo = F, fig.align='center', out.width='85%', fig.cap='Struggles for the Frequentist model in J = 5'}
 res_j5 <- read_csv(here("data", "J5_res.csv")) %>% 
@@ -337,19 +337,17 @@ rbind(res_j5, all_res) %>%
 ```
 
 
-Clearly, Figure \@ref(fig:j5res) gives us plenty of reason to worry about proceeding in this way. While the Frequentist model did not fail to converge, it clearly struggled mightily in those settings. Importantly, this is not a knock against Frequentist models in *all* modeling settings, but rather in this situation it actually is advantageous that the Bayesian models are more sensitive to poor model specification. 
-
-This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
+Clearly, Figure \@ref(fig:j5res) gives us plenty of reason to worry about proceeding in this way. While the Frequentist model did not fail to converge, it clearly struggled mightily in those settings. Importantly, this is not a knock against Frequentist models in *all* modeling settings, but rather in this situation it actually is advantageous that the Bayesian models are more sensitive to poor model specification. In a more applied setting we likely could have tweaked the priors and the model structure to get our Bayesian models to converge more often and at times it's nice that the Bayesian procedure forces us to do this. This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
 
 ### Procedural Discussion
 
-One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part- MCMC is hard and writing code for Bayesian models in `Stan` is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approachable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, comes variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified. That being said, regardless of how interesting and useful Bayesian modeling is, the computational burden will likely continue to keep people from utilizing it. Even with packages like `rstanarm` and `R2WinBUGS` which really streamline the process, I certainly want to acknowledge that this aspect of Bayesian modeling is still a sizeable barrier to entry.
+One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part- MCMC is hard and writing code for Bayesian models in `Stan` is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approachable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, comes variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified. That being said, regardless of how interesting and useful Bayesian modeling is, the computational burden will likely continue to keep people from utilizing it. Even though packages like `rstanarm` and `R2WinBUGS` really streamline the process, I want to acknowledge that this aspect of Bayesian modeling is still a sizeable barrier to entry.
 
 
-Another way in which Bayesian models are perhaps more unattractive has to do with the conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where that parameter value might lie and how it might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that you are required to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the `lm` function in R and getting a reasonable output, but it can sometimes become too easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. In my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions. 
+Another way in which Bayesian models are perhaps more unattractive has to do with the conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where those parameter values might lie and how they might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that it requires you to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the `lm` function in R and getting a reasonable output, but it can sometimes become too easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. Thus, in my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions. 
 
 
-Hopefully these points have shed light on the ways that Bayesian models has value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.
+Hopefully these points have shed light on the ways in which Bayesian models have value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.
 
 
 

@@ -113,7 +113,7 @@
   \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 
 % To pass between YAML and LaTeX the dollar signs are added by CII
-\title{Bayesian Hierarchical Cluster Zero-Inflation Models}
+\title{A Bayesian Approach to Zero-Inflation Modeling}
 \author{Josh Yamamoto}
 % The month and year that you submit your FINAL draft TO THE LIBRARY (May or December)
 \date{May 2023}
@@ -200,7 +200,7 @@ I'd like to thank my advisors Lenny Wainstein and Kelly McConville for their sig
 }
 
 \Abstract{
-This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understand how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow.
+This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
 }
 
 	\usepackage{setspace}\onehalfspacing
@@ -231,7 +231,7 @@ This thesis considers modeling situations where the data exhibits two distinctiv
 
   \listoffigures
   \begin{abstract}
-    This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understand how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow.
+    This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
   \end{abstract}
 
 \mainmatter % here the regular arabic numbering starts
@@ -240,12 +240,12 @@ This thesis considers modeling situations where the data exhibits two distinctiv
 \hypertarget{intro-section}{%
 \chapter{Introduction}\label{intro-section}}
 
-In this thesis, I will be concerned with modeling a response variable from various explanatory variables in data that exhibit two distinctive features: (i) the response variable is ``zero-inflated'', and (ii) the data is ``clustered''.
+In this thesis, I will be concerned with modeling a response variable using various explanatory variables from data that exhibit two distinctive features: (i) the response variable is ``zero-inflated'', and (ii) the data is ``clustered''.
 
 \hypertarget{zero-inflated-data}{%
 \section{Zero-Inflated Data}\label{zero-inflated-data}}
 
-As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of ``zeroness'', I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
+As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of ``zeroness'', I do require that the non-zero data is positive and continuously distributed. For example, a response variable that is zero-inflated in this way might look like this:
 \begin{figure}
 
 {\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/ziex-1} 
@@ -254,23 +254,23 @@ As the name suggests, data are canonically classified as being zero-inflated whe
 
 \caption{Zero-Inflated data}\label{fig:ziex}
 \end{figure}
-And in reality, this form of zero-inflated data is one that we see quite often in the real world. Importantly, an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself, for example if we collected data on the total weight of fish caught at a lake by individuals on a given day, we likely would see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But, other times it could be a characteristic of the data collection process itself. For example a measurement error or a sampling error could cause data to be zero-inflated as well.
+In reality, this form of zero-inflated data is one that we see quite often in the real world. We should note that an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself. For example, if we collected data on the total weight of fish caught at a lake by individuals on a given day, we would likely see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But, other times it could be a characteristic of the data collection process itself. For example a measurement error or a sampling error could cause data to be zero-inflated as well.
 
 Importantly, as I am working in a modeling setting, when I say that data is zero-inflated I mean that the \emph{response variable} is zero-inflated. Although I will simply refer to my data as being zero-inflated and my models as being suited for zero-inflated data for the duration of this thesis, this is simply a matter of convenience and not a statement that the methods work for any situation in which data can be considered zero-inflated. Put simply, I explore, present, and evaluate a model that is suited for a response variable which has a significant portion of zeroes, with the non-zero portion of that variable belonging to a positive continuous distribution.
 
 \hypertarget{clustered-data}{%
 \section{Clustered Data}\label{clustered-data}}
 
-Furthermore, we will be operating in a setting where the data is not only zero-inflated, but also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points across clusters.
+Furthermore, we will be operating in a setting where the data is not only zero-inflated, but also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be considered clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points between clusters.
 
 For example, going back to the fishing in a lake example, if we looked at data on the weight of each individual fish caught, we would imagine that fish of the same species would generally be more similar in weight than fish from different species.
 
 \hypertarget{forestry-setting}{%
 \section{Forestry Setting}\label{forestry-setting}}
 
-One specific setting that exhibits both of these data features is the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory \& Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: ``The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems.''(McConville, Moisen, \& Frescino, 2020).
+One specific setting where we see both of these features is the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory \& Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: ``The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems.''(McConville, Moisen, \& Frescino, 2020).
 
-The FIA employs a quasi-systematic sampling design to determine which locations to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
+The FIA employs a quasi-systematic sampling design to determine which locations across the U.S. to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
 
 While the main use of the additional remote sensed data sources are to increase the accuracy of the estimators that the FIA builds, they are also used to make rational decisions about the aforementioned plot-level data collection. Before sending a crew out to a given sampled location, the FIA will first look at the remote sensed data for that location. If that location happens to be in a place where there is clearly no forest, for example in the middle of a parking lot, the FIA will not send a crew out and instead will mark all forest attributes for that location as being zero. As you might imagine, this happens quite a bit, and so an interesting characteristic of many forest attribute variables collected by the FIA is that they are zero-inflated. Importantly, this is an example of where the data is zero-inflated because of the data collection process.
 
@@ -283,9 +283,9 @@ If we look at the distribution of the FIA collected forest attribute ``Dry Above
 
 \caption{Zero-Inflated Forestry data.}\label{fig:forestrydata}
 \end{figure}
-Additionally, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
+Additionally, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each plot-level data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
 
-Not only is the FIA data a good real life example of when we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
+Not only is the FIA data a good real life example where we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
 
 \hypertarget{immediate-modeling-struggles}{%
 \subsection{Immediate Modeling Struggles}\label{immediate-modeling-struggles}}
@@ -299,14 +299,14 @@ To motivate using a more complex method, I'll first show what happens when we tr
 
 \caption{The shortcomings of a simple linear regression model in this context.}\label{fig:scatterzi}
 \end{figure}
-While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \ref{fig:scatterzi} doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
+While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \ref{fig:scatterzi} does not appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range of observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability of our response variable being zero, changes with our covariate.
 
-We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While perhaps it's unfair to motivate my method by pitting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used model. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead, the model I present is interpretable and intuitive while being flexible enough to capture the structure of the zero-inflated data.
+We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While perhaps it's unfair to motivate my method by pitting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used tool. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead, the model I present is interpretable and intuitive while flexible enough to better capture the structure of the zero-inflated data.
 
 \hypertarget{the-new-model}{%
 \subsection{The New Model}\label{the-new-model}}
 
-While I will exhaustively describe details of, and the math behind, the exact model in Chapter \ref{methods-sec}, I'll go through a non-technical overview of how it will function here.
+While I will exhaustively describe the details of, and the math behind, the exact model in Chapter \ref{methods-sec}, I'll go through a non-technical overview of how it will function here.
 
 The defining characteristic of the model is that it is a two-part model. Instead of trying to fit the data with a singular model, we instead fit two different models and then combine them at the end. The two models are
 \begin{enumerate}
@@ -322,7 +322,7 @@ To get a final prediction for a data point we take the prediction from model (1)
 \text{Final Prediction} =  \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}} \times \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} 
 \]
 
-Let's think back to Figure \ref{fig:scatterzi} to unpack why this is a reasonable strategy.
+We can go back to Figure \ref{fig:scatterzi} to unpack why this is a reasonable strategy.
 \begin{figure}
 
 {\centering \includegraphics[width=0.95\linewidth]{thesis_files/figure-latex/modintuition-1} 
@@ -331,9 +331,9 @@ Let's think back to Figure \ref{fig:scatterzi} to unpack why this is a reasonabl
 
 \caption{Example of two new data points that we might be interested in testing our model on.}\label{fig:modintuition}
 \end{figure}
-Let's start with the left hand side of Figure \ref{fig:modintuition} that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent close to zero by that classification model output.
+Let's start with the left hand side of Figure \ref{fig:modintuition} that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent close to zero when multiplied by that classification model output.
 
-On the other hand, the right hand side of Figure \ref{fig:modintuition} has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a likely non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
+On the other hand, the right hand side of Figure \ref{fig:modintuition} where we have a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a likely non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
 
 Clearly the success of this strategy relies on the quality of the two individual models, but at least we can see how this method has the capacity to capture the zero-inflation data structure.
 
@@ -378,19 +378,19 @@ For example, a simple Google search for ``Bayesian v.s. Frequentist'' will tell 
 
 If you dig a bit deeper and refine your Google search, you'll eventually come across a more technical definition such as this one from Gelman:
 \begin{quote}
-``Bayesian statistical conclusions about a parameter \(\theta\) are made in terms of probability statements. These probability statements are conditional on the observed value of {[}x{]}, and \ldots{} are written simply as \(p(\theta \ | \ x)\) \ldots{} It is at the fundamental level of conditioning on observed data that Bayesian inference departs from the approach to statistical inference described in many textbooks, which is based on a retrospective evaluation of the procedure used to estimate \(\theta\) over the distribution of possible {[}x{]} values conditional on the true unknown value of \(\theta\)'' \footnote{Gelman, Carlin, Stern, \& Rubin (1995)}
+``Bayesian statistical conclusions about a parameter \(\theta\) are made in terms of probability statements. These probability statements are conditional on the observed value of {[}x{]}, and \ldots{} are written simply as \(p(\theta \ | \ x)\) \ldots{} It is at the fundamental level of conditioning on observed data that Bayesian inference departs from the approach to statistical inference described in many textbooks, which is based on a retrospective evaluation of the procedure used to estimate \(\theta\) over the distribution of possible {[}x{]} values conditional on the true unknown value of \(\theta\)'' (Gelman, Carlin, Stern, \& Rubin, 1995)
 \end{quote}
 It's not important to understand what this is saying right now, but I include it here because in just a few sentences Gelman fully lays out the core difference between Bayesian and Frequentist methods. While it is not a good entry point for someone just beginning to learn, it will be helpful to return back to portions of this excerpt as we work through an extended example.
 
 \hypertarget{worked-example-a-better-way-to-learn}{%
 \section{Worked Example: A better way to learn}\label{worked-example-a-better-way-to-learn}}
 
-At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter \(\theta\)
+At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter \(\theta\),
 \begin{itemize}
 \item
   Frequentists treat the parameter as fixed and aim to quantify how the data might vary around the fixed (but unknown) parameter value.
 \item
-  Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data
+  Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data.
 \end{itemize}
 With this in mind, we now turn to a simple inference example.
 
@@ -399,7 +399,7 @@ Suppose we are interested in estimating the average weight of squirrels in a giv
 \hypertarget{frequentist-version}{%
 \subsection{Frequentist Version}\label{frequentist-version}}
 
-We choose the sample mean \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 \[
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
@@ -409,7 +409,7 @@ Furthermore, properties of the Normal distribution tell us that,
 
 \[
 \begin{aligned}
-P\bigg(-1.96 < \frac{\bar{X} - \theta}{1/\sqrt{n}} < 1.96\bigg) = 0.95 \implies P\bigg(\bar{X} - 1.96\cdot\frac{1}{\sqrt{n}} < \theta < \bar{X} + 1.96\cdot\frac{1}{\sqrt{n}}\bigg) = 0.95
+&P\bigg(-1.96 < \frac{\bar{X} - \theta}{1/\sqrt{n}} < 1.96\bigg) = 0.95 \\ \implies &P\bigg(\bar{X} - 1.96\cdot\frac{1}{\sqrt{n}} < \theta < \bar{X} + 1.96\cdot\frac{1}{\sqrt{n}}\bigg) = 0.95
 \end{aligned}
 \]
 
@@ -453,14 +453,14 @@ While these definitions are still found to be lacking when trying to absorb them
 \hypertarget{bayesian-version}{%
 \subsection{Bayesian Version}\label{bayesian-version}}
 
-Instead of first describing the nuts and bolts of how we estimate both the parameter of interest and the uncertainty in that estimate as we did in the previous section, we start at the end with the final expression for both of these things in order to draw some of the most important similarities and differences between the two methods.
+Instead of first describing the nuts and bolts of how we estimate both the parameter of interest and the uncertainty in that estimate as we did in the previous section, we start at the end with the final expression for both of these things in order to draw out some of the more important similarities and differences between the two methods.
 
 \hypertarget{general-form}{%
 \subsubsection{General Form}\label{general-form}}
 
 A good place to start whenever performing a Bayesian analysis is to remember that ``the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution.'' (Gelman et al., 1995). In the context of inference where we're interested in an unknown parameter \(\theta\), a Bayesian describes all of their knowledge about \(\theta\) using a probability distribution. In particular, Bayesians use a specific distribution to do so- \emph{the posterior distribution.} The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the observed data: \(p(\theta \ | \ x)\).
 
-Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about \(\theta\) using a distribution we are already doing something very different form in the Frequentist version.In particular, we make conclusions about the distribution of \(\theta\), a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about \(\theta\) and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the \emph{true} mean weight might vary conditional on the set observed data.
+Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about \(\theta\) using a distribution we are already doing something very different from in the Frequentist version. In particular, we're making conclusions about the distribution of \(\theta\), a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about \(\theta\) and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the \emph{true} mean weight might vary conditional on the set of observed data.
 
 Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval \(C\) such that,
 
@@ -475,12 +475,12 @@ Furthermore, once we compute C, then we can correctly say that.
   P(\theta \in C \ | \ x) = 0.95
   \label{eq:bayes-ci}
 \end{equation}
-And here we really do mean that the probability that our interval \(C\) captures \(\theta\) is 0.95. \textbf{Bayesians conceptualize probability in terms of certainty, or uncertainty, about events, meaning that their probability statements can be about the unknown parameter itself}.
+And here we really do mean that the probability that our interval \(C\) captures \(\theta\) is 0.95. Bayesians conceptualize probability in terms of certainty, or uncertainty, about events, meaning that their probability statements can be about the unknown parameter itself.
 
 \hypertarget{back-to-the-cryptic-definitions}{%
 \subsubsection{Back to the Cryptic Definitions!}\label{back-to-the-cryptic-definitions}}
 
-Again, it's the fact that Bayesians conceptualize probability as being related to one's own certainy or uncertainty, that allows us to interpret \eqref{eq:bayes-ci} in the way that we do. Furthermore, if we revisit Gelman's quote as well that ``Bayesian statistical conclusions about a parameter \(\theta\) are made in terms of probability statements. These probability statements are conditional on the observed value of {[}x{]}, and \ldots{} are written simply as \(p(\theta \ | \ x)\)''\footnote{Gelman et al. (1995)}, we can directly tie it into what we showed above.
+Again, it's the fact that Bayesians conceptualize probability as being related to one's own certainy or uncertainty, that allows us to interpret \eqref{eq:bayes-ci} in the way that we do. Furthermore, if we revisit Gelman's quote as well that ``Bayesian statistical conclusions about a parameter \(\theta\) are made in terms of probability statements. These probability statements are conditional on the observed value of {[}x{]}, and \ldots{} are written simply as \(p(\theta \ | \ x)\)''(Gelman et al., 1995), we can directly tie it into what we showed above.
 
 Now that we've explained the gist of Bayesian analysis at a high level, we'll dive into the nuts and bolts of how the posterior is actually computed.
 
@@ -505,19 +505,19 @@ Importantly, while the likelihood function, \(p(x \ | \ \theta)\), is a function
 
 To clear up what all of this looks like in practice, we'll now walk through our squirrel weights example in this Bayesian setting. As we walk through this process, just remember that at the end of the day, all we're really doing is choosing a prior, computing the likelihood, and multiplying the prior by the likelihood.
 
-Recall that each individual \(X\) is distributed \(\mathcal{N}(\theta, 1)\) so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be \(f(\theta) = \mathcal{N}(1.5,10)\). While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that \(\theta\) is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
+Recall that each individual \(X\) is distributed \(\mathcal{N}(\theta, 1)\) so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, but we aren't squirrel experts so we attach a relatively large variance if 10 to that guess. So the prior that we supply could be \(p(\theta) = \mathcal{N}(1.5,10)\). While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that \(\theta\) is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
 
 Next we use Bayes Theorem to combine our prior with the likelihood:
 
 \[
 \begin{aligned}
-p(\theta \ | \ x) &\propto \mathcal{L}(\theta \ | \ x)p(\theta) \\
-&= \bigg[\prod_{i=1}^n\mathcal{L}(\theta \ | \ x_i)\bigg]p(\theta) \\
+p(\theta \ | \ x) &\propto p(\theta \ | \ x)p(\theta) \\
+&= \bigg[\prod_{i=1}^np(\theta \ | \ x_i)\bigg]p(\theta) \\
 &= \bigg[\prod_{i=1}^n\frac{1}{\sqrt{2\pi}}\text{exp}\bigg(-\frac{1}{2}(x_i - \theta )^2\bigg)\bigg]\frac{1}{\sqrt{2\pi\cdot10^2}}\text{exp}\bigg(-\frac{1}{2\cdot10^2}(\theta - 1.5)^2\bigg) 
 \end{aligned}
 \]
 
-a rather large amount of math will simplify this down to
+A rather large amount of math will simplify this down to
 
 \[
 p(\theta \ | \ x) \propto \frac{1}{\sqrt{2\pi\sigma_f^2}}\text{exp}\bigg(-\frac{1}{2\sigma_f^2}(\theta - \theta_f)^2\bigg)
@@ -548,7 +548,7 @@ Clearly, even in this simple example it takes quite a bit of work to derive the 
 \hypertarget{takeaways}{%
 \section{Takeaways}\label{takeaways}}
 
-In summary, in a Frequentist analysis the question being asked is ``What sort of \(\hat{\theta}\) would we expect to get under hypothetical resampling?'', while in a Bayesian analysis the question is ``What is our knowledge of \(\theta\) based on the data and our prior information?''
+In summary, in a Frequentist analysis the question being asked is ``What sort of \(\theta\) would we expect to get under hypothetical resampling?'', while in a Bayesian analysis the question is ``What is our knowledge of \(\theta\) based on the data and our prior information?''
 
 While this thesis will focus on statistical predictive models rather than inference, the fundamental functional differences remain the same. To build a model in a Bayesian frame is to represent one's knowledge about the model parameters using probability distributions. What's more, predictions are no longer point estimates but rather distributions themselves. As stated earlier, \emph{the state of knowledge about anything unknown is described by a probability distribution}.
 
@@ -575,7 +575,7 @@ z_{ij} =
 \hypertarget{model-structure-motivation}{%
 \section{Model Structure Motivation}\label{model-structure-motivation}}
 
-We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do, and I think that looking at the steps draws out a lot of helpful intuition.
+We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do and I think that looking at the steps draws out a lot of helpful intuition.
 
 Let \(Y\) represent the response variable and \(X\) represent the covariates. We typically write \(\mathbb{E}[Y \ | \ X]\) to denote the expected value of our response variable conditional on it's covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
 \begin{equation}
@@ -586,7 +586,7 @@ Let \(Y\) represent the response variable and \(X\) represent the covariates. We
 \end{split}
 \label{eq:intuition}
 \end{equation}
-Out of this equation comes a wonderful intuition for what our new modeling process will look like. What we end up with is something that is somewhat meta in that it doesn't tell us what the exact model will be, but rather it tells us what the structure of our model should look like. What we do know is that we should have one model that predicts our non-zero response using our covariates \(E[Y \ | \ X = x, \ Y>0]\), and another that predicts whether our response is non-zero or not, again using the covariates \(P(Y > 0 \ | \ X = x)\). Think back to the Introduction where we introduced the model as being:
+Out of this equation comes a nice intuition for what our new modeling process will look like. What we end up with is something that is somewhat meta in that it doesn't tell us what the exact model will be, but rather it tells us what the structure of our model should look like. What we do know is that we should have one model that predicts our non-zero response using our covariates \(E[Y \ | \ X = x, \ Y>0]\), and another that predicts whether our response is non-zero or not, again using the covariates \(P(Y > 0 \ | \ X = x)\). Think back to the Introduction where we introduced the model as being:
 
 \[
 \text{Final Prediction} = \bigg(\text{Classification Model Output}\bigg) \times \bigg(\text{Regression Model Output}\bigg) 
@@ -599,7 +599,7 @@ Importantly, while Equation \eqref{eq:intuition} describes the broader two-part 
 \hypertarget{specificmods}{%
 \section{Specific Models}\label{specificmods}}
 
-Although we could model these two parts however we wanted to, we will use a logistic regression model for the classification model and a generalized linear regression model (that is non-logistic) for the regression model. Moreover, because the data we will be working with has a clustered structure we attempt to capture that by including group-level random effects in both models. The precise models that we will be evaluating will be as follows.
+Although we could model these two parts however we wanted to, we will use a logistic regression model for the classification model and a generalized linear regression model (that is non-logistic) for the regression model. Moreover, because the data we will be working with has a clustered structure we include group-level random effects in both models. The precise models that we will be evaluating will be as follows.
 
 We fit a generalized linear model with random intercepts to the \textbf{non-zero} portion of the data (the \(*\) helps differentiate this model from our final model). The linear predictor is specified as follows
 
@@ -607,7 +607,7 @@ We fit a generalized linear model with random intercepts to the \textbf{non-zero
 \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j  \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
-With a link function \(g^{-1}\) and a probability distribution for the response, we get the final model as
+We choose a link function \(g^{-1}\) and a probability distribution for the response, which gives us the final model:
 
 \[
 E\big[y^*_{ij} \ | \ x\big] = g^{-1}(\mu_{ij})
@@ -635,7 +635,7 @@ We will now quickly go over how these models are fit in a Frequentist frame befo
 
 As it is not the focus of this thesis, we will not go in depth into how these models are fit in a Frequentist setting. Still, it's important to at least provide a brief summary of how it is most often done.
 
-In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function \(p(\text{data} \ | \ \text{parameters})\). And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model
+In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function \(p(\text{data} \ | \ \text{parameters})\). And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model.
 
 We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \ref{bayes-freq}. By making an assumption about the model that best describes the process that generated the data, we are placing a distribution assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
 
@@ -655,7 +655,7 @@ Again we start by specifying the broad distribution of our response in this mode
 z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j \ \ \ \text{and} \ \ \ v_j  \sim \mathcal{N}(0, \sigma_{v}^2)
 \]
 
-Here \(\boldsymbol{\gamma} = (\gamma_1, ..., \gamma_P)\). Up until this point we have done nothing differently than in the usual Frequentist formulation of a model, but now instead of treating our model parameters as fixed but unknown, we treat them as random variables and attach priors to them.
+Up until this point we have done nothing differently than in the usual Frequentist formulation of a model, but now instead of treating our model parameters as fixed, we treat them as random variables and attach priors to them.
 
 Since the fixed effects coefficients \(\boldsymbol{\gamma}\) could plausibly be any real number, we'll utilize a normal distribution for their priors. On the other hand the variance parameter is necessarily strictly positive and so we use a Half-Cauchy prior for it.
 
@@ -666,7 +666,7 @@ Since the fixed effects coefficients \(\boldsymbol{\gamma}\) could plausibly be 
 \end{aligned}
 \]
 
-The prior parameters \(m_p, s_p^2, r_1^2\) are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that ``even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region.''\footnote{Gelman (2006)}. While dependence between priors \emph{can} be modeled in a bayesian frame, we will assume that all of our priors are independent of each other. An example of what the prior distributions look like across a few of their parameter values is shown below.
+The prior parameters \(m_p, s_p, \ \text{and} \ r_1\) are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that ``even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region.''(Gelman, 2006). While dependence between priors \emph{can} be modeled in a bayesian frame, we will assume that all of our priors are independent of each other. An example of what the prior distributions look like across a few of their parameter values is shown below.
 \begin{figure}
 
 {\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/priors-1} 
@@ -675,7 +675,7 @@ The prior parameters \(m_p, s_p^2, r_1^2\) are real-valued numbers that center a
 
 \caption{Various parameter values for the prior distributions.}\label{fig:priors}
 \end{figure}
-Again, in estimating the actual \textbf{model parameters} in a Bayesian analysis the goal is to recover the joint posterior distribution of those parameters. As before, let \(\boldsymbol{\gamma} = (\gamma_1, ...,\gamma_P)\) and \(\mathbf{v} = (v_1, ..., v_J)\). The joint posterior distribution can be written as
+Again, in estimating the actual \emph{model parameters} in a Bayesian analysis the goal is to recover the joint posterior distribution of those parameters. As before, let \(\boldsymbol{\gamma} = (\gamma_1, ...,\gamma_P)\) and \(\mathbf{v} = (v_1, ..., v_J)\). The joint posterior distribution can be written as
 
 \[
 \begin{aligned}
@@ -684,7 +684,7 @@ p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[
 \end{aligned}
 \]
 
-If we were able to compute a closed form expression for the posterior, we could then attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only \(\sigma_u^2\). In that case, the marginal posterior can be computed as follows:
+If we we're able to compute a simple form expression for the posterior, then we can attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only \(\sigma_u^2\). In that case, the marginal posterior could be computed as follows:
 
 \[
 p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
@@ -692,9 +692,9 @@ p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{
 
 The result would be a probability density function that encapsulates all of our information about \(\sigma_{v}^2\).
 
-As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language ``Stan''. The specific version of MCMC algorithm that Stan runs is called ``Hamiltonian Monte Carlo''. While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that \emph{has the desired posterior distribution as it's stationary distribution.} Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
+As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language \texttt{Stan}. The specific version of MCMC algorithm that Stan runs is called ``Hamiltonian Monte Carlo''. While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that target distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that \emph{has the desired posterior distribution as it's stationary distribution.} Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
 
-In it's most basic configuration Stan will output 2,000 sets of parameter draws which represent samples from the approximate joint posterior distribution.
+In it's default configuration Stan will output 2,000 sets of parameter draws which represent samples from the approximate joint posterior distribution.
 
 \[
 \begin{bmatrix}
@@ -704,7 +704,7 @@ In it's most basic configuration Stan will output 2,000 sets of parameter draws 
 \end{bmatrix}
 \]
 
-One really nice aspect of this is that the while the combination of all of the columns in the output represent samples from the approximate \textbf{joint} posterior distribution, each column individually represent samples from the approximate \textbf{marginal} posterior distributions for that given individual parameter.
+One really nice aspect of this is that the while the combination of all of the columns in the output represent samples from the approximate \emph{joint} posterior distribution, each column individually represent samples from the approximate \emph{marginal} posterior distributions for that given individual parameter.
 
 \hypertarget{bayeslin}{%
 \subsubsection{(Generalized) Linear Regression Component: Normal}\label{bayeslin}}
@@ -715,7 +715,7 @@ The simplest way to model the non-zero response is through simple linear regress
 y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j \  \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
-Here \(\boldsymbol{\beta} = (\beta_1, ..., \beta_P)\). In this setting, the errors are assumed to be distributed \(\mathcal{N}(0, \sigma_{\varepsilon}^2)\). And the other model parameters are given the same class of priors as before.
+Here \(\boldsymbol{\beta} = (\beta_1, ..., \beta_P)\). In this setting, the errors are assumed to be distributed \(\mathcal{N}(0, \sigma_{\varepsilon}^2)\). The other model parameters are given the same class of priors as before.
 
 \[
 \begin{aligned}
@@ -725,7 +725,7 @@ Here \(\boldsymbol{\beta} = (\beta_1, ..., \beta_P)\). In this setting, the erro
 \end{aligned}
 \]
 
-Importantly while \(s_p^2, r_1^2, r_2^2\) are given the same names as in the previous model, they should usually be chosen with the scale of the response in mind.
+Importantly while \(s_p, r_1, \ \text{and} \ r_2\) are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind.
 
 We can write out our expression for the posterior as follows:
 
@@ -749,7 +749,7 @@ Again, we employ MCMC using Stan to simulate draws from it. The Stan output will
 \hypertarget{generalized-linear-regression-component-gamma}{%
 \subsubsection{(Generalized) Linear Regression Component: Gamma}\label{generalized-linear-regression-component-gamma}}
 
-An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \ref{fig:gamma} displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response can be skewed in a way that a Normal distribution cannot.
+An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \ref{fig:gamma} displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response might be skewed, which a Normal distribution cannot do.
 \begin{figure}
 
 {\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/gamma-1} 
@@ -761,13 +761,13 @@ An alternative model that we considered in this thesis was a Gamma Generalized L
 Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
 \[
-y_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
+y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
 We are operating under the shape and rate parametrization of a Gamma distribution, and this specific parametrization was chosen so the mean of our response would be the output of the linear component:
 
 \[
-E[y_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
+E[y^*_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
 \]
 
 We then define priors for the other parameters as
@@ -780,7 +780,7 @@ We then define priors for the other parameters as
 \end{aligned}
 \]
 
-where \(m_p, s_p^2, t_1, r_1, r_2\) are real valued numbers. While the Cauchy prior put on the shape parameter \(\alpha\) is still bounded below by zero, we now allow it's mode to be set based on the given data.
+where \(m_p, s_p, t_1, r_1, r_2\) are real valued numbers. While the Cauchy prior put on the shape parameter \(\alpha\) is still bounded below by zero, we now allow it's mode to be set based on the given data.
 
 Letting \(\boldsymbol{\beta} = (\beta_1, ..., \beta_P)\) and \(\mathbf{u} = (u_1, ..., u_J)\) we can write out the joint posterior distribution as
 
@@ -826,7 +826,7 @@ To produce an estimate for the distribution of a new data point \(y_{ij, \ new}\
 
 \[
 \begin{aligned}
-\int_A p(y_{ij, \ new} \ | \ A)p(A )dA   = p(y_{ij, \ new} )   \\
+ p(y_{ij, \ new}) = \int_A p(y_{ij, \ new} \ | \ A)p(A )dA   \\
 \end{aligned}
 \]
 
@@ -861,7 +861,7 @@ p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \in
 \end{aligned}
 \]
 
-And for the classification model it can be expressed as
+And for the logistic regression model it can be expressed as
 
 \[
 \begin{aligned}
@@ -870,7 +870,7 @@ p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \in
 \end{aligned}
 \]
 
-The distributions \(p(y^*_{ij, \ new} \ | \ \mathbf{y})\) and \(p(z_{ij, \ new}\ | \ \mathbf{y})\) not only capture where we think each prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
+The distributions \(p(y^*_{ij, \ new} \ | \ \mathbf{y})\) and \(p(z_{ij, \ new}\ | \ \mathbf{y})\) not only capture where our prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
 
 While the theory behind constructing these posterior predictive is pretty intuitive, it's clear that even in the case of a fairly simple model, the actual computations are rather unwieldy. Again, we are saved by the fact that in practice the posterior is too complex to algebraically solve for, so we're already functioning in a setting where we use MCMC to simulate draws from the approximate posterior.
 
@@ -937,7 +937,7 @@ We thought that the proof and description of this finding deserved it's own chap
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
-Since we are interested in a making predictions for the average response in group \(j\) we obtain a set that approximates the posterior predictive distribution for each unit \(i\) in group \(j\). For example, if we fix \(j\) and let \(U_j = 5\) we would have 5 sets:
+Since we are interested in a making predictions for the average response in group \(j\) we obtain a set that approximates the posterior predictive distribution for each unit \(i\) in group \(j\). We do so by matching the samples from our approximate posterior predictive distributions by MCMC index \((k)\) as follows: \(y^{(k)}_{ij,\ new} = y^{*^{(k)}}_{ij, \ new}z^{(k)}_{ij, \ new}\). Now, for example, if we fix \(j\) and let \(U_j = 5\) we would have 5 sets where each one represents a sample from the approximate posterior predictive distribution of \(y_{ij, \ new}\) for the 5 different points in \(U_j\).
 
 \[
 \begin{aligned}
@@ -970,7 +970,7 @@ Which is an approximation of the posterior predictive distribution for the mean 
 \hypertarget{wraptwo}{%
 \subsection{Prediction Intervals}\label{wraptwo}}
 
-In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \ref{bayes-freq} provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
+In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \ref{bayes-freq} provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation.
 
 Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are distributions themselves, these prediction intervals are baked right into the prediction process.
 
@@ -979,7 +979,7 @@ Unfortunately it is far less straightforward in the Frequentist setting. While p
 \hypertarget{a-note-of-caution}{%
 \subsubsection{A note of caution}\label{a-note-of-caution}}
 
-While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals are only assumed to be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estimates for free, but a 95\% prediction interval will likely not get 95\% coverage, thus indicating that the intervals themselves are also incorrect.
+While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist ones simply for the ease of access to prediction intervals, an important caveat is that these prediction intervals are only assumed to be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estimates for free, but a 95\% prediction interval will likely not get 95\% coverage, thus indicating that the intervals themselves are also incorrect.
 
 \hypertarget{sepsim}{%
 \chapter{Simultaneous v.s Separate}\label{sepsim}}
@@ -987,9 +987,9 @@ While it might be tempting to gleefully pronounce Bayesian models to be better t
 \hypertarget{simultaneous-model-build}{%
 \section{Simultaneous Model Build}\label{simultaneous-model-build}}
 
-As we mentioned in \ref{comb}, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. But, as we will show in this section, under a few assumptions we actually don't have to do this simulataneous build, and are justified in just building the two models separately and combining them at the end. The one major assumption that we will have here is that there is no dependence in the priors \textbf{between} models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain (Pfeffermann, Terryn, \& Moura, 2008).
+As we mentioned in \ref{comb}, to get around our problem of how we combine the MCMC iterations for the models built separately, we could fit the models simultaneously. But, as we will show in this section, under a few assumptions we actually don't have to do this simulataneous build, and are justified in just building the two models separately and combining them at the end. The one major assumption that we will have here is that there is no dependence in the priors \emph{between} models. While there are certainly cases where this doesn't hold, trying to incorporate these dependencies into the model incorporate a lot more complexity without much performance gain (Pfeffermann, Terryn, \& Moura, 2008).
 
-This result holds regardless of the particular models that we use, but for the sake of simplicity and relevance we'll use a logistic regression model with random intercepts and a Normal linear regression model with random intercepts. In this setting our posterior for both models would be:
+This result holds regardless of the particular models that we use, but for the sake of simplicity and relevance we'll use a logistic regression model with random intercepts and a Normal linear regression model with random intercepts. In this setting our full posterior for both models would be:
 
 \[
 \begin{aligned}
@@ -1001,7 +1001,7 @@ We can expand this by writing out the likelihood more fully based on whether \(y
 
 \[
 \begin{aligned}
-p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
+p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y}) & \propto \bigg[\prod_{i:y_i = 0}(1-p_i)\prod_{i:y_i > 0}(p_i)p(y_i \ | \ \boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2)\bigg]\cdot  \\ & \ \ \ \ \  \ p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2)\\
 \end{aligned}
 \]
 
@@ -1015,7 +1015,7 @@ But, there's important insight still to be found here. Let's group these terms b
 \end{aligned}
 \]
 
-Again, we are able to split the joint prior in this way because we are assuming that there is no dependence in the priors \textbf{between} models.
+Again, we are able to split the joint prior in this way because we are assuming that there is no dependence in the priors \emph{between} models.
 
 But now, if we look at this closely we can see that what we really have here is a full separation into the posteriors for the individual models for \(z\) and \(y^*\) as seen in our derivation in the section \ref{bayeslog}. This means that we can write:
 
@@ -1026,19 +1026,19 @@ p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \
 \end{aligned}
 \]
 
-Finally, since these are all proper probability distributions we know that they should all integrate to 1 when integrated across all of their parameters. If we integrate both sides over all of the parameters from both models, its clear that the LHS would be one, and once we recall that there is no parameter dependence \textbf{between} the models, it is clear that the RHS does as well. And so we are left with the conclusion that \(C = 1\) and thus that
+Finally, since these are all proper probability distributions we know that they should all integrate to 1 when integrated across all of their parameters. If we integrate both sides over all of the parameters from both models, its clear that the LHS is 1, and once we recall that there is no parameter dependence \emph{between} the models, it is clear that the RHS is as well. And so we are left with the conclusion that \(C = 1\) and thus we can say that,
 \begin{equation}
 p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y})  = p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})
 \label{eq:sepsimeq}
 \end{equation}
-So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that \emph{as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.}. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each individual model.
+So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that \emph{as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.}. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually.
 
 Practically speaking, if our MCMC algorithm properly converges, then we can interpret the MCMC output as a random sample from the approximate posterior distribution. Because of this it actually doesn't really matter how we match up the indices of the posterior predictive distributions from the models for \(y^*\) and \(z\). That being said, for the sake of consistency, in all of our work we'll match the posterior predictive distributions by MCMC index.
 
 \hypertarget{practical-backing}{%
-\subsection{Practical Backing}\label{practical-backing}}
+\section{Practical Backing}\label{practical-backing}}
 
-We'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
+We'll now show that this holds in practice, with a simple example and we'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
 
 \[
 z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j
@@ -1067,14 +1067,14 @@ And indeed, when we fit the models simultaneously and also fit them separately m
 \hypertarget{sim-study}{%
 \chapter{Simulation Study}\label{sim-study}}
 
-We now introduce the set up for the simulation study that will be the main avenue through which we evaluate the various models.
+We now introduce the set up for the simulation study that will be the main avenue through which we evaluate our models.
 
 \hypertarget{aims}{%
 \section{Aims}\label{aims}}
 
 The first aim for this simulation study is to understand when we might benefit from using a Bayesian model.
 
-In order to try to answer this question of \emph{when} we will be turning a few dials. Because we are functioning in a setting with grouped data with moderately small sample sizes we will vary the data along two axes
+In order to try to answer this question of \emph{when} we will be turning a few dials. Because we are functioning in a setting with grouped data we will vary the data along two axes
 \begin{itemize}
 \tightlist
 \item
@@ -1098,7 +1098,7 @@ The idea to vary the quality of the priors comes out of the idea that while the 
 \hypertarget{estimands}{%
 \subsection{Estimands}\label{estimands}}
 
-The primary estimand for this simulation study will be \(Y_j\): the mean of our response variable in domain \(j\). In order to stay consistent across all models and simulation runs, we only made predictions on group \(1\).
+The primary estimand for this simulation study will be \(Y_j\): the mean of our response variable in group \(j\). In order to stay consistent across all models and simulation runs, we only made predictions on group \(1\).
 
 \hypertarget{data-generating-process}{%
 \subsection{Data Generating Process}\label{data-generating-process}}
@@ -1117,9 +1117,7 @@ y_{ij} &=z_{ij}\cdot y^*_{ij}
 
 Where \(X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\), \(v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\) and \(u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)\)
 
-This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response \(Y\) and a covariate \(X\). For example in Figure \ref{fig:simdataplot} we examine the generated population data and see the following.
-
-The response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
+This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response \(Y\) and a covariate \(X\). For example in Figure \ref{fig:simdataplot} we examine the generated population data and see that the response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
 \begin{figure}
 
 {\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/simdataplot-1} 
@@ -1161,7 +1159,7 @@ Next, within each \((n,\ J)\) combination we built the Bayesian models with two 
 \end{itemize}
 Note that across all models the random effects are assumed to be \(\mathcal{N}(0, \tau^2)\) distributed and thus can be thought of as universally having a normal prior with a variance hyperparameter. While the distributions chosen for these priors were introduced in the methods section, we will now choose real valued numbers used to center and scale those priors.
 
-These parameters that require priors can be placed into 3 main groups: fixed effects, variance, and shape. We simplified the process of assigning the levels of priors by not varying the priors within these groups within each bracket of quality.
+The parameters that require priors can be placed into 3 main groups: fixed effects, variance, and shape. We simplified the process of assigning the levels of priors by not varying the priors within these groups within each bracket of quality.
 
 \hypertarget{non-informative}{%
 \subsubsection{Non-Informative}\label{non-informative}}
@@ -1182,7 +1180,7 @@ On the other hand, we tweaked the scale of this prior for the logistic regressio
 Next, following the advice of (Gelman, 2006) the scale parameter of \(2.5\) was used to parametrize the Cauchy prior put on all variance parameters. In full the \(\text{Half-Cauchy}(0, 2.5)\) prior was utilized.
 \begin{center}\includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/unnamed-chunk-8-1} \end{center}
 
-Finally, since the non-zero portion of the response variable has a mean of 31.12, we can use the following ``back of the napkin'' calculation to get an idea for what the shape parameter should be centered on. Recall that a \(\text{Gamma}(\alpha, \beta)\) distribution has mean \(\alpha / \beta\) and variance \(\alpha / \beta^2\).
+Finally, since the non-zero portion of the response variable has a mean of 31.12, we can use the following ``back of the napkin'' calculation to get an idea for what the shape parameter should be centered on. Recall that a \(\text{Gamma}(\alpha, \beta)\) distribution has mean \(\alpha / \beta\) and variance \(\alpha / \beta^2\). Thus we can say that,
 
 \[
 \bar{y} = 31.4 \approx \frac{\alpha}{\beta}\qquad \text{and} \qquad s^2 = 338.8 \approx \frac{\alpha}{\beta^2}
@@ -1240,15 +1238,15 @@ There will be 3 different models run throughout the simulation.
 \hypertarget{metrics}{%
 \section{Performance metrics}\label{metrics}}
 
-Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\)
+As mentioned previously, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\)
 
-The most broadly used and expected performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is computed as follows:
+The most broadly used performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is just a rescaling of this metric and is computed as follows:
 
 \[
 \text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{Y}_{j, s} - Y_{j}\bigg)^2}
 \]
 
-Where \(S\) is the total number of simulation reps, \(\hat{\mu}_{j, s}\) is the estimated mean of the response variable \(y\) in domain \(j\) for simulation rep \(s\), and \(Y_{j}\) is the true mean of the response variable \(y\) in domain \(j\). Since we get this true value from our generated population, it does not vary by simulation rep.
+Here \(S\) is the total number of simulation reps, \(\hat{Y}_{j, s}\) is the estimated mean of the response variable in group \(j\) for simulation rep \(s\), and \(Y_{j}\) is the true mean of the response variable in group \(j\). Since we get this true value from our generated population, it does not vary by simulation rep.
 
 Next we will be examining the Empirical Bias of each model:
 
@@ -1272,7 +1270,7 @@ And finally we will look at the total number of model failures.
 \begin{itemize}
 \tightlist
 \item
-  For the Frequentist models, a model failure was registered whenever one of the ``Model failed to converge'' warnings from \texttt{lme4} was returned, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
+  For the Frequentist models, a model failure was registered whenever one of the ``Model failed to converge'' warnings from \texttt{lme4} was returned, although even in small sample sizes our data was robust enough to elicit zero model failures.
 \item
   For the Bayesian models, a model failure was registered whenever the MCMC algorithm failed one or more of the diagnostics that indicate that the algorithm has converged and is stable. The Stan programming language is robust enough that you should never trust the results when one of these warnings are administered, and so while potentially overly harsh in some cases, we chose to count any convergence warning as a model failure.
 \end{itemize}
@@ -1281,15 +1279,15 @@ Importantly, one solution to combating MCMC convergence issues is to bump up the
 \hypertarget{res-sec}{%
 \chapter{Results}\label{res-sec}}
 
-We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \ref{metrics}. Across all of these sections we will label simulation settings like \(n = \cdot\) - \(J = \cdot\). For example if we have \((n = 15, J = 10 )\) it's important to remember that this means that the data sets used in that simulation setting had 10 groups each with 15 observations, and thus the models were trained on \(n\times J = 150\) data points.
+We now present the results from the simulation study. Each section compares each model with regards to a specific performance metric as laid out in Section \ref{metrics}. Across all of these sections we will label simulation settings like \(n = \cdot\) - \(J = \cdot\). For example if we have \((n = 15, J = 10 )\) then this means that the data sets used in that simulation setting had 10 groups with 15 observations each, and thus the models were trained on \(n\times J = 150\) data points.
 
-Additionally, since the logistic regression component remained the same across all of the Bayesian models, we will use the following syntax when refering to the bayesian models.
+Additionally, since the logistic regression component remained the same across all of the Bayesian models, we will refer to each distinct Bayesian model by describing what the GLM used to model the non-zero response was. We use the following syntax:
 \begin{itemize}
 \tightlist
 \item
   {[}Type of priors, distribution used to model the non-zero response{]}
 \end{itemize}
-For example, {[}Flat Priors, Normal{]} refers to the Bayesian model that used flat priors and modeled the non-zero response using the Normal distribution.
+For example, {[}Flat Priors, Normal{]} refers to the Bayesian model that used flat priors and modeled the non-zero response using a Normal distribution.
 
 \hypertarget{expectations}{%
 \section{Expectations}\label{expectations}}
@@ -1330,10 +1328,10 @@ Importantly we omit the Frequentist model in the following plot because it regis
 \end{figure}
 Perhaps the most notable takeaway from Figure \ref{fig:failures} is that the number of groups seems to drive failure rates much more than the number of observations per group. Moreover there is a massive jump in model failure rates from \(J = 10\) to \(J = 5\) that is quite alarming.
 
-Importantly, in order to avoid biasing our results, whenever we evaluate some of the models we only do so across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table \ref{fig:tbl} we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
+Importantly, in order to avoid biasing our results, whenever we evaluate the models we do so only across simulation reps in which none of the models that we are comparing failed. For example, if we wanted to compare all 4 of the different models using the truncated results in the table \ref{fig:tbl} we might be tempted to simply remove individual rows in which the model failed. But doing so would mean that each model would be evaluated on a different number of results. To avoid this issue, we simply disregard all results from Simulation Rep 1 and only use Simulation Reps where none of the models failed (e.g Simulation Rep 2).
 \begin{figure}
 
-{\centering \includegraphics[width=0.95\linewidth]{figure/tb1} 
+{\centering \includegraphics[width=0.8\linewidth]{figure/tb1} 
 
 }
 
@@ -1342,7 +1340,7 @@ Importantly, in order to avoid biasing our results, whenever we evaluate some of
 Of course this means that the individual model failure rates have a large impact on how much of the simulation results we are able to utilize. Below, in Figure \ref{fig:keep}, we show what percent of the simulation results we'd be able to retain in each setting.
 \begin{figure}
 
-{\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/keep-1} 
+{\centering \includegraphics[width=0.8\linewidth]{thesis_files/figure-latex/keep-1} 
 
 }
 
@@ -1353,7 +1351,7 @@ Clearly the Bayesian models fail far too much for any trustworthy and meaningful
 \hypertarget{model-regularization-through-informative-priors}{%
 \subsection{Model Regularization through Informative Priors}\label{model-regularization-through-informative-priors}}
 
-If we only compare the ``Flat Priors, Normal'' and ``Informative Priors, Normal'' failure rates, we are able to get a sense for the role that the prior distributions play here. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
+If we only compare the ``Flat Priors, Normal'' and ``Informative Priors, Normal'' failure rates, we are able to get a sense for the role that the prior distributions play. After all these are the same underlying models just with different priors, and so their failure rates give us good insight into the power of priors to stabilize and regularize models.
 \begin{figure}
 
 {\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/regularization-1} 
@@ -1376,7 +1374,7 @@ We now compare the RMSE of our models. As a reminder, due to the high model fail
 
 \caption{Root Mean Squared Error}\label{fig:rmse}
 \end{figure}
-As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to ``learn'' the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors. The only setting in which they are outperformed is when \(J = 10\) where they are marginally outperformed by the Frequentist model. Note that the true value of the response for group one was \(23.7\) which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, it would be a little unfair to cite these differences as substantive improvements between the Bayesian and Frequentist models.
+As we'd expect, we see decreases in RMSE across all models as the number of observations per group and the number of groups increases. Essentially as the model has access to more data, we'd expect it to be able to ``learn'' the data structure better and thus have lower prediction error. We also see that the models that consistently have some of the lowest RMSE are the Bayesian Normal model with flat priors and the Bayesian Normal model with informative priors. The only setting in which they are outperformed is when \(J = 10\) where they are marginally outperformed by the Frequentist model. That being said, the true value of the response for group 1 was \(23.7\) which gives a sense of scale for this model prediction error metric. While there are small differences in how the models performed, it would be a little unfair to cite these differences as substantive improvements between the Bayesian and Frequentist models.
 
 \hypertarget{empirical-variance}{%
 \section{Empirical Variance}\label{empirical-variance}}
@@ -1390,7 +1388,7 @@ Next we look at the empirical variance which gives a sense for how variable the 
 
 \caption{Empirical Variance}\label{fig:variance}
 \end{figure}
-Again we see the decrease in variance as \(n\) and \(J\) increase that we'd expect to see. And besides small amounts of separation between the models in the setting \((n = 15, \ J = 10)\), they all seem to perform very similarly.
+Again we see the decrease in variance as \(n\) and \(J\) increase that we'd expect to see. But besides small amounts of separation between the models in the setting \((n = 15, \ J = 10)\), they all seem to perform very similarly.
 
 \hypertarget{empirical-bias}{%
 \section{Empirical Bias}\label{empirical-bias}}
@@ -1404,20 +1402,20 @@ Next we examine the Empirical Bias of the same three models. These results are b
 
 \caption{Empirical Bias}\label{fig:bias}
 \end{figure}
-That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where \(J = 10\) due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small and the true value of the response is \(23.7\). I truly wish that I could take this plot and proclaim that the Bayesian Normal model with informative priors performs far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that were initially a bit befuddling in Figure \ref{fig:bias}.
+That being said, we do see that the the Bayesian Normal model with informative priors seems to consistently have the lowest bias, with the Bayesian Normal model with flat priors performing next best. These two models perform more similarly than it may initially seem in the settings where \(J = 10\) due to the fact that the Bayesian Normal model with informative priors actually has negative bias in some of those settings. If we looked at the absolute empirical bias we would see that they perform very similarly there. Finally, even though we do see lower bias for the two Bayesian Normal models, note that the scale on the y-axis of these plots is very small and again the true value of the response is \(23.7\). I truly wish that I could take this plot and proclaim that the Bayesian Normal model with informative priors performs far and away the best in terms of bias, but the reality is that the scale of the bias is so small for each model that there really isn't much here. In fact, it's likely this small scale that gives us the patterns that were initially a bit befuddling.
 
 \hypertarget{coverage}{%
 \section{Coverage}\label{coverage}}
 
-And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here.
+And finally, we examine the coverage of the Bayesian models. Note that we do not include the Frequentist model here due to the fact that we found no good method for estimating prediction intervals for this type of model.
 \begin{center}\includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/unnamed-chunk-13-1} \end{center}
 
-Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a certainly a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
+Interestingly, while we get close to 95\% coverage in all of our Bayesian models, we do see consistent slight over-coverage in almost every setting. While there are a couple of different reasons why this might have happened, the most prominent one in my mind has to do with the fact that the Bayesian models should all be a little bit misspecified due to the fact that the parameters in the data generating process were fixed constants. While we didn't end up seeing significant differences in bias due to this misspecification, we do see slight overcoverage as a result of it.
 
 \hypertarget{general-remarks}{%
 \section{General Remarks}\label{general-remarks}}
 
-It would be relatively easy to look at the results from Chapter \ref{res-sec} and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful.
+It would be relatively easy to look at the results from Chapter \ref{res-sec} and conclude that the Bayesian model isn't really worth our time. After all, the best-performing Bayesian model in each setting performs practically identically to the Frequentist model while requiring a lot more computational and conceptual work to get there. It's certainly tempting to base our conclusions solely on some of the performance metrics that we procured, but to proceed in this way would be to forget the whole point of this thesis. Recall that the point was not to go through all this work to be able to appoint either the Bayesian models or Frequentist models as being the better of the two approaches. Rather we were primarily interested in learning about Bayesian models and looking to understand when and how they are useful.
 
 It is unfortunate that the general statistical modeling discourse is so overwhelmingly focused on performance that pedagogy and intuition for a method often take a backseat to a dense results section. There's no denying that results are important and should be presented, but problems arise when results are taken to be the only expression of a model's value. To try to break out of this mold I will walk through some takeaways from the results themselves, but I will also talk more generally about the value and usefulness of the Bayesian models that exist outside of their performance metrics.
 
@@ -1428,7 +1426,7 @@ As stated previously, in terms of metrics like RMSE, empirical bias, and empiric
 
 Perhaps the main worry when looking at the performance of the Bayesian model has to do with the model failures metric. After all, the Frequentist model never failed in any settings, while the failure rates of the Bayesian models in the \(J=5\) settings were so high that they rendered the results unuseable. I'll push back on this a little bit as a segway into the next portion of our discussion.
 
-There's certainly an argument to be made that Bayesian model convergence failures are a good safeguard against building bad models. What I mean by this is that in some cases if your Bayesian model is not properly specified or has another substantive problem with its formulation it will fail to converge and leave you without a useable model. I want to stress that I am not generalizing this to all cases, but in some cases this is actually good behavior because it forces you to think about what your data looks like and why your model is failing to fit to it. The Frequentist models are often so robust that it takes a very serious specification problem for them to ever fail. The main point is this: having a model that never fails is not always a good thing when trying to build a good model. To make sense of why this is, we'll look at the RMSE of the Frequentist model in the \(J = 5\) settings from our simulation in Chapter \ref{sim-study}. In these settings, the argument could be made that the Frequentist models are better in these settings due to the fact that they never failed. But if we look at the RMSE performance of the Frequentist models across \textbf{all} simulation reps in these settings we see something pretty alarming.
+There's an argument to be made that Bayesian model convergence failures are a good safeguard against building bad models. What I mean by this is that in some cases if your Bayesian model is not properly specified or has another substantive problem with its formulation it will fail to converge and leave you without a useable model. I want to stress that I am not generalizing this to all cases, but in some cases this is actually good behavior because it forces you to think about what your data looks like and why your model is failing to fit to it. Conversely, the Frequentist models are often so robust that it takes a very serious specification problem for them to ever fail. The main point is this: having a model that never fails is not always a good thing when trying to build a good model. To make sense of why this is, we'll look at the RMSE of the Frequentist model in the \(J = 5\) settings from our simulation in Chapter \ref{sim-study}. In these settings, the argument could be made that the Frequentist models are better due to the fact that they never failed. But if we look at the RMSE performance of the Frequentist models across \emph{all} simulation reps in these settings we see something pretty alarming.
 \begin{figure}
 
 {\centering \includegraphics[width=0.85\linewidth]{thesis_files/figure-latex/j5res-1} 
@@ -1437,23 +1435,21 @@ There's certainly an argument to be made that Bayesian model convergence failure
 
 \caption{Struggles for the Frequentist model in J = 5}\label{fig:j5res}
 \end{figure}
-Clearly, Figure \ref{fig:j5res} gives us plenty of reason to worry about proceeding in this way. While the Frequentist model did not fail to converge, it clearly struggled mightily in those settings. Importantly, this is not a knock against Frequentist models in \emph{all} modeling settings, but rather in this situation it actually is advantageous that the Bayesian models are more sensitive to poor model specification.
-
-This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
+Clearly, Figure \ref{fig:j5res} gives us plenty of reason to worry about proceeding in this way. While the Frequentist model did not fail to converge, it clearly struggled mightily in those settings. Importantly, this is not a knock against Frequentist models in \emph{all} modeling settings, but rather in this situation it actually is advantageous that the Bayesian models are more sensitive to poor model specification. In a more applied setting we likely could have tweaked the priors and the model structure to get our Bayesian models to converge more often and at times it's nice that the Bayesian procedure forces us to do this. This leads us nicely into a larger point about the ways in which Bayesian modeling as a procedure encourages intentionality and understanding.
 
 \hypertarget{procedural-discussion}{%
 \subsection{Procedural Discussion}\label{procedural-discussion}}
 
-One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part- MCMC is hard and writing code for Bayesian models in \texttt{Stan} is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approachable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, comes variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified. That being said, regardless of how interesting and useful Bayesian modeling is, the computational burden will likely continue to keep people from utilizing it. Even with packages like \texttt{rstanarm} and \texttt{R2WinBUGS} which really streamline the process, I certainly want to acknowledge that this aspect of Bayesian modeling is still a sizeable barrier to entry.
+One big barrier to Bayesian models is the added computational work involved with MCMC and the general software that exists for these methods. I won't sugar coat this part- MCMC is hard and writing code for Bayesian models in \texttt{Stan} is a laborious process. There have been enormous advances in computing that have made this aspect of Bayesian modeling more approachable, but for a general modeler, debugging MCMC problems is a real struggle. The one spin here is that with all of that additional computational work, comes variance estimates and prediction intervals at no extra cost. Though recall that these variance estimates are only correct when the Bayesian models are correctly specified. That being said, regardless of how interesting and useful Bayesian modeling is, the computational burden will likely continue to keep people from utilizing it. Even though packages like \texttt{rstanarm} and \texttt{R2WinBUGS} really streamline the process, I want to acknowledge that this aspect of Bayesian modeling is still a sizeable barrier to entry.
 
-Another way in which Bayesian models are perhaps more unattractive has to do with the conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where that parameter value might lie and how it might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that you are required to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the \texttt{lm} function in R and getting a reasonable output, but it can sometimes become too easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. In my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions.
+Another way in which Bayesian models are perhaps more unattractive has to do with the conceptual load associated with building them. While I agree that computational burden is a downside of the current state of Bayesian modeling, I want to push back on the idea that this extra conceptual load is as well. Through the process of learning about Bayesian data analysis and in particular Bayesian modeling, I came to realize the ways in which the workflows can really be conducive to understanding your data and your problem more fully. For example, in order to attach informative priors to your model parameters you have to really understand where those parameter values might lie and how they might vary. Even though these decisions make the Bayesian modelling process a slower one, I ultimately think the effect is net positive, due to the fact that it requires you to intuit connections between the data and the model. Of course, in larger sample size settings the prior distribution tends to have less of an effect on the model and so it can be reasonable to choose priors that are more uninformative. But even in these settings you have to restrict your priors to the range of values that your parameters could possibly take on, which requires some understanding of that connection between data and model. It's true that there's something very nice about just throwing a model formula into the \texttt{lm} function in R and getting a reasonable output, but it can sometimes become too easy to just default to using that simple linear regression without thinking about why you're doing it or if it's justified. Thus, in my mind, the extra conceptual work required by Bayesian models adds value in that it can lead to greater intentionality in model building decisions.
 
-Hopefully these points have shed light on the ways that Bayesian models has value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.
+Hopefully these points have shed light on the ways in which Bayesian models have value outside of their performance metrics. Ultimately, the goal for any data analysis methodology is to learn from data. Bayesian methods, models, and conceptualizations do just that and hopefully I've made it clear that they are interesting and valuable beyond the results that they produce.
 
 \hypertarget{vignette}{%
 \chapter{Package Vignette}\label{vignette}}
 
-This thesis so far has spent a great deal of time explaining why these cluster zero-inflation models are interesting and useful, but no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models. We will start by describing the motivation for the package and it's structure, before returning to the forestry data from Chapter \ref{intro-section} to show how it can be used.
+So far, this thesis has spent a great deal of time explaining why these cluster zero-inflation models are interesting and useful, but no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models. We will start by describing the motivation for the package and it's structure, before returning to the forestry data from Chapter \ref{intro-section} to show how it can be used.
 
 \hypertarget{r-package-zinf}{%
 \section{R Package: zinf}\label{r-package-zinf}}
@@ -1472,11 +1468,11 @@ The challenge of writing a software package for these zero-inflation models was 
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  Write a function that takes as argument all the individual pieces needed to build each of the two models and internally builds the two models and then define all of the necessary functionality (i.e prediction).
+  Write a function that takes as argument all the individual pieces needed to build each of the two models and internally builds the two models and then define all of the necessary functionality for the two-part model (i.e prediction).
 \item
-  Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the necessary functionality.
+  Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the necessary functionality for that object.
 \end{enumerate}
-On the one hand, version (1) is nice in that it ``does it all'' for the user. But the main problem with version (1) is that the functions \texttt{lme4::lmer} and \texttt{lme4::glmer} for Frequentist models and \texttt{rstanarm::stan\_lmer} and \texttt{rstanarm::stan\_glmer} for Bayesian models are already so popular and well developed and robust that it seems silly not to rely on that pre-existing software. After all, as we showed in Section \ref{sepsim}, the Bayesian models can be built separately and made as complex as desired, and this is also certainly the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function argument that those \texttt{lme4} and \texttt{rstanarm} functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
+On the one hand, version (1) is nice in that it ``does it all'' for the user. But the main problem with version (1) is that the functions \texttt{lme4::lmer} and \texttt{lme4::glmer} for Frequentist models and \texttt{rstanarm::stan\_lmer} and \texttt{rstanarm::stan\_glmer} for Bayesian models are already so popular, well developed, and robust that it seems silly not to rely on that pre-existing software. After all, as we showed in Section \ref{sepsim}, the Bayesian models can be built separately and made as complex as desired, and this is also the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function argument that those \texttt{lme4} and \texttt{rstanarm} functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
 \begin{figure}
 
 {\centering \includegraphics[width=0.9\linewidth]{figure/v1v2} 
@@ -1485,7 +1481,7 @@ On the one hand, version (1) is nice in that it ``does it all'' for the user. Bu
 
 \caption{Two Software Versions}\label{fig:tbl2}
 \end{figure}
-In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the \texttt{lme4} functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the \texttt{zinf} functions still have enormous usefulness in that they define methods for producing a summary of the zero-inflation model and most importantly for predicting with the zero-inflation model.
+In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the \texttt{lme4} functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the \texttt{zinf} functions still have enormous usefulness in that they define methods for producing a summary of the zero-inflation model and most importantly for performing prediction with the zero-inflation model.
 
 \hypertarget{forestry-data}{%
 \section{Forestry Data}\label{forestry-data}}
@@ -1497,7 +1493,7 @@ The particular subset of Forestry data that we'll be looking at comes from the S
    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
       9      43      88     142     188     544 
 \end{verbatim}
-The covariate that we will be using from the forestry data is called ``Tree Canopy Cover'' (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns \footnote{Toney, Shaw, \& Nelson (2008)}. This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
+The covariate that we will be using from the forestry data is called ``Tree Canopy Cover'' (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns (Toney, Shaw, \& Nelson, 2008). This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
 
 The response variable that we will be using is called ``Dry Above Ground Biomass from Live Trees'' and is expressed in the units of per area density. This Dry Above Ground Biomass variable is one that is very important for understanding the health of forest ecosystems and plays a role in decisions regarding merchantable timber and fire hazard. For these reasons its vitally important for the FIA to be able to produce accurate estimates of this variable. The zero-inflation models presented in this thesis provide a reasonable approach for trying to do exactly that, and the software package \texttt{zinf} provides an early stage version of a tool to do so.
 
@@ -1681,7 +1677,7 @@ If we examine the class of these objects we'll find that they're of class \textt
 \begin{verbatim}
 [1] "zinf_bayes"
 \end{verbatim}
-At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines \texttt{zinf\_bayes} and \texttt{zinf\_freq} as S3 generics. In R ``the job of an S3 generic is to perform method dispatch, i.e.~find the specific implementation for a class.''\footnote{Wickham (2019)}. So what \texttt{zinf} is really doing is defining methods like \texttt{predict()} and \texttt{summary()} for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
+At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines \texttt{zinf\_bayes} and \texttt{zinf\_freq} as S3 generics. In R ``the job of an S3 generic is to perform method dispatch, i.e.~find the specific implementation for a class.''(Wickham, 2019). So what \texttt{zinf} is really doing is defining methods like \texttt{predict()} and \texttt{summary()} for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
 
 And as we can see below, making predictions on the test dataset using our Frequentist zero-inflation model is a very familiar process. Since the estimand we're interested in is the Ecosubsection level mean and our test data set included two Ecosubsections, we get an output with two rows.
 \begin{Shaded}
@@ -1706,9 +1702,9 @@ The object returned by running \texttt{predict} on one of the Bayesian zero-infl
 \begin{itemize}
 \tightlist
 \item
-  A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group
+  A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group.
 \item
-  A data frame containing the raw posterior predictive distributions for each group
+  A data frame containing the raw posterior predictive distributions for each group.
 \end{itemize}
 If we examine the first item we see a very similar result to that of the direct output of the Frequentist predictions, except now we also have upper and lower bounds for 95\% prediction intervals.
 \begin{Shaded}
@@ -1721,7 +1717,7 @@ If we examine the first item we see a very similar result to that of the direct 
 1 M242Ba          88.41021 73.39606 102.72571
 2 M242Db          71.04143 56.44706  85.59905
 \end{verbatim}
-But since Bayesian predictions are distributions themselves, you can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
+But since Bayesian predictions are distributions themselves, we can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
 \begin{Shaded}
 \begin{Highlighting}[]
 \NormalTok{bayes\_preds\_normal}\SpecialCharTok{$}\NormalTok{posterior\_predictive\_distribution }\SpecialCharTok{\%\textgreater{}\%} 
@@ -1755,7 +1751,7 @@ With this we can actually plot the posterior predictive distributions for each g
 
 \caption{Posterior Predictive Distributions for the two groups in our test dataset}\label{fig:unnamed-chunk-26}
 \end{figure}
-Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and look at how the models compared.
+Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and compare how the models performed.
 \begin{longtable}{ccccc}
 \toprule
 group & Bayes Gamma & Bayes Normal & Frequentist & True Mean \\ 
@@ -1769,7 +1765,7 @@ It's nice to see that the models performed similarly, as we saw in our simulatio
 \hypertarget{next-steps}{%
 \section{Next Steps}\label{next-steps}}
 
-Right now the package is fairly limited in that it can primarily only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common, zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like \texttt{zinf} that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
+Right now the package is fairly limited in that it can only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common, zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like \texttt{zinf} that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
 
 \hypertarget{conc}{%
 \chapter{Conclusion}\label{conc}}
@@ -1783,11 +1779,11 @@ Overall I see zero-inflation models having enormous usefulness in applied settin
 \hypertarget{future-work}{%
 \section{Future Work}\label{future-work}}
 
-Ultimately there remains much to be done in this area of research on zero-inflation models. While the Bayesian models that we employed were well suited for the particular setting we were working in, these models could be extended in a couple of ways that would make them more robust to a wider variety of settings. For starters, the models could be enhanced by allowing for random slopes instead of only utilizing random intercepts. Secondly, in the Normal regression models we assumed constant variance of the errors, but it might make more sense to treat that variance as heteroskedastic. Additionally, while the zero-inflated setting where the non-zero portion of the response belongs to a positive continuous distribution is a relatively common one, it would be worthwhile to build models for discrete settings and settings in which the response is bounded. Finally, taking a step back, it would be interesting to utilize different types of classification and regression models in the two-part model. For example more advanced statistical models like random forests and support vector machines could be used to try to more accurately classify points as being zero or not and some kind of a nonparametric regression model could be used to model the nonzero response. While these ideas were outside of the scope of this thesis, I think that each one has the capacity to substantially enhance these zero-inflation models.
+Ultimately there remains much to be done in this area of research on zero-inflation models. While the Bayesian models that we employed were well suited for the particular setting we were working in, these models could be extended in a couple of ways that would make them more robust to a wider variety of settings. For starters, the models could be enhanced by allowing for random slopes instead of only utilizing random intercepts. Secondly, in the Normal regression models we assumed constant variance of the errors, but it might make more sense to treat that variance as heteroskedastic. Additionally, while the zero-inflated setting where the non-zero portion of the response belongs to a positive continuous distribution is a relatively common one, it would be worthwhile to build models for discrete settings and settings in which the response is bounded in other ways. Finally, taking a step back, it would be interesting to utilize different types of classification and regression models in the two-part model. For example more advanced statistical models like random forests and support vector machines could be used to try to more accurately classify points as being zero or not and some kind of a nonparametric regression model could be used to model the nonzero response. While these ideas were outside of the scope of this thesis, I think that each one has the capacity to substantially enhance these zero-inflation models.
 
-It would also be interesting to compare the performance of these zero-inflation models to simpler models. For example, a singular simple linear regression model or a model that first takes the average of each group and fits a model to these aggregated data points. While we'd expect the zero-inflation models to broadly outperform these models, it would be interesting to quantify to what degree they do so, and to try to understand how the characteristics of the data set play into this.
+It would also be interesting to compare the performance of these zero-inflation models to simpler models. For example, a singular simple linear regression model or a model that first takes the average of each group and fits a model to these aggregated data points. While we'd expect the zero-inflation models to broadly outperform these models, it would be interesting to quantify to what degree they do so, and to try to understand how the characteristics of a data set play into this.
 
-Additionally, while we were unable to figure out how to boostrap the prediction errors for the Frequentist zero-inflation model, such a process would be extremely important to this area of research. Not only would it allow for comparisons between the coverage metrics of each model, but it would provide the tooling necessary to run a speed test between the Bayesian and Frequentist processes. It's true that for the models used in this thesis, the Bayesian ones took much longer to run than the Frequentist ones, but bootstrapping is not generally an especially quick process and so a more fair comparison could be made if the Frequentist models were generating prediction intervals as well.
+Additionally, while we were unable to figure out how to boostrap the prediction errors for the Frequentist zero-inflation model, such a process would be extremely important to this area of research. Not only would it allow for comparisons between the coverage metrics of each model, but it would provide the tooling necessary to run a speed test between the Bayesian and Frequentist processes. It's true that for the models used in this thesis, the Bayesian ones took much longer to run than the Frequentist ones, but bootstrapping is not an especially quick process and so a more fair comparison could be made if the Frequentist models were generating prediction intervals as well.
 
 \backmatter
 

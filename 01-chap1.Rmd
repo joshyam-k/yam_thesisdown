@@ -1,10 +1,10 @@
 # Introduction {#intro-section}
 
-In this thesis, I will be concerned with modeling a response variable from various explanatory variables in data that exhibit two distinctive features: (i) the response variable is "zero-inflated", and (ii) the data is "clustered".
+In this thesis, I will be concerned with modeling a response variable using various explanatory variables from data that exhibit two distinctive features: (i) the response variable is "zero-inflated", and (ii) the data is "clustered".
 
 ## Zero-Inflated Data
 
-As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, the response variable might look like this:
+As the name suggests, data are canonically classified as being zero-inflated when they contain a significant proportion of zeroes. While it's hardly ever very productive to spell out a definition for a phrase that is its own definition, I do so here to emphasize the fact that to call data zero-inflated is to only say something very broad about how that data is distributed. There is no commonly accepted cutoff for at what proportion of zeros our data deserves the label zero-inflation, and there is no restriction on the distribution of the non-zero data. While the work done in this thesis concerns zero-inflated data with no constraint on the level of "zeroness", I do require that the non-zero data is positive and continuously distributed. For example, a response variable that is zero-inflated in this way might look like this:
 
 ```{r ziex, echo=F, message=F, warning=F, fig.align='center', out.width='85%', fig.cap="Zero-Inflated data"}
 set.seed(6)
@@ -42,22 +42,21 @@ ggplot() +
   theme_bw()
 ```
 
-And in reality, this form of zero-inflated data is one that we see quite often in the real world. Importantly, an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself, for example if we collected data on the total weight of fish caught at a lake by individuals on a given day, we likely would see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But, other times it could be a characteristic of the data collection process itself. For example a measurement error or a sampling error could cause data to be zero-inflated as well.
+In reality, this form of zero-inflated data is one that we see quite often in the real world. We should note that an abundance of zeros in a measured variable might come about for a variety of different reasons. Sometimes it could be a characteristic of the data itself. For example, if we collected data on the total weight of fish caught at a lake by individuals on a given day, we would likely see a lot of individuals who caught zero fish leading to a significant portion of zeros in our data. But, other times it could be a characteristic of the data collection process itself. For example a measurement error or a sampling error could cause data to be zero-inflated as well.
 
 Importantly, as I am working in a modeling setting, when I say that data is zero-inflated I mean that the *response variable* is zero-inflated. Although I will simply refer to my data as being zero-inflated and my models as being suited for zero-inflated data for the duration of this thesis, this is simply a matter of convenience and not a statement that the methods work for any situation in which data can be considered zero-inflated. Put simply, I explore, present, and evaluate a model that is suited for a response variable which has a significant portion of zeroes, with the non-zero portion of that variable belonging to a positive continuous distribution.
 
 ## Clustered Data
 
-Furthermore, we will be operating in a setting where the data is not only zero-inflated, but also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points across clusters.
+Furthermore, we will be operating in a setting where the data is not only zero-inflated, but also exhibits a clustered structure. Again, the notion of data being clustered is a very non precise one. For this thesis we will not put a very strong restriction on what this looks like. Our data will be considered clustered in the sense that there is meaningful grouping in the data structure that makes data points within the same cluster more alike on average than points between clusters.
 
 For example, going back to the fishing in a lake example, if we looked at data on the weight of each individual fish caught, we would imagine that fish of the same species would generally be more similar in weight than fish from different species.
 
-
 ## Forestry Setting
 
-One specific setting that exhibits both of these data features is the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory & Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: "The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems."[@mcconville2020tutorial].
+One specific setting where we see both of these features is the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory & Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: "The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems."[@mcconville2020tutorial].
 
-The FIA employs a quasi-systematic sampling design to determine which locations to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g. temperature and precipitation), geomorphological measures (e.g. elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
+The FIA employs a quasi-systematic sampling design to determine which locations across the U.S. to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g. temperature and precipitation), geomorphological measures (e.g. elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
 
 While the main use of the additional remote sensed data sources are to increase the accuracy of the estimators that the FIA builds, they are also used to make rational decisions about the aforementioned plot-level data collection. Before sending a crew out to a given sampled location, the FIA will first look at the remote sensed data for that location. If that location happens to be in a place where there is clearly no forest, for example in the middle of a parking lot, the FIA will not send a crew out and instead will mark all forest attributes for that location as being zero. As you might imagine, this happens quite a bit, and so an interesting characteristic of many forest attribute variables collected by the FIA is that they are zero-inflated. Importantly, this is an example of where the data is zero-inflated because of the data collection process.
 
@@ -88,11 +87,11 @@ ggplot() +
   theme_bw()
 ```
 
-Additionally, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
+Additionally, the FIA groups the continental U.S. into smaller domains called Eco-Subsections. These Eco-Subsections are drawn with the goal of maintaining internal ecologically homogeneity as best as possible. Thus each plot-level data point belongs to a specific Eco-Subsection and it's this grouping that gives us a clustered data structure.
 
-Not only is the FIA data a good real life example of when we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
+Not only is the FIA data a good real life example where we see this zero-inflated and clustered data structure, but it's also a setting in which it's quite important that the models used to estimate these forest attributes are sufficiently accurate and efficient.
 
-###  Immediate Modeling Struggles
+### Immediate Modeling Struggles
 
 To motivate using a more complex method, I'll first show what happens when we try to just fit a simple linear regression to this type of data. If we regress our response variable on a useful covariate and plot both the data and the simple linear regression line together we get the following
 
@@ -114,13 +113,13 @@ data %>%
   theme_bw()
 ```
 
-While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \@ref(fig:scatterzi) doesn't appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the *non-zero* response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability our response variable being zero, changes with our covariate.
+While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \@ref(fig:scatterzi) does not appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the *non-zero* response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range of observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability of our response variable being zero, changes with our covariate.
 
-We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While perhaps it's unfair to motivate my method by pitting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used model. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead, the model I present is interpretable and intuitive while being flexible enough to capture the structure of the zero-inflated data.
+We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While perhaps it's unfair to motivate my method by pitting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used tool. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead, the model I present is interpretable and intuitive while flexible enough to better capture the structure of the zero-inflated data.
 
 ### The New Model
 
-While I will exhaustively describe details of, and the math behind, the exact model in Chapter \@ref(methods-sec), I'll go through a non-technical overview of how it will function here.
+While I will exhaustively describe the details of, and the math behind, the exact model in Chapter \@ref(methods-sec), I'll go through a non-technical overview of how it will function here.
 
 The defining characteristic of the model is that it is a two-part model. Instead of trying to fit the data with a singular model, we instead fit two different models and then combine them at the end. The two models are
 
@@ -134,7 +133,7 @@ $$
 \text{Final Prediction} =  \underbrace{\bigg(\text{Classification Model Output}\bigg)}_{\text{Model (1)}} \times \underbrace{\bigg(\text{Regression Model Output}\bigg)}_{\text{Model (2)}} 
 $$
 
-Let's think back to Figure \@ref(fig:scatterzi) to unpack why this is a reasonable strategy.
+We can go back to Figure \@ref(fig:scatterzi) to unpack why this is a reasonable strategy.
 
 ```{r modintuition, echo=F, message=F, warning=F, fig.align='center', out.width='95%', fig.height=3.6, fig.cap="Example of two new data points that we might be interested in testing our model on."}
 set.seed(19)
@@ -172,12 +171,11 @@ p1 + p2
 
 ```
 
-Let's start with the left hand side of Figure \@ref(fig:modintuition) that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent close to zero by that classification model output.
+Let's start with the left hand side of Figure \@ref(fig:modintuition) that has a data point with zero response value. We'd expect a very bad prediction from model (2) which was only fit to the non-zero data, but the intuition here is that if our classification model is sufficiently accurate then it shouldn't matter, as it will identify the point as being zero and thus the prediction will just be sent close to zero when multiplied by that classification model output.
 
-On the other hand, the right hand side of Figure \@ref(fig:modintuition) has a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a likely non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
+On the other hand, the right hand side of Figure \@ref(fig:modintuition) where we have a data point with non-zero response value. We'd expect a good prediction from model (2) here and again if the classification model is sufficiently accurate then it should identify it as being a likely non-zero data point and the model (2) prediction should be relatively unchanged when multiplied by the classification model output.
 
 Clearly the success of this strategy relies on the quality of the two individual models, but at least we can see how this method has the capacity to capture the zero-inflation data structure.
-
 
 ### Building the Model
 
@@ -193,9 +191,9 @@ In order to introduce, study, and implement these models I will structure the re
 
 -   Chapter \@ref(bayes-freq) gives a thorough functional overview of how Bayesian and Frequentist methods differ in the simple setting of inference for a mean. The goal here is primarily to provide a gentle introduction to Bayesian data analysis, so as not to drop the reader into the deep end when the main model is introduced.
 
--   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Cluster Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally. 
+-   Chapter \@ref(methods-sec) gives a detailed overview of all the methods employed in the thesis. It starts with a high-level description of the Cluster Zero-Inflation model, before moving on to detailed descriptions of how each model will be built. Next, prediction for Bayesian models is illustrated both theoretically and computationally.
 
-- Chapter \@ref(sepsim) walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
+-   Chapter \@ref(sepsim) walks through a proof that provides justification for building each part of the Bayesian two part model separately and then combining the results at the end.
 
 -   Chapter \@ref(sim-study) sets up the simulation study that serves as the main process by which we evaluate the various models.
 
@@ -203,9 +201,4 @@ In order to introduce, study, and implement these models I will structure the re
 
 -   Chapter \@ref(vignette) gives an overview of the R Package written to accompany the methods explored in this thesis. A vignette is provided the applies the R Package to the Forestry data setting.
 
-- Finally, Chapter \@ref(conc) provides some concluding thoughts and describes possible extensions.
-
-
-
-
-
+-   Finally, Chapter \@ref(conc) provides some concluding thoughts and describes possible extensions.

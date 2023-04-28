@@ -7,13 +7,13 @@ library(gt)
 library(patchwork)
 ```
 
-We now introduce the set up for the simulation study that will be the main avenue through which we evaluate the various models. 
+We now introduce the set up for the simulation study that will be the main avenue through which we evaluate our models. 
 
 ## Aims
 
 The first aim for this simulation study is to understand when we might benefit from using a Bayesian model.
 
-In order to try to answer this question of *when* we will be turning a few dials. Because we are functioning in a setting with grouped data with moderately small sample sizes we will vary the data along two axes
+In order to try to answer this question of *when* we will be turning a few dials. Because we are functioning in a setting with grouped data we will vary the data along two axes
 
 -   Number of groups
 -   Number of observations per group
@@ -29,7 +29,7 @@ The idea to vary the quality of the priors comes out of the idea that while the 
 
 ### Estimands
 
-The primary estimand for this simulation study will be $Y_j$: the mean of our response variable in domain $j$. In order to stay consistent across all models and simulation runs, we only made predictions on group $1$.
+The primary estimand for this simulation study will be $Y_j$: the mean of our response variable in group $j$. In order to stay consistent across all models and simulation runs, we only made predictions on group $1$.
 
 ### Data Generating Process
 
@@ -47,9 +47,7 @@ $$
 
 Where $X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$, $v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$ and $u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$
 
-This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response $Y$ and a covariate $X$. For example in Figure \@ref(fig:simdataplot) we examine the generated population data and see the following.
-
-The response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
+This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response $Y$ and a covariate $X$. For example in Figure \@ref(fig:simdataplot) we examine the generated population data and see that the response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
 
 ```{r simdataplot, warning = F, message = F, echo=F, fig.align='center', out.width='80%', fig.cap='The distribution of the response variable in the population that we generated for our simulation.'}
 DGP <- function(N, g) {
@@ -128,7 +126,7 @@ Next, within each $(n,\ J)$ combination we built the Bayesian models with two ty
 
 Note that across all models the random effects are assumed to be $\mathcal{N}(0, \tau^2)$ distributed and thus can be thought of as universally having a normal prior with a variance hyperparameter. While the distributions chosen for these priors were introduced in the methods section, we will now choose real valued numbers used to center and scale those priors.
 
-These parameters that require priors can be placed into 3 main groups: fixed effects, variance, and shape. We simplified the process of assigning the levels of priors by not varying the priors within these groups within each bracket of quality.
+The parameters that require priors can be placed into 3 main groups: fixed effects, variance, and shape. We simplified the process of assigning the levels of priors by not varying the priors within these groups within each bracket of quality.
 
 #### Non-Informative
 
@@ -220,7 +218,7 @@ ggplot(data.frame(x = c(0, 20)), aes(x)) +
   )
 ```
 
-Finally, since the non-zero portion of the response variable has a mean of `r round(mean(data[data$Z == 1, ]$Y), 2)`, we can use the following "back of the napkin" calculation to get an idea for what the shape parameter should be centered on. Recall that a $\text{Gamma}(\alpha, \beta)$ distribution has mean $\alpha / \beta$ and variance $\alpha / \beta^2$.
+Finally, since the non-zero portion of the response variable has a mean of `r round(mean(data[data$Z == 1, ]$Y), 2)`, we can use the following "back of the napkin" calculation to get an idea for what the shape parameter should be centered on. Recall that a $\text{Gamma}(\alpha, \beta)$ distribution has mean $\alpha / \beta$ and variance $\alpha / \beta^2$. Thus we can say that,
 
 $$
 \bar{y} = 31.4 \approx \frac{\alpha}{\beta}\qquad \text{and} \qquad s^2 = 338.8 \approx \frac{\alpha}{\beta^2}
@@ -271,15 +269,15 @@ There will be 3 different models run throughout the simulation.
 
 ## Performance metrics {#metrics}
 
-Importantly, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of $Y_1 = 23.7$
+As mentioned previously, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of $Y_1 = 23.7$
 
-The most broadly used and expected performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is computed as follows:
+The most broadly used performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is just a rescaling of this metric and is computed as follows:
 
 $$
 \text{RMSE}_j  = \sqrt{\frac{1}{S}\sum_{s = 1}^{S}\bigg(\hat{Y}_{j, s} - Y_{j}\bigg)^2}
 $$
 
-Where $S$ is the total number of simulation reps, $\hat{\mu}_{j, s}$ is the estimated mean of the response variable $y$ in domain $j$ for simulation rep $s$, and $Y_{j}$ is the true mean of the response variable $y$ in domain $j$. Since we get this true value from our generated population, it does not vary by simulation rep.
+Here $S$ is the total number of simulation reps, $\hat{Y}_{j, s}$ is the estimated mean of the response variable in group $j$ for simulation rep $s$, and $Y_{j}$ is the true mean of the response variable in group $j$. Since we get this true value from our generated population, it does not vary by simulation rep.
 
 Next we will be examining the Empirical Bias of each model:
 
@@ -301,7 +299,7 @@ $$
 
 And finally we will look at the total number of model failures.
 
--   For the Frequentist models, a model failure was registered whenever one of the "Model failed to converge" warnings from `lme4` was returned, although even in small sample sizes our data was robust enough that we essentially saw zero model failures.
+-   For the Frequentist models, a model failure was registered whenever one of the "Model failed to converge" warnings from `lme4` was returned, although even in small sample sizes our data was robust enough to elicit zero model failures.
 -   For the Bayesian models, a model failure was registered whenever the MCMC algorithm failed one or more of the diagnostics that indicate that the algorithm has converged and is stable. The Stan programming language is robust enough that you should never trust the results when one of these warnings are administered, and so while potentially overly harsh in some cases, we chose to count any convergence warning as a model failure.
 
 Importantly, one solution to combating MCMC convergence issues is to bump up the number of iterations that the algorithm progresses through. That being said, this is not a sure fire solution, and always comes at the cost of longer computation time. The default number of iterations is 2000 and is considered a reasonable number of iterations for most models. Because the models we are fitting are fairly complex, ran a few tests to guage how many iterations we should use in order to try to minimize model failures while keeping model run-times reasonable. We saw good improvements up to 5000 iterations and then diminishing returns afterwards, so we used 5000 iterations for all of our Bayesian models.

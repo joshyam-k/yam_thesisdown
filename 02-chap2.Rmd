@@ -1,12 +1,14 @@
 # Frequentists and Bayesians {#bayes-freq}
 
 <!-- Required to number equations in HTML files -->
+
+```{=html}
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
   TeX: { equationNumbers: { autoNumber: "AMS" } }
 });
 </script>
-
+```
 ## Bayesian "v.s." Frequentist: Cryptic Definitions
 
 Perhaps the biggest roadblock for understanding how a Bayesian methodology differs from a Frequentist one stems from the fact that most of the statements you find on the internet are short cryptic quips that, while true, are largely unhelpful for someone just starting to dig in.
@@ -15,48 +17,48 @@ For example, a simple Google search for "Bayesian v.s. Frequentist" will tell yo
 
 If you dig a bit deeper and refine your Google search, you'll eventually come across a more technical definition such as this one from Gelman:
 
-> "Bayesian statistical conclusions about a parameter $\theta$ are made in terms of probability statements. These probability statements are conditional on the observed value of [x], and ... are written simply as $p(\theta \ | \ x)$ ... It is at the fundamental level of conditioning on observed data that Bayesian inference departs from the approach to statistical inference described in many textbooks, which is based on a retrospective evaluation of the procedure used to estimate $\theta$ over the distribution of possible [x] values conditional on the true unknown value of $\theta$" ^[@gelman1995bayesian]
+> "Bayesian statistical conclusions about a parameter $\theta$ are made in terms of probability statements. These probability statements are conditional on the observed value of [x], and ... are written simply as $p(\theta \ | \ x)$ ... It is at the fundamental level of conditioning on observed data that Bayesian inference departs from the approach to statistical inference described in many textbooks, which is based on a retrospective evaluation of the procedure used to estimate $\theta$ over the distribution of possible [x] values conditional on the true unknown value of $\theta$" [@gelman1995bayesian]
+
 
 It's not important to understand what this is saying right now, but I include it here because in just a few sentences Gelman fully lays out the core difference between Bayesian and Frequentist methods. While it is not a good entry point for someone just beginning to learn, it will be helpful to return back to portions of this excerpt as we work through an extended example.
 
 ## Worked Example: A better way to learn
 
-At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter $\theta$
+At a very high level, the fact that one should always return to when comparing a Bayesian and Frequentist methodology is that in an analysis for a parameter $\theta$,
 
 -   Frequentists treat the parameter as fixed and aim to quantify how the data might vary around the fixed (but unknown) parameter value.
 
--   Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data
-
+-   Bayesians treat the parameter as random and try to quantify how the parameter might vary based on the observed data.
 
 With this in mind, we now turn to a simple inference example.
 
 Suppose we are interested in estimating the average weight of squirrels in a given park, let's call this $\theta$. Moreover, suppose that we want to somehow quantify our uncertainty for that estimate. Suppose that the distribution of the weight for the entire squirrel population in that park is $\mathcal{N}(\theta, 1)$ (we treat the standard deviation as being fixed and known so as to simplify our example) and that we've properly collected a random sample $\{X_1, X_2, ..., X_n\}$ from the population.
 
-###  Frequentist Version
+### Frequentist Version
 
-We choose the sample mean $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 $$
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
 $$
 
-
-Furthermore,  properties of the Normal distribution tell us that,
+Furthermore, properties of the Normal distribution tell us that,
 
 $$
 \begin{aligned}
-P\bigg(-1.96 < \frac{\bar{X} - \theta}{1/\sqrt{n}} < 1.96\bigg) = 0.95 \implies P\bigg(\bar{X} - 1.96\cdot\frac{1}{\sqrt{n}} < \theta < \bar{X} + 1.96\cdot\frac{1}{\sqrt{n}}\bigg) = 0.95
+&P\bigg(-1.96 < \frac{\bar{X} - \theta}{1/\sqrt{n}} < 1.96\bigg) = 0.95 \\ \implies &P\bigg(\bar{X} - 1.96\cdot\frac{1}{\sqrt{n}} < \theta < \bar{X} + 1.96\cdot\frac{1}{\sqrt{n}}\bigg) = 0.95
 \end{aligned}
 $$
 
 So a Frequentist would end up with what is called a 95% confidence interval for $\theta$ of:
 
+```{=tex}
 \begin{equation}
   \bigg(\bar{X} - 1.96\cdot\frac{1}{\sqrt{n}}, \ \bar{X} + 1.96\cdot\frac{1}{\sqrt{n}}\bigg)
   (\#eq:freq-ci)
 \end{equation}
-
-Let's pause to ask ourselves what is random in Equation \@ref(eq:freq-ci). For starters, $\bar{X}$ is certainly random since it came from a random sample from the population, but an immediate implication of this is that the interval itself is actually random too. The very first step in our process was to use asymptotic theory (the Central Limit Theorem) to place a distribution on our observed data $\bar{X}$. This randomness in the data thus carries through to our confidence interval and we end up with an uncertainty statement about the **procedure** being performed and not the parameter itself. Different samples will results in different $\bar{X}$s which will result in different confidence intervals. 
+```
+Let's pause to ask ourselves what is random in Equation \@ref(eq:freq-ci). For starters, $\bar{X}$ is certainly random since it came from a random sample from the population, but an immediate implication of this is that the interval itself is actually random too. The very first step in our process was to use asymptotic theory (the Central Limit Theorem) to place a distribution on our observed data $\bar{X}$. This randomness in the data thus carries through to our confidence interval and we end up with an uncertainty statement about the **procedure** being performed and not the parameter itself. Different samples will results in different $\bar{X}$s which will result in different confidence intervals.
 
 It's perhaps easiest to understand how to interpret Equation \@ref(eq:freq-ci) through a quick simulation and visualization. If we generated a 100 new samples from the population with the true parameter $\theta$ being 5, and computed a confidence interval for each, we could then plot all 100 intervals and count how many of them contain the true parameter.
 
@@ -102,11 +104,9 @@ res %>%
   )
 ```
 
-First of all, \@ref(fig:ci-coverage-ex) really drills home the point that Frequentists treat the parameter as fixed and try to quantify how the data might vary around it. Here we see that in 6 of our iterations of this sampling procedure, the confidence interval did not contain the true parameter, giving us coverage of 94\%. The reason we did not observe 95% coverage, is again due to the fact that the intervals are random and Equation \@ref(eq:freq-ci) is an asymptotic statement about the process of resampling data and computing a new confidence interval. Thus, the correct interpretation of Equation \@ref(eq:freq-ci) is that if we repeated the sampling procedure many times, we'd expect the true mean, $\theta$, to be captured by such an interval 95\% of the time. 
+First of all, \@ref(fig:ci-coverage-ex) really drills home the point that Frequentists treat the parameter as fixed and try to quantify how the data might vary around it. Here we see that in 6 of our iterations of this sampling procedure, the confidence interval did not contain the true parameter, giving us coverage of 94%. The reason we did not observe 95% coverage, is again due to the fact that the intervals are random and Equation \@ref(eq:freq-ci) is an asymptotic statement about the process of resampling data and computing a new confidence interval. Thus, the correct interpretation of Equation \@ref(eq:freq-ci) is that if we repeated the sampling procedure many times, we'd expect the true mean, $\theta$, to be captured by such an interval 95% of the time.
 
-
-
-With this new understanding, we can unpack why it's incorrect to interpret Equation \@ref(eq:freq-ci) as saying that "the interval contains the true parameter with probability 0.95". As we just saw, our confidence interval is really a statement about a result we'd see if we repeated the whole procedure many times, and it is absolutely not a statement about any singular instance of the procedure. For a given confidence interval, the true parameter either lies within the interval or it doesn't, with 100% certainty. 
+With this new understanding, we can unpack why it's incorrect to interpret Equation \@ref(eq:freq-ci) as saying that "the interval contains the true parameter with probability 0.95". As we just saw, our confidence interval is really a statement about a result we'd see if we repeated the whole procedure many times, and it is absolutely not a statement about any singular instance of the procedure. For a given confidence interval, the true parameter either lies within the interval or it doesn't, with 100% certainty.
 
 #### Revisiting the Cryptic Definitions
 
@@ -114,21 +114,21 @@ Before moving on to exploring how a Bayesian would tackle this inference problem
 
 What's more, while it's still overly complicated in it's language, Gelman's statement that Frequentist inference is "based on a retrospective evaluation of the procedure used to estimate $\theta$ over the distribution of possible [x] values conditional on the true unknown value of $\theta$" [@gelman1995bayesian], can at least partially be understood. Each of these pieces are things ideas that we've developed through our example:
 
-- "The retrospective evaluation of the procedure used to estimate $\theta$": In the example this was the resampling of our data 
-- "over the distribution of possible [x] values": In our example this involved using the Central Limit Theorem to place a distribution on our data
-- "conditional on the true unknown value of $\theta$": Treating $\theta$ as fixed but unknown.
+-   "The retrospective evaluation of the procedure used to estimate $\theta$": In the example this was the resampling of our data
+-   "over the distribution of possible [x] values": In our example this involved using the Central Limit Theorem to place a distribution on our data
+-   "conditional on the true unknown value of $\theta$": Treating $\theta$ as fixed but unknown.
 
 While these definitions are still found to be lacking when trying to absorb them on their own, in the context of our example, we can start to understand and appreciate the things that they are saying.
 
-###  Bayesian Version
+### Bayesian Version
 
-Instead of first describing the nuts and bolts of how we estimate both the parameter of interest and the uncertainty in that estimate as we did in the previous section, we start at the end with the final expression for both of these things in order to draw some of the most important similarities and differences between the two methods.
+Instead of first describing the nuts and bolts of how we estimate both the parameter of interest and the uncertainty in that estimate as we did in the previous section, we start at the end with the final expression for both of these things in order to draw out some of the more important similarities and differences between the two methods.
 
-####  General Form
+#### General Form
 
 A good place to start whenever performing a Bayesian analysis is to remember that "the guiding principle for bayesian statistics is that the state of knowledge about anything unknown is described by a probability distribution." [@gelman1995bayesian]. In the context of inference where we're interested in an unknown parameter $\theta$, a Bayesian describes all of their knowledge about $\theta$ using a probability distribution. In particular, Bayesians use a specific distribution to do so- *the posterior distribution.* The posterior distribution is the center of interest for all Bayesian analyses and it is simply the distribution of the parameter of interest, conditional on the observed data: $p(\theta \ | \ x)$.
 
-Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about $\theta$ using a distribution we are already doing something very different form in the Frequentist version.In particular, we make conclusions about the distribution of $\theta$, a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about $\theta$ and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the *true* mean weight might vary conditional on the set observed data.
+Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about $\theta$ using a distribution we are already doing something very different from in the Frequentist version. In particular, we're making conclusions about the distribution of $\theta$, a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about $\theta$ and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the *true* mean weight might vary conditional on the set of observed data.
 
 Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval $C$ such that,
 
@@ -140,22 +140,24 @@ Again, notice how drastically this differs from the Frequentist calculation of a
 
 Furthermore, once we compute C, then we can correctly say that.
 
+```{=tex}
 \begin{equation}
   P(\theta \in C \ | \ x) = 0.95
   (\#eq:bayes-ci)
 \end{equation}
-
-And here we really do mean that the probability that our interval $C$ captures $\theta$ is 0.95. **Bayesians conceptualize probability in terms of certainty, or uncertainty, about events, meaning that their probability statements can be about the unknown parameter itself**. 
+```
+And here we really do mean that the probability that our interval $C$ captures $\theta$ is 0.95. Bayesians conceptualize probability in terms of certainty, or uncertainty, about events, meaning that their probability statements can be about the unknown parameter itself.
 
 #### Back to the Cryptic Definitions!
 
-Again, it's the fact that Bayesians conceptualize probability as being related to one's own certainy or uncertainty, that allows us to interpret \@ref(eq:bayes-ci) in the way that we do. Furthermore, if we revisit Gelman's quote as well that "Bayesian statistical conclusions about a parameter $\theta$ are made in terms of probability statements. These probability statements are conditional on the observed value of [x], and ... are written simply as $p(\theta \ | \ x)$"^[@gelman1995bayesian], we can directly tie it into what we showed above.
+Again, it's the fact that Bayesians conceptualize probability as being related to one's own certainy or uncertainty, that allows us to interpret \@ref(eq:bayes-ci) in the way that we do. Furthermore, if we revisit Gelman's quote as well that "Bayesian statistical conclusions about a parameter $\theta$ are made in terms of probability statements. These probability statements are conditional on the observed value of [x], and ... are written simply as $p(\theta \ | \ x)$"[@gelman1995bayesian], we can directly tie it into what we showed above.
 
-Now that we've explained the gist of Bayesian analysis at a high level, we'll dive into the nuts and bolts of how the posterior is actually computed. 
 
-####  Building an Estimate
+Now that we've explained the gist of Bayesian analysis at a high level, we'll dive into the nuts and bolts of how the posterior is actually computed.
 
-So how do we actually calculate and estimate $p(\theta \ | \ x)$? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quantify the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces. 
+#### Building an Estimate
+
+So how do we actually calculate and estimate $p(\theta \ | \ x)$? As the name of the framework suggests, we leverage Bayes Theorem as a way to try to quantify the posterior distribution. Bayes Theorem tells us that we can break it down into three separate pieces.
 
 $$
 p(\theta \ | \ x) =  \frac{p(x \ | \ \theta)p(\theta)}{p(x)}
@@ -173,19 +175,19 @@ Importantly, while the likelihood function, $p(x \ | \ \theta)$, is a function o
 
 To clear up what all of this looks like in practice, we'll now walk through our squirrel weights example in this Bayesian setting. As we walk through this process, just remember that at the end of the day, all we're really doing is choosing a prior, computing the likelihood, and multiplying the prior by the likelihood.
 
-Recall that each individual $X$ is distributed $\mathcal{N}(\theta, 1)$ so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, and attach a relatively large variance to that guess of 10. So the prior that we supply could be $f(\theta) = \mathcal{N}(1.5,10)$. While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that $\theta$ is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
+Recall that each individual $X$ is distributed $\mathcal{N}(\theta, 1)$ so this gives us our likelihood function. Next, we might start by guessing that squirrels might weigh around 1.5 pounds on average, but we aren't squirrel experts so we attach a relatively large variance if 10 to that guess. So the prior that we supply could be $p(\theta) = \mathcal{N}(1.5,10)$. While there is a huge literature on how you should choose your priors, for now, all you need to know is that at the very least a prior should extend over the entire range of possible values that your unknown parameter could take on. While we could use a distribution that is strictly positive to emphasize the fact that $\theta$ is certainly positive, we'll stick with a normally distributed prior for the sake of simplicity (in fact what makes this a simple choice is that it achieves something called conjugacy which in this case just means that it guarantees that our posterior will also be a normal distribution).
 
 Next we use Bayes Theorem to combine our prior with the likelihood:
 
 $$
 \begin{aligned}
-p(\theta \ | \ x) &\propto \mathcal{L}(\theta \ | \ x)p(\theta) \\
-&= \bigg[\prod_{i=1}^n\mathcal{L}(\theta \ | \ x_i)\bigg]p(\theta) \\
+p(\theta \ | \ x) &\propto p(\theta \ | \ x)p(\theta) \\
+&= \bigg[\prod_{i=1}^np(\theta \ | \ x_i)\bigg]p(\theta) \\
 &= \bigg[\prod_{i=1}^n\frac{1}{\sqrt{2\pi}}\text{exp}\bigg(-\frac{1}{2}(x_i - \theta )^2\bigg)\bigg]\frac{1}{\sqrt{2\pi\cdot10^2}}\text{exp}\bigg(-\frac{1}{2\cdot10^2}(\theta - 1.5)^2\bigg) 
 \end{aligned}
 $$
 
-a rather large amount of math will simplify this down to
+A rather large amount of math will simplify this down to
 
 $$
 p(\theta \ | \ x) \propto \frac{1}{\sqrt{2\pi\sigma_f^2}}\text{exp}\bigg(-\frac{1}{2\sigma_f^2}(\theta - \theta_f)^2\bigg)
@@ -241,14 +243,8 @@ Clearly, even in this simple example it takes quite a bit of work to derive the 
 
 ## Takeaways
 
-In summary, in a Frequentist analysis the question being asked is "What sort of $\hat{\theta}$ would we expect to get under hypothetical resampling?", while in a Bayesian analysis the question is "What is our knowledge of $\theta$ based on the data and our prior information?"
+In summary, in a Frequentist analysis the question being asked is "What sort of $\theta$ would we expect to get under hypothetical resampling?", while in a Bayesian analysis the question is "What is our knowledge of $\theta$ based on the data and our prior information?"
 
 While this thesis will focus on statistical predictive models rather than inference, the fundamental functional differences remain the same. To build a model in a Bayesian frame is to represent one's knowledge about the model parameters using probability distributions. What's more, predictions are no longer point estimates but rather distributions themselves. As stated earlier, *the state of knowledge about anything unknown is described by a probability distribution*.
 
 This all seems fine and interesting, but at the end of the day the question remains- why bother doing statistical analysis in this way? This thesis should be read as a log of the time I spent trying to answer that question and not as some strongly opinionated piece about the quality of Bayesianism relative to Frequentism.
-
-
-
-
-
-

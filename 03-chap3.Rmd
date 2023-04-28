@@ -18,7 +18,7 @@ $$
 
 ## Model Structure Motivation
 
-We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do, and I think that looking at the steps draws out a lot of helpful intuition.
+We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do and I think that looking at the steps draws out a lot of helpful intuition.
 
 Let $Y$ represent the response variable and $X$ represent the covariates. We typically write $\mathbb{E}[Y \ | \ X]$ to denote the expected value of our response variable conditional on it's covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
 
@@ -32,7 +32,7 @@ Let $Y$ represent the response variable and $X$ represent the covariates. We typ
 \end{equation}
 
 
-Out of this equation comes a wonderful intuition for what our new modeling process will look like. What we end up with is something that is somewhat meta in that it doesn't tell us what the exact model will be, but rather it tells us what the structure of our model should look like. What we do know is that we should have one model that predicts our non-zero response using our covariates $E[Y \ | \ X = x, \ Y>0]$, and another that predicts whether our response is non-zero or not, again using the covariates $P(Y > 0 \ | \ X = x)$. Think back to the Introduction where we introduced the model as being:
+Out of this equation comes a nice intuition for what our new modeling process will look like. What we end up with is something that is somewhat meta in that it doesn't tell us what the exact model will be, but rather it tells us what the structure of our model should look like. What we do know is that we should have one model that predicts our non-zero response using our covariates $E[Y \ | \ X = x, \ Y>0]$, and another that predicts whether our response is non-zero or not, again using the covariates $P(Y > 0 \ | \ X = x)$. Think back to the Introduction where we introduced the model as being:
 
 $$
 \text{Final Prediction} = \bigg(\text{Classification Model Output}\bigg) \times \bigg(\text{Regression Model Output}\bigg) 
@@ -44,7 +44,7 @@ Importantly, while Equation \@ref(eq:intuition) describes the broader two-part m
 
 ## Specific Models {#specificmods}
 
-Although we could model these two parts however we wanted to, we will use a logistic regression model for the classification model and a generalized linear regression model (that is non-logistic) for the regression model. Moreover, because the data we will be working with has a clustered structure we attempt to capture that by including group-level random effects in both models. The precise models that we will be evaluating will be as follows.
+Although we could model these two parts however we wanted to, we will use a logistic regression model for the classification model and a generalized linear regression model (that is non-logistic) for the regression model. Moreover, because the data we will be working with has a clustered structure we include group-level random effects in both models. The precise models that we will be evaluating will be as follows.
 
 We fit a generalized linear model with random intercepts to the **non-zero** portion of the data (the $*$ helps differentiate this model from our final model). The linear predictor is specified as follows
 
@@ -52,7 +52,7 @@ $$
 \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j  \qquad \text{where} \qquad u_j \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
-With a link function $g^{-1}$ and a probability distribution for the response, we get the final model as
+We choose a link function $g^{-1}$ and a probability distribution for the response, which gives us the final model:
 
 $$
 E\big[y^*_{ij} \ | \ x\big] = g^{-1}(\mu_{ij})
@@ -78,7 +78,7 @@ We will now quickly go over how these models are fit in a Frequentist frame befo
 
 As it is not the focus of this thesis, we will not go in depth into how these models are fit in a Frequentist setting. Still, it's important to at least provide a brief summary of how it is most often done. 
 
-In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model
+In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model.
 
 We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \@ref(bayes-freq). By making an assumption about the model that best describes the process that generated the data, we are placing a distribution assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
 
@@ -97,7 +97,7 @@ $$
 z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j \ \ \ \text{and} \ \ \ v_j  \sim \mathcal{N}(0, \sigma_{v}^2)
 $$
 
-Here $\boldsymbol{\gamma} = (\gamma_1, ..., \gamma_P)$. Up until this point we have done nothing differently than in the usual Frequentist formulation of a model, but now instead of treating our model parameters as fixed but unknown, we treat them as random variables and attach priors to them. 
+Up until this point we have done nothing differently than in the usual Frequentist formulation of a model, but now instead of treating our model parameters as fixed, we treat them as random variables and attach priors to them. 
 
 Since the fixed effects coefficients $\boldsymbol{\gamma}$ could plausibly be any real number, we'll utilize a normal distribution for their priors. On the other hand the variance parameter is necessarily strictly positive and so we use a Half-Cauchy prior for it.
 
@@ -108,7 +108,7 @@ $$
 \end{aligned}
 $$
 
-The prior parameters $m_p, s_p^2, r_1^2$ are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that "even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region."^[@gelman2006prior]. While dependence between priors *can* be modeled in a bayesian frame, we will assume that all of our priors are independent of each other. An example of what the prior distributions look like across a few of their parameter values is shown below.
+The prior parameters $m_p, s_p, \ \text{and} \ r_1$ are real-valued numbers that center and scale the priors, thus they are chosen with the specifics of the data set in mind. A Half-Cauchy distribution is just a Cauchy distribution bounded to non-negative values, and is broadly utilized as a prior for variance parameters due to the fact that "even in the tail, they have a gentle slope (unlike, for example, a half-normal distribution) and can let the data dominate if the likelihood is strong in that region."[@gelman2006prior]. While dependence between priors *can* be modeled in a bayesian frame, we will assume that all of our priors are independent of each other. An example of what the prior distributions look like across a few of their parameter values is shown below.
 
 ```{r priors, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="Various parameter values for the prior distributions."}
 library(tidyverse)
@@ -181,7 +181,7 @@ cauchy <- ggplot(data.frame(x = c(0, 5)), aes(x)) +
 normal + cauchy
 ```
 
-Again, in estimating the actual **model parameters** in a Bayesian analysis the goal is to recover the joint posterior distribution of those parameters. As before, let $\boldsymbol{\gamma} = (\gamma_1, ...,\gamma_P)$ and $\mathbf{v} = (v_1, ..., v_J)$. The joint posterior distribution can be written as
+Again, in estimating the actual *model parameters* in a Bayesian analysis the goal is to recover the joint posterior distribution of those parameters. As before, let $\boldsymbol{\gamma} = (\gamma_1, ...,\gamma_P)$ and $\mathbf{v} = (v_1, ..., v_J)$. The joint posterior distribution can be written as
 
 $$
 \begin{aligned}
@@ -190,7 +190,7 @@ p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[
 \end{aligned}
 $$
 
-If we were able to compute a closed form expression for the posterior, we could then attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only $\sigma_u^2$. In that case, the marginal posterior can be computed as follows:
+If we we're able to compute a simple form expression for the posterior, then we can attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only $\sigma_u^2$. In that case, the marginal posterior could be computed as follows:
 
 $$
 p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
@@ -198,9 +198,9 @@ $$
 
 The result would be a probability density function that encapsulates all of our information about $\sigma_{v}^2$.
 
-As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language "Stan". The specific version of MCMC algorithm that Stan runs is called "Hamiltonian Monte Carlo". While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that *has the desired posterior distribution as it's stationary distribution.* Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
+As it turns out, the models are often complex enough that the RHS will not result in a recognizable probability density function. Thus we employ a Markov Chain Monte Carlo (MCMC) algorithm to simulate draws from the approximate posterior. To do so we use the probabilistic programming language `Stan`. The specific version of MCMC algorithm that Stan runs is called "Hamiltonian Monte Carlo". While this thesis will not describe MCMC in depth, the short and sweet description is that an MCMC algorithm's strategy for drawing samples from an unknown probability distribution is to wander around the space in such a way that the amount of time spent in each location is proportional to the height of that target distribution. The real nuts and bolts of the algorithm lie in how decisions are made about how and where to move around in the space so that the result is obtained. The especially powerful thing about MCMC algorithms is that under enough iterations, they construct a Markov Chain (random walk) that *has the desired posterior distribution as it's stationary distribution.* Thus we have to be a little bit careful with our language when interpreting the MCMC output. It's not that we are attaining samples from the actual posterior distribution (after all it is unknown), but rather stops along the random walk that is exploring the unknown posterior. That being said, if the MCMC algorithm converges properly then we will have samples from the approximate posterior distribution that should have characteristics similar to the actual posterior.
 
-In it's most basic configuration Stan will output 2,000 sets of parameter draws which represent samples from the approximate joint posterior distribution.
+In it's default configuration Stan will output 2,000 sets of parameter draws which represent samples from the approximate joint posterior distribution.
 
 $$
 \begin{bmatrix}
@@ -210,7 +210,7 @@ $$
 \end{bmatrix}
 $$
 
-One really nice aspect of this is that the while the combination of all of the columns in the output represent samples from the approximate **joint** posterior distribution, each column individually represent samples from the approximate **marginal** posterior distributions for that given individual parameter.
+One really nice aspect of this is that the while the combination of all of the columns in the output represent samples from the approximate *joint* posterior distribution, each column individually represent samples from the approximate *marginal* posterior distributions for that given individual parameter.
 
 #### (Generalized) Linear Regression Component: Normal {#bayeslin}
 
@@ -220,7 +220,7 @@ $$
 y^*_{ij} \ | \ \boldsymbol{\beta}, \boldsymbol{u}, \sigma_{u}^2,  \sigma_{\varepsilon}^2 \sim \mathcal{N}(\mu_{ij}, \sigma_{\varepsilon}^2) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j \  \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
-Here $\boldsymbol{\beta} = (\beta_1, ..., \beta_P)$. In this setting, the errors are assumed to be distributed $\mathcal{N}(0, \sigma_{\varepsilon}^2)$. And the other model parameters are given the same class of priors as before.
+Here $\boldsymbol{\beta} = (\beta_1, ..., \beta_P)$. In this setting, the errors are assumed to be distributed $\mathcal{N}(0, \sigma_{\varepsilon}^2)$. The other model parameters are given the same class of priors as before.
 
 $$
 \begin{aligned}
@@ -230,7 +230,7 @@ $$
 \end{aligned}
 $$
 
-Importantly while $s_p^2, r_1^2, r_2^2$ are given the same names as in the previous model, they should usually be chosen with the scale of the response in mind. 
+Importantly while $s_p, r_1, \ \text{and} \ r_2$ are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind. 
 
 We can write out our expression for the posterior as follows:
 
@@ -253,7 +253,7 @@ $$
 
 #### (Generalized) Linear Regression Component: Gamma
 
-An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \@ref(fig:gamma) displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response can be skewed in a way that a Normal distribution cannot.
+An alternative model that we considered in this thesis was a Gamma Generalized Linear Model. The motivation for this was to have a model that is more flexible to the distribution of the non-zero response. Figure \@ref(fig:gamma) displays several versions of a Gamma distribution with various parameters. In particular, note that the Gamma distribution is able to capture the fact that the non-zero response might be skewed, which a Normal distribution cannot do.
 
 ```{r gamma, echo = F, warning = F, message = F, fig.align = 'center', out.width="80%", fig.cap="The Gamma(a, b) Distribution"}
 gamma <- ggplot(data.frame(x = c(0, 20)), aes(x)) +
@@ -293,13 +293,13 @@ gamma
 Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
 $$
-y_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
+y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
 We are operating under the shape and rate parametrization of a Gamma distribution, and this specific parametrization was chosen so the mean of our response would be the output of the linear component:
 
 $$
-E[y_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
+E[y^*_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
 $$
 
 We then define priors for the other parameters as
@@ -312,7 +312,7 @@ $$
 \end{aligned}
 $$
 
-where $m_p, s_p^2, t_1, r_1, r_2$ are real valued numbers. While the Cauchy prior put on the shape parameter $\alpha$ is still bounded below by zero, we now allow it's mode to be set based on the given data.
+where $m_p, s_p, t_1, r_1, r_2$ are real valued numbers. While the Cauchy prior put on the shape parameter $\alpha$ is still bounded below by zero, we now allow it's mode to be set based on the given data.
 
 Letting $\boldsymbol{\beta} = (\beta_1, ..., \beta_P)$ and $\mathbf{u} = (u_1, ..., u_J)$ we can write out the joint posterior distribution as
 
@@ -355,7 +355,7 @@ To produce an estimate for the distribution of a new data point $y_{ij, \ new}$ 
 
 $$
 \begin{aligned}
-\int_A p(y_{ij, \ new} \ | \ A)p(A )dA   = p(y_{ij, \ new} )   \\
+ p(y_{ij, \ new}) = \int_A p(y_{ij, \ new} \ | \ A)p(A )dA   \\
 \end{aligned}
 $$
 
@@ -391,7 +391,7 @@ p(y^*_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\beta_1}  \dots \int_{\beta_P} \in
 \end{aligned}
 $$
 
-And for the classification model it can be expressed as
+And for the logistic regression model it can be expressed as
 
 $$
 \begin{aligned}
@@ -400,7 +400,7 @@ p(z_{ij, \ new} \ | \ \mathbf{y}) &=  \int_{\gamma_1}  \dots \int_{\gamma_P} \in
 \end{aligned}
 $$
 
-The distributions $p(y^*_{ij, \ new} \ | \ \mathbf{y})$ and $p(z_{ij, \ new}\ | \ \mathbf{y})$ not only capture where we think each prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
+The distributions $p(y^*_{ij, \ new} \ | \ \mathbf{y})$ and $p(z_{ij, \ new}\ | \ \mathbf{y})$ not only capture where our prediction might lie, but also how we would expect it to vary. Often in predictive modeling we're interested in quantifying the uncertainty in our model estimates, and in the Bayesian framework these are baked right into the predictions themselves.
 
 While the theory behind constructing these posterior predictive is pretty intuitive, it's clear that even in the case of a fairly simple model, the actual computations are rather unwieldy. Again, we are saved by the fact that in practice the posterior is too complex to algebraically solve for, so we're already functioning in a setting where we use MCMC to simulate draws from the approximate posterior.
 
@@ -465,7 +465,7 @@ We thought that the proof and description of this finding deserved it's own chap
 
 Now that we know that we can fit the models separately and then combine them at the end, we are finally ready to describe how final predictions are made.
 
-Since we are interested in a making predictions for the average response in group $j$ we obtain a set that approximates the posterior predictive distribution for each unit $i$ in group $j$. For example, if we fix $j$ and let $U_j = 5$ we would have 5 sets:
+Since we are interested in a making predictions for the average response in group $j$ we obtain a set that approximates the posterior predictive distribution for each unit $i$ in group $j$. We do so by matching the samples from our approximate posterior predictive distributions by MCMC index $(k)$ as follows: $y^{(k)}_{ij,\ new} = y^{*^{(k)}}_{ij, \ new}z^{(k)}_{ij, \ new}$. Now, for example, if we fix $j$ and let $U_j = 5$ we would have 5 sets where each one represents a sample from the approximate posterior predictive distribution of $y_{ij, \ new}$ for the 5 different points in $U_j$.
 
 $$
 \begin{aligned}
@@ -497,7 +497,7 @@ Which is an approximation of the posterior predictive distribution for the mean 
 
 ### Prediction Intervals {#wraptwo}
 
-In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \@ref(bayes-freq) provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation or data point.
+In statistical modeling, another piece of information that we're often interested is a measure of our uncertainty in our predicted values. Often times these are referred to broadly as prediction intervals, and whereas the confidence intervals and credible intervals that we described in Chapter \@ref(bayes-freq) provide uncertainty bounds for parameter estimates, these prediction intervals provide uncertainty bounds for a future observation.
 
 Immediately, we can see how straightforward it is to acquire these in the Bayesian setting. Because our predictions are not simply point estimates, but are distributions themselves, these prediction intervals are baked right into the prediction process. 
 
@@ -505,5 +505,5 @@ Unfortunately it is far less straightforward in the Frequentist setting. While p
 
 #### A note of caution
 
-While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist simply for the ease of access to prediction intervals, the important caveat is that these prediction intervals are only assumed to be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estimates for free, but a 95% prediction interval will likely not get 95% coverage, thus indicating that the intervals themselves are also incorrect. 
+While it might be tempting to gleefully pronounce Bayesian models to be better than Frequentist ones simply for the ease of access to prediction intervals, an important caveat is that these prediction intervals are only assumed to be correct when the Bayesian model is correct. What I mean by that is that if our Bayesian model badly fits the data, then we still get uncertainty estimates for free, but a 95% prediction interval will likely not get 95% coverage, thus indicating that the intervals themselves are also incorrect. 
 

@@ -1,6 +1,6 @@
 # Package Vignette {#vignette}
 
-This thesis so far has spent a great deal of time explaining why these cluster zero-inflation models are interesting and useful, but no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models. We will start by describing the motivation for the package and it's structure, before returning to the forestry data from Chapter \@ref(intro-section) to show how it can be used.
+So far, this thesis has spent a great deal of time explaining why these cluster zero-inflation models are interesting and useful, but no matter how good a method is, it can't be used if the tooling doesn't exist to actually perform it. Thus, the last portion of this thesis will be devoted to describing the very early stages of an R software package that we have written to build and utilize these zero-inflation models. We will start by describing the motivation for the package and it's structure, before returning to the forestry data from Chapter \@ref(intro-section) to show how it can be used.
 
 ## R Package: zinf
 
@@ -16,17 +16,17 @@ The two main functions that `zinf` contains are `zinf_bayes` and `zinf_freq` whi
 
 The challenge of writing a software package for these zero-inflation models was truthfully a lot trickier than I initially thought it would be. There were two different possible structural versions that I considered to be viable:
 
-1. Write a function that takes as argument all the individual pieces needed to build each of the two models and internally builds the two models and then define all of the necessary functionality (i.e prediction).
-2. Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the necessary functionality.
+1. Write a function that takes as argument all the individual pieces needed to build each of the two models and internally builds the two models and then define all of the necessary functionality for the two-part model (i.e prediction).
+2. Write a function that takes as argument each of the two already built models and internally combine the models into a single object and define all of the necessary functionality for that object.
 
-On the one hand, version (1) is nice in that it "does it all" for the user. But the main problem with version (1) is that the functions `lme4::lmer` and `lme4::glmer` for Frequentist models and `rstanarm::stan_lmer` and `rstanarm::stan_glmer` for Bayesian models are already so popular and well developed and robust that it seems silly not to rely on that pre-existing software. After all, as we showed in Section \@ref(sepsim), the Bayesian models can be built separately and made as complex as desired, and this is also certainly the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function argument that those `lme4` and `rstanarm` functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
+On the one hand, version (1) is nice in that it "does it all" for the user. But the main problem with version (1) is that the functions `lme4::lmer` and `lme4::glmer` for Frequentist models and `rstanarm::stan_lmer` and `rstanarm::stan_glmer` for Bayesian models are already so popular, well developed, and robust that it seems silly not to rely on that pre-existing software. After all, as we showed in Section \@ref(sepsim), the Bayesian models can be built separately and made as complex as desired, and this is also the case for the Frequentist models. So, while there's an argument to be made for the abstraction of all model building processes, the reality is that under version (1) if I wanted my package to be as familiar and robust as the pre-existing software for building the individual models, I would have to essentially take as arguments every possible function argument that those `lme4` and `rstanarm` functions take, and internally feed them back into those functions. At that point the question becomes: why not just have the user build the individual models separately and then feed those finished models into our function? And that lands us directly at version (2).
 
 ```{r tbl2, echo=F, warning=F, message=F, fig.cap="Two Software Versions", out.width="90%", fig.align="center"}
 include_graphics(path = "figure/v1v2.png")
 ```
 
 
-In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the `lme4` functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the `zinf` functions still have enormous usefulness in that they define methods for producing a summary of the zero-inflation model and most importantly for predicting with the zero-inflation model.
+In the Frequentist setting, version (1) doesn't seem that bad, especially since most of the time a user only specifies the model formula and the data set within the `lme4` functions, but things grow a lot worse in the bayesian versions where all kinds of priors and MCMC settings need to be specified. In the end, I decided that it made more sense to build version (2). While this does leave more work for the user than I would have liked, I think that the `zinf` functions still have enormous usefulness in that they define methods for producing a summary of the zero-inflation model and most importantly for performing prediction with the zero-inflation model.
 
 
 ## Forestry Data
@@ -46,7 +46,7 @@ The particular subset of Forestry data that we'll be looking at comes from the S
 summary(data %>% count(ECOSUBCD) %>% pull(n)) 
 ```
 
-The covariate that we will be using from the forestry data is called "Tree Canopy Cover" (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns ^[@toney2008stem]. This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
+The covariate that we will be using from the forestry data is called "Tree Canopy Cover" (tcc) which is defined as the proportion of forest floor covered by a vertical projection of the tree crowns [@toney2008stem]. This is one of the FIA's remote sensed variables, so the information is associated with the pixels that overlay the individual plot.
 
 The response variable that we will be using is called "Dry Above Ground Biomass from Live Trees" and is expressed in the units of per area density. This Dry Above Ground Biomass variable is one that is very important for understanding the health of forest ecosystems and plays a role in decisions regarding merchantable timber and fire hazard. For these reasons its vitally important for the FIA to be able to produce accurate estimates of this variable. The zero-inflation models presented in this thesis provide a reasonable approach for trying to do exactly that, and the software package `zinf` provides an early stage version of a tool to do so.
 
@@ -234,7 +234,7 @@ class(bayesian_zi_mod_normal)
 ```
 
 
-At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines `zinf_bayes` and `zinf_freq` as S3 generics. In R "the job of an S3 generic is to perform method dispatch, i.e. find the specific implementation for a class."^[@wickham2019advanced]. So what `zinf` is really doing is defining methods like `predict()` and `summary()` for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
+At first this might not seem like much, but the real usefulness of the software package lies in the fact that it defines `zinf_bayes` and `zinf_freq` as S3 generics. In R "the job of an S3 generic is to perform method dispatch, i.e. find the specific implementation for a class."[@wickham2019advanced]. So what `zinf` is really doing is defining methods like `predict()` and `summary()` for these zero-inflation model objects. The upshot is that we can now use these model objects much in the same way as we do for typical model objects in R.
 
 And as we can see below, making predictions on the test dataset using our Frequentist zero-inflation model is a very familiar process. Since the estimand we're interested in is the Ecosubsection level mean and our test data set included two Ecosubsections, we get an output with two rows.
 
@@ -251,8 +251,8 @@ bayes_preds_normal <- predict(bayesian_zi_mod_normal, newdata = test)
 
 The object returned by running `predict` on one of the Bayesian zero-inflation models is a list that contains two items:
 
-- A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group
-- A data frame containing the raw posterior predictive distributions for each group
+- A data frame containing the group level predictions which in this case are the centers of the posterior predictive distributions for each group.
+- A data frame containing the raw posterior predictive distributions for each group.
 
 
 If we examine the first item we see a very similar result to that of the direct output of the Frequentist predictions, except now we also have upper and lower bounds for 95% prediction intervals.
@@ -261,7 +261,7 @@ If we examine the first item we see a very similar result to that of the direct 
 bayes_preds_normal$posterior_predictive_centers
 ```
 
-But since Bayesian predictions are distributions themselves, you can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
+But since Bayesian predictions are distributions themselves, we can access the raw distributions as follows. We'll just look at the first five rows of this data frame to get an idea of what it looks like.
 
 ```{r, message=F, warning=F}
 bayes_preds_normal$posterior_predictive_distribution %>% 
@@ -277,7 +277,7 @@ bayes_preds_normal$posterior_predictive_distribution %>%
   theme_bw()
 ```
 
-Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and look at how the models compared.
+Finally if we also compute the predictions for our Bayesian model with a Gamma GLM, then we can aggregate and compare how the models performed.
 
 ```{r, echo=F}
 bayes_preds_gamma <- predict(bayesian_zi_mod_gamma, newdata = test)
@@ -324,4 +324,4 @@ It's nice to see that the models performed similarly, as we saw in our simulatio
 
 ## Next Steps
 
-Right now the package is fairly limited in that it can primarily only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common,  zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like `zinf` that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
+Right now the package is fairly limited in that it can only deal with the models that we worked with in this thesis, so there's plenty of work to be done in that regard. Moreover, while zero-inflated data are fairly common,  zero-inflated clustered data are much less common, so a good extension would be to extend the package to work with models without random effects. That being said, I still believe that the package is enormously useful as is. In particular Bayesian prediction is an incredibly cumbersome task to do on your own, and it's even more difficult in this two-part model setting. Thus, having a package like `zinf` that will abstract away a lot of that messy process contributes a lot to the field of research surrounding these zero-inflation models.
