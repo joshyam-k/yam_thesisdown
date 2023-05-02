@@ -45,7 +45,7 @@ y_{ij} &=z_{ij}\cdot y^*_{ij}
 \end{aligned}
 $$
 
-Where $X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$, $v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$ and $u_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$
+Where $X_{ij} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$, $v_j \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$ and $u_{j} \overset{\text{iid}}{\sim} \mathcal{N}(0, 1)$
 
 This data generating process checks all of our boxes as it produces zero-inflated data with a grouped structure and a moderate relationship between the response $Y$ and a covariate $X$. For example in Figure \@ref(fig:simdataplot) we examine the generated population data and see that the response variable is indeed zero inflated with a strictly positive and continuous non-zero portion.
 

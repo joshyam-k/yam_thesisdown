@@ -318,7 +318,7 @@ Letting $\boldsymbol{\beta} = (\beta_1, ..., \beta_P)$ and $\mathbf{u} = (u_1, .
 
 $$
 \begin{aligned}
-p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y}) &=\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_{u}^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \alpha) 
+p(\boldsymbol{\beta}, \mathbf{u}, \sigma_{u}^2, \alpha \ | \ \mathbf{y}) &\propto\bigg[\prod_{i:y_{i} > 0}p(y_{i} \ | \ \boldsymbol{\beta},\mathbf{u}, \sigma_{u}^2, \alpha)\bigg]\cdot p(\beta_1)\cdot...\cdot p(\beta_P)p(u_1)\cdot ... \cdot p(u_J)p(\sigma_{u}^2)p( \alpha)
 \end{aligned}
 $$
 
