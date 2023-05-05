@@ -200,7 +200,7 @@ I'd like to thank my advisors Lenny Wainstein and Kelly McConville for their sig
 }
 
 \Abstract{
-This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
+This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to its Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
 }
 
 	\usepackage{setspace}\onehalfspacing
@@ -231,7 +231,7 @@ This thesis considers modeling situations where the data exhibits two distinctiv
 
   \listoffigures
   \begin{abstract}
-    This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to it's Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
+    This thesis considers modeling situations where the data exhibits two distinctive features: the response variable is ``zero-inflated'', and the data is ``clustered''. I take zero-inflated to mean that values of the response are either zero or belong to a strictly positive continuous distribution, and I take clustered to mean that there is a meaningful grouping in the data structure that makes points within clusters similar. The thesis focuses primarily on building the models in a Bayesian frame and is just as interested in understanding the procedural aspects of doing so as it is in dissecting the results. In this way this work departs from the majority of statistical modeling literature as it seeks to highlight the ways in which a model can be valuable beyond the results that it produces. An extensive simulation was run with the aim of understanding how the performance of these models changes as we vary the sample size, the number of total clusters, and the quality of the priors used. While we find that the Bayesian model performs very similarly to its Frequentist counterpart in terms of traditional performance metrics, we also lay out and describe the ways in which the additional conceptual work associated with building Bayesian models has the capacity to promote greater intentionality and understanding in a model building workflow. Finally, we introduce the developmental version of an R software package that aims to reduce the computational burden of executing methods like prediction and summary for these zero-inflation models.
   \end{abstract}
 
 \mainmatter % here the regular arabic numbering starts
@@ -270,7 +270,7 @@ For example, going back to the fishing in a lake example, if we looked at data o
 
 One specific setting where we see both of these features is the United States' forests. In particular, I will focus on forestry data collected by the Forestry Inventory \& Analysis Program (FIA) of the U.S. Government. The FIA monitors the nation's forests by collecting data on, and providing estimates for, a wide array of forest attributes. Not only is this work vitally important, but it's essential that it be done accurately and efficiently: ``The FIA is responsible for reporting on dozens, if not hundreds, of forest attributes relating to merchantable timber and other wood products, fuels and potential fire hazard, condition of wildlife habitats, risk associated with fire, insects or disease, biomass, carbon storage, forest health, and other general characteristics of forest ecosystems.''(McConville, Moisen, \& Frescino, 2020).
 
-The FIA employs a quasi-systematic sampling design to determine which locations across the U.S. to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data, make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employes as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
+The FIA employs a quasi-systematic sampling design to determine which locations across the U.S. to physically collect forest attribute data at. These sampled locations are referred to as plot-level data and the FIA sends a crew out to physically measure a wealth of forest attributes at that location. As you might expect, not only is this method extremely time intensive, but it is also very expensive. The vastness of the nation's forests in tandem with the resources needed to collect plot-level data make it impossible to collect census level data on forest metrics. Thus, the need for additional data sources as well as statistical models are vital to the work that the FIA does. The main secondary data source that the FIA employs as covariates in their statistical models is remote sensed data. The remote sensed data typically includes climate metrics (e.g.~temperature and precipitation), geomorphological measures (e.g.~elevation and eastness), as well as metrics like proportion of forest which can be measured from a satellite.
 
 While the main use of the additional remote sensed data sources are to increase the accuracy of the estimators that the FIA builds, they are also used to make rational decisions about the aforementioned plot-level data collection. Before sending a crew out to a given sampled location, the FIA will first look at the remote sensed data for that location. If that location happens to be in a place where there is clearly no forest, for example in the middle of a parking lot, the FIA will not send a crew out and instead will mark all forest attributes for that location as being zero. As you might imagine, this happens quite a bit, and so an interesting characteristic of many forest attribute variables collected by the FIA is that they are zero-inflated. Importantly, this is an example of where the data is zero-inflated because of the data collection process.
 
@@ -299,7 +299,7 @@ To motivate using a more complex method, I'll first show what happens when we tr
 
 \caption{The shortcomings of a simple linear regression model in this context.}\label{fig:scatterzi}
 \end{figure}
-While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \ref{fig:scatterzi} does not appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range of observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability of our response variable being zero, changes with our covariate.
+While this model isn't awful, it's certainly misspecified. What I mean by this is that a simple straight line shown in Figure \ref{fig:scatterzi} does not appropriately capture the dynamics of the relationship between our covariate and our response. The zero-inflation in the response variable pulls the regression line down so that it doesn't properly capture the relationship between the explanatory variable and the \emph{non-zero} response, but more importantly it doesn't capture the structure of zeros in the response at all. We can see that the only time this model will predict a near zero response is when the covariate value is very close to zero, but this is an extreme limitation of the model since we observe zero response values across almost the entire range of observed values for the covariate. What's more, a simple linear regression model does not allow us to understand how the probability of our response variable being zero changes with our covariate.
 
 We would call this model statistically biased, as it is overly simple and thus doesn't properly capture the structure of the data. While perhaps it's unfair to motivate my method by pitting it against the simplest of statistical models, the reality is that linear regression is a very powerful and widely used tool. Moreover, in a setting such as this one where the data looks plausibly linear, the principle of parsimony might make a linear regression model a well reasoned choice. While there's certainly a need for a model that is better fit to the data, I won't go down the route of constructing an incredibly opaque and complex deep learning model to do so. Instead, the model I present is interpretable and intuitive while flexible enough to better capture the structure of the zero-inflated data.
 
@@ -399,7 +399,7 @@ Suppose we are interested in estimating the average weight of squirrels in a giv
 \hypertarget{frequentist-version}{%
 \subsection{Frequentist Version}\label{frequentist-version}}
 
-We choose the sample mean \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean \(\bar{X}\) as our point estimate and because of the Central Limit Theorem we can say that it is approximately distributed \(\mathcal{N}(\theta, 1/n)\). And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 \[
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
@@ -462,7 +462,7 @@ A good place to start whenever performing a Bayesian analysis is to remember tha
 
 Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about \(\theta\) using a distribution we are already doing something very different from in the Frequentist version. In particular, we're making conclusions about the distribution of \(\theta\), a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about \(\theta\) and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the \emph{true} mean weight might vary conditional on the set of observed data.
 
-Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval \(C\) such that,
+Once we have an expression for our posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval \(C\) such that,
 
 \[
 \int_C p(\theta \ | \ x)d\theta = 0.95
@@ -543,7 +543,7 @@ where each have notably been influenced by both the prior and the likelihood. It
 \end{figure}
 Above we see the three main components of a Bayesian analysis plotted all together. It's helpful to visualize what's happening here because it really drills home the idea that the posterior is, in a sense, a tradeoff between the prior and the likelihood function. More technically, the posterior is the normalized product of the likelihood and the prior. The result is that the prior information has pulled the posterior to the left and has introduced more variance than from the likelihood function alone.
 
-Clearly, even in this simple example it takes quite a bit of work to derive the exact expression for the posterior. In fact, in practice the posterior is often times something that is incredibly complicated and so we don't even bother trying to simplify the product of the likelihood and the prior down into a distribution that we can recognize. Instead we make use of the massive computational advances that have been made that allow us to algorithmically approximate the posterior. Mainly, a process called Markov Chain Monte Carlo (MCMC) is used due to it's very powerful ability to produce samples from the posterior distribution.
+Clearly, even in this simple example it takes quite a bit of work to derive the exact expression for the posterior. In fact, in practice the posterior is often times something that is incredibly complicated and so we don't even bother trying to simplify the product of the likelihood and the prior down into a distribution that we can recognize. Instead we make use of the massive computational advances that have been made that allow us to algorithmically approximate the posterior. Mainly, a process called Markov Chain Monte Carlo (MCMC) is used due to its very powerful ability to produce samples from the posterior distribution.
 
 \hypertarget{takeaways}{%
 \section{Takeaways}\label{takeaways}}
@@ -562,7 +562,7 @@ We now move into a thorough description of all of the methods employed in this t
 \hypertarget{notation}{%
 \section{Notation}\label{notation}}
 
-Let \(U\) denote a finite population with \(N\) elements. \(U\) is broken into \(J\) groups \(U_j\), \(j = 1, 2, ..., J\), where each group \(U_j\) is defined as having \(n_j\) sample observations. Let \(p = 1, ..., P\) index the covariates. Each sample observation, \(i\) in group \(j\) has auxiliary information \(x_{ij}^p\) for covariate \(p\), response value \(y_{ij}\), and indicator for being non-zero \(z_{ij}\).
+Let \(U\) denote a finite population with \(N\) elements. \(U\) is broken into \(J\) groups \(U_j\), \(j = 1, 2, ..., J\), where each group \(U_j\) is defined as having \(n_j\) sample observations. Let \(p = 1, ..., P\) index the covariates. Each sample observation \(i\) in group \(j\) has auxiliary information \(x_{ij}^p\) for covariate \(p\), response value \(y_{ij}\), and indicator for being non-zero \(z_{ij}\).
 
 \[
 z_{ij} =
@@ -577,7 +577,7 @@ z_{ij} =
 
 We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do and I think that looking at the steps draws out a lot of helpful intuition.
 
-Let \(Y\) represent the response variable and \(X\) represent the covariates. We typically write \(\mathbb{E}[Y \ | \ X]\) to denote the expected value of our response variable conditional on it's covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
+Let \(Y\) represent the response variable and \(X\) represent the covariates. We typically write \(\mathbb{E}[Y \ | \ X]\) to denote the expected value of our response variable conditional on its covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
 \begin{equation}
 \begin{split}
     E[ Y  \ | \ X = x] &= \underbrace{E[Y \ | \ X = x, Y = 0]}_{= \ 0}P(Y = 0 \ | \ X = x) + \\
@@ -637,7 +637,7 @@ As it is not the focus of this thesis, we will not go in depth into how these mo
 
 In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function \(p(\text{data} \ | \ \text{parameters})\). And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model.
 
-We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \ref{bayes-freq}. By making an assumption about the model that best describes the process that generated the data, we are placing a distribution assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
+We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \ref{bayes-freq}. By making an assumption about the model that best describes the process that generated the data, we are placing a distributional assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
 
 \hypertarget{bayesian}{%
 \subsection{Bayesian}\label{bayesian}}
@@ -687,7 +687,7 @@ p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_v^2 \ | \ \mathbf{y}) &\propto \bigg[
 If we we're able to compute a simple form expression for the posterior, then we can attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only \(\sigma_u^2\). In that case, the marginal posterior could be computed as follows:
 
 \[
-p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
+p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\gamma_1 ... d\gamma_P dv_1 ... dv_J
 \]
 
 The result would be a probability density function that encapsulates all of our information about \(\sigma_{v}^2\).
@@ -725,7 +725,7 @@ Here \(\boldsymbol{\beta} = (\beta_1, ..., \beta_P)\). In this setting, the erro
 \end{aligned}
 \]
 
-Importantly while \(s_p, r_1, \ \text{and} \ r_2\) are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind.
+Importantly while \(m_p, s_p, r_1, \ \text{and} \ r_2\) are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind.
 
 We can write out our expression for the posterior as follows:
 
@@ -761,13 +761,13 @@ An alternative model that we considered in this thesis was a Gamma Generalized L
 Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
 \[
-y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
+y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{e^{\mu_{ij}}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
 \]
 
 We are operating under the shape and rate parametrization of a Gamma distribution, and this specific parametrization was chosen so the mean of our response would be the output of the linear component:
 
 \[
-E[y^*_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
+E[y^*_{ij} \ | \ x] = \text{log}\bigg[\alpha \bigg(\frac{\alpha}{e^{\mu_{ij}}}\bigg)^{-1}\bigg] = \text{log}\big(e^{\mu_{ij}}\big) = \mu_{ij}
 \]
 
 We then define priors for the other parameters as
@@ -897,11 +897,11 @@ For the Gamma model we do the same thing but using the appropriate distribution
 
 \[
 \begin{bmatrix}
-y_{ij, \ new}^{*^{(1)}} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}\Bigg) \\
+y_{ij, \ new}^{*^{(1)}} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ e^{\mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}}\Bigg) \\
 \\
 \vdots \\
 \\
-y_{ij, \ new}^{*^{(2000)}} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}\Bigg)
+y_{ij, \ new}^{*^{(2000)}} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ e^{\mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}}\Bigg)
 \end{bmatrix}
 \]
 
@@ -920,7 +920,7 @@ While it may not be immediately clear, these processes are really just mimicking
 \hypertarget{comb}{%
 \subsection{Combining the Model Predictions}\label{comb}}
 
-Now that we have two sets which represent approximate the posterior predictive distribution for unit \(i\) in group \(j\) for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, so we certainly need a posterior predictive distribution of \(y_{ij, \ new} = y_{ij, \ new}^*z_{ij, \ new}\), but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. One idea is to just match MCMC iteration \(k\) from each model together. For example, when using the GLM with normal distribution and identity link as well as the logistic regression model we might just proceed as follows:
+Now that we have two sets which approximate the posterior predictive distribution for unit \(i\) in group \(j\) for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, so we certainly need a posterior predictive distribution of \(y_{ij, \ new} = y_{ij, \ new}^*z_{ij, \ new}\), but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. One idea is to just match MCMC iteration \(k\) from each model together. For example, when using the GLM with normal distribution and identity link as well as the logistic regression model we might just proceed as follows:
 
 \[
 \Big\{y_{ij , \ new}^{*^{(1)}}\cdot z^{(1)}_{ij, \ new}, \  ... \ , y_{ij, \ new}^{*^{(2000)}}\cdot z^{(2000)}_{ij, \ new}\Big\}
@@ -1031,7 +1031,7 @@ Finally, since these are all proper probability distributions we know that they 
 p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \sigma_v^2, \sigma_{\varepsilon}^2\ | \ \mathbf{y})  = p(\boldsymbol{\beta}, \mathbf{u}, \sigma_u^2, \sigma_{\varepsilon}^2 \ | \ \mathbf{y})p(\boldsymbol{\gamma}, \mathbf{v}, \sigma_v^2 \ | \ \mathbf{y})
 \label{eq:sepsimeq}
 \end{equation}
-So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that \emph{as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.}. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually.
+So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that \emph{as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.} This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually.
 
 Practically speaking, if our MCMC algorithm properly converges, then we can interpret the MCMC output as a random sample from the approximate posterior distribution. Because of this it actually doesn't really matter how we match up the indices of the posterior predictive distributions from the models for \(y^*\) and \(z\). That being said, for the sake of consistency, in all of our work we'll match the posterior predictive distributions by MCMC index.
 
@@ -1041,13 +1041,13 @@ Practically speaking, if our MCMC algorithm properly converges, then we can inte
 We'll now show that this holds in practice, with a simple example and we'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
 
 \[
-z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j
+z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}\boldsymbol{\gamma} + v_j
 \]
 
 But then the two part process gets folded into the way that we set up the Normal linear regression model:
 
 \[
-y_{ij} \sim \mathcal{N}\bigg(z_{ij}\cdot m_{ij} \ , \ \Big[z_{ij}\cdot\tau_1 + (1 - z_{ij})\tau_2\Big]\bigg) \qquad \text{where} \qquad m_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j
+y_{ij} \sim \mathcal{N}\bigg(z_{ij}\cdot m_{ij} \ , \ \Big[z_{ij}\cdot\tau_1 + (1 - z_{ij})\tau_2\Big]\bigg) \qquad \text{where} \qquad m_{ij} =\mathbf{x}_{ij}\boldsymbol{\beta} + u_j
 \]
 
 Here \(\tau_1\) represents the variance of \(y_{ij}\) when \(z_{ij} = 1\) and thus can be estimated, but \(\tau_2\) is the variance of \(y_{ij}\) when \(z_{ij} = 0\) and so there's no practical way for it to be estimated by the MCMC algorithm. The solution is to just set \(\tau_2\) as some small fixed number (i.e \(0.001\)) and approximate the posterior for all the other parameters. This strategy functions on the idea that when \(z_{ij} = 1\) then we're fitting a Normal distribution centered at \(m_{ij}\) with model estimated variance \(\tau_1\), and when \(z_{ij} = 0\) then we're fitting a Normal model centered at 0 with miniscule variance meaning that we'll effectively get zero as we should.
@@ -1238,7 +1238,7 @@ There will be 3 different models run throughout the simulation.
 \hypertarget{metrics}{%
 \section{Performance metrics}\label{metrics}}
 
-As mentioned previously, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\)
+As mentioned previously, due to the fact that our data has a clustered structure, we chose to evaluate all of our models on a single group. Thus all of the following performance metrics were computed for the same individual group (group 1) which had a true mean value of \(Y_1 = 23.7\).
 
 The most broadly used performance metric of an estimator is the Mean Squared Error (MSE). We use the Root Mean Squared Error (RMSE) which is just a rescaling of this metric and is computed as follows:
 

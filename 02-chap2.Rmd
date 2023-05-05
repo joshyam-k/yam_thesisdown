@@ -36,7 +36,7 @@ Suppose we are interested in estimating the average weight of squirrels in a giv
 
 ### Frequentist Version
 
-We choose the sample mean $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
+We choose the sample mean $\bar{X}$ as our point estimate and because of the Central Limit Theorem we can say that it is approximately distributed $\mathcal{N}(\theta, 1/n)$. And indeed, as laid out above, by using asymptotic theory to place a distribution on the data while centering it on the fixed unknown value of the parameter, we are treating the data as random and the unknown parameter as fixed. Some shifting and scaling tells us that,
 
 $$
 \frac{\bar{X} - \theta}{1/\sqrt{n}} \sim \mathcal{N}(0,1)
@@ -130,7 +130,7 @@ A good place to start whenever performing a Bayesian analysis is to remember tha
 
 Let's step back for a moment and think about what the immediate implications of this framework are. By describing our knowledge about $\theta$ using a distribution we are already doing something very different from in the Frequentist version. In particular, we're making conclusions about the distribution of $\theta$, a.k.a how it varies, conditional on our observed data. For a Bayesian, this distribution holds all of the available information about $\theta$ and thus is the focus of their attention. So in the context of our example, when a Bayesian wants to perform inference for the mean weight of squirrels in a park, they will do so by constructing a posterior distribution that describes how the *true* mean weight might vary conditional on the set of observed data.
 
-Once we have an expression for out posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval $C$ such that,
+Once we have an expression for our posterior, we quantify our uncertainty by creating what are called credible intervals. We do so by finding an interval $C$ such that,
 
 $$
 \int_C p(\theta \ | \ x)d\theta = 0.95
@@ -239,7 +239,7 @@ ggplot(data = data.frame(x = c(-17,17))) +
 
 Above we see the three main components of a Bayesian analysis plotted all together. It's helpful to visualize what's happening here because it really drills home the idea that the posterior is, in a sense, a tradeoff between the prior and the likelihood function. More technically, the posterior is the normalized product of the likelihood and the prior. The result is that the prior information has pulled the posterior to the left and has introduced more variance than from the likelihood function alone.
 
-Clearly, even in this simple example it takes quite a bit of work to derive the exact expression for the posterior. In fact, in practice the posterior is often times something that is incredibly complicated and so we don't even bother trying to simplify the product of the likelihood and the prior down into a distribution that we can recognize. Instead we make use of the massive computational advances that have been made that allow us to algorithmically approximate the posterior. Mainly, a process called Markov Chain Monte Carlo (MCMC) is used due to it's very powerful ability to produce samples from the posterior distribution.
+Clearly, even in this simple example it takes quite a bit of work to derive the exact expression for the posterior. In fact, in practice the posterior is often times something that is incredibly complicated and so we don't even bother trying to simplify the product of the likelihood and the prior down into a distribution that we can recognize. Instead we make use of the massive computational advances that have been made that allow us to algorithmically approximate the posterior. Mainly, a process called Markov Chain Monte Carlo (MCMC) is used due to its very powerful ability to produce samples from the posterior distribution.
 
 ## Takeaways
 

@@ -48,7 +48,7 @@ p(\boldsymbol{\beta}, \boldsymbol{\gamma}, \mathbf{u}, \mathbf{v}, \sigma_u^2, \
 (\#eq:sepsimeq)
 \end{equation}
 
-So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that *as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.*. This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually. 
+So the full posterior for the model built simultaneously is equal to the product of the posteriors for each model built separately. The major upshot here is that *as long as we don't build in any correlations between the parameters in the two models, then we can build each model as complex as we might desire without having to worry about how we will eventually build the two models together. As we learned above, we can simply build them separately and combine the results at the end.* This is a really nice theoretical finding as it alleviates the need to figure out how to build the models simultaneously and encourages us to have freedom in how we build each one individually. 
 
 Practically speaking, if our MCMC algorithm properly converges, then we can interpret the MCMC output as a random sample from the approximate posterior distribution. Because of this it actually doesn't really matter how we match up the indices of the posterior predictive distributions from the models for $y^*$ and $z$. That being said, for the sake of consistency, in all of our work we'll match the posterior predictive distributions by MCMC index.
 
@@ -57,13 +57,13 @@ Practically speaking, if our MCMC algorithm properly converges, then we can inte
 We'll now show that this holds in practice, with a simple example and we'll start by discussing how to actually build the models simultaneously. As mentioned previously, we have to get a bit crafty when building the models simultaneously and the way we do this is as follows. First we fit the logistic regression model as we normally would:
 
 $$
-z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\gamma} + v_j
+z_{ij} \sim \text{Bernoulli}\Bigg(\frac{1}{1 + e^{-\mu_{ij}}}\Bigg) \qquad \text{where} \qquad \mu_{ij} =\mathbf{x}_{ij}\boldsymbol{\gamma} + v_j
 $$
 
 But then the two part process gets folded into the way that we set up the Normal linear regression model: 
 
 $$
-y_{ij} \sim \mathcal{N}\bigg(z_{ij}\cdot m_{ij} \ , \ \Big[z_{ij}\cdot\tau_1 + (1 - z_{ij})\tau_2\Big]\bigg) \qquad \text{where} \qquad m_{ij} =\mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j
+y_{ij} \sim \mathcal{N}\bigg(z_{ij}\cdot m_{ij} \ , \ \Big[z_{ij}\cdot\tau_1 + (1 - z_{ij})\tau_2\Big]\bigg) \qquad \text{where} \qquad m_{ij} =\mathbf{x}_{ij}\boldsymbol{\beta} + u_j
 $$
 
 Here $\tau_1$ represents the variance of $y_{ij}$ when $z_{ij} = 1$ and thus can be estimated, but $\tau_2$ is the variance of $y_{ij}$ when $z_{ij} = 0$ and so there's no practical way for it to be estimated by the MCMC algorithm. The solution is to just set $\tau_2$ as some small fixed number (i.e $0.001$) and approximate the posterior for all the other parameters. This strategy functions on the idea that when $z_{ij} = 1$ then we're fitting a Normal distribution centered at $m_{ij}$ with model estimated variance $\tau_1$, and when $z_{ij} = 0$ then we're fitting a Normal model centered at 0 with miniscule variance meaning that we'll effectively get zero as we should.

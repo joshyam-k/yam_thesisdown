@@ -5,7 +5,7 @@ We now move into a thorough description of all of the methods employed in this t
 
 ## Notation {#notation}
 
-Let $U$ denote a finite population with $N$ elements. $U$ is broken into $J$ groups $U_j$, $j = 1, 2, ..., J$, where each group $U_j$ is defined as having $n_j$ sample observations. Let $p = 1, ..., P$ index the covariates. Each sample observation, $i$ in group $j$ has auxiliary information $x_{ij}^p$ for covariate $p$, response value $y_{ij}$, and indicator for being non-zero $z_{ij}$.
+Let $U$ denote a finite population with $N$ elements. $U$ is broken into $J$ groups $U_j$, $j = 1, 2, ..., J$, where each group $U_j$ is defined as having $n_j$ sample observations. Let $p = 1, ..., P$ index the covariates. Each sample observation $i$ in group $j$ has auxiliary information $x_{ij}^p$ for covariate $p$, response value $y_{ij}$, and indicator for being non-zero $z_{ij}$.
 
 $$
 z_{ij} =
@@ -20,7 +20,7 @@ $$
 
 We now introduce the modeling technique that will be the main focus of the thesis. Wonderfully, there is some real mathematical backing for why we might build this model in the way that we do and I think that looking at the steps draws out a lot of helpful intuition.
 
-Let $Y$ represent the response variable and $X$ represent the covariates. We typically write $\mathbb{E}[Y \ | \ X]$ to denote the expected value of our response variable conditional on it's covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
+Let $Y$ represent the response variable and $X$ represent the covariates. We typically write $\mathbb{E}[Y \ | \ X]$ to denote the expected value of our response variable conditional on its covariates. Since the separation of the response into values that are zero and those that are not is a finite partition, we can leverage the law of iterated expectation to expand our model structure:
 
 \begin{equation}
 \begin{split}
@@ -80,7 +80,7 @@ As it is not the focus of this thesis, we will not go in depth into how these mo
 
 In most cases (and in particular in most statistical software), Frequentist regression models are fit using something called Maximum Likelihood Estimation (MLE). Very broadly, MLE functions by first assuming that the observed data was sampled from some distribution. Out of that assumption we get a likelihood function $p(\text{data} \ | \ \text{parameters})$. And finally, as the name suggests, we choose parameter values that maximize the likelihood of the observed data given that parameter. In words, we choose the parameters under which the data we observed was the most likely outcome, assuming our model.
 
-We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \@ref(bayes-freq). By making an assumption about the model that best describes the process that generated the data, we are placing a distribution assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
+We won't say much more about this process and this strategy other than to tie it back to some of the ideas laid out in Section \@ref(bayes-freq). By making an assumption about the model that best describes the process that generated the data, we are placing a distributional assumption on the data. The goal is to figure out which fixed parameters define a process that would have been most likely to produce an instance of the data like the one we observed.
 
 
 ### Bayesian
@@ -193,7 +193,7 @@ $$
 If we we're able to compute a simple form expression for the posterior, then we can attain posteriors for each of our individual model parameters by marginalizing- i.e integrating out all of the other parameters. For example, we might be interested in the posterior of only $\sigma_u^2$. In that case, the marginal posterior could be computed as follows:
 
 $$
-p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\beta_1 ... d\beta_P dv_1 ... dv_J
+p(\sigma_{v}^2 \ | \ \mathbf{y}) = \int_{\gamma_1} \cdots \int_{\gamma_p} \int_{v_1} \dots \int_{v_J} p(\boldsymbol{\gamma}, \mathbf{v},  \sigma_{v}^2 \ | \ \mathbf{y}) d\gamma_1 ... d\gamma_P dv_1 ... dv_J
 $$
 
 The result would be a probability density function that encapsulates all of our information about $\sigma_{v}^2$.
@@ -230,7 +230,7 @@ $$
 \end{aligned}
 $$
 
-Importantly while $s_p, r_1, \ \text{and} \ r_2$ are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind. 
+Importantly while $m_p, s_p, r_1, \ \text{and} \ r_2$ are given the same names as in the previous model, they should be chosen with the specific scale of the response in mind. 
 
 We can write out our expression for the posterior as follows:
 
@@ -293,13 +293,13 @@ gamma
 Because the response variable we are working with is strictly positive and often-times right skewed, it's logical to try to model the response as coming from a Gamma distribution. The model is formulated as follows
 
 $$
-y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{\mu_{ij}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
+y^*_{ij} \sim \text{Gamma}\bigg(\alpha, \frac{\alpha}{e^{\mu_{ij}}}\bigg) \qquad \text{where} \qquad \mu_{ij} = \mathbf{x}_{ij}^T\boldsymbol{\beta} + u_j \ \ \ \text{and} \ \ \ u_j  \sim \mathcal{N}(0, \sigma_{u}^2)
 $$
 
 We are operating under the shape and rate parametrization of a Gamma distribution, and this specific parametrization was chosen so the mean of our response would be the output of the linear component:
 
 $$
-E[y^*_{ij}] = \alpha \bigg(\frac{\alpha}{\mu_{ij}}\bigg)^{-1} = \mu_{ij}
+E[y^*_{ij} \ | \ x] = \text{log}\bigg[\alpha \bigg(\frac{\alpha}{e^{\mu_{ij}}}\bigg)^{-1}\bigg] = \text{log}\big(e^{\mu_{ij}}\big) = \mu_{ij}
 $$
 
 We then define priors for the other parameters as
@@ -426,11 +426,11 @@ For the Gamma model we do the same thing but using the appropriate distribution
 
 $$
 \begin{bmatrix}
-y_{ij, \ new}^{*^{(1)}} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}\Bigg) \\
+y_{ij, \ new}^{*^{(1)}} \sim \text{Gamma}\Bigg(\alpha^{(1)}, \frac{\alpha^{(1)}}{ e^{\mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(1)} + u_j^{(1)}}}\Bigg) \\
 \\
 \vdots \\
 \\
-y_{ij, \ new}^{*^{(2000)}} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ \mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}\Bigg)
+y_{ij, \ new}^{*^{(2000)}} \sim \text{Gamma}\Bigg(\alpha^{(2000)}, \frac{\alpha^{(2000)}}{ e^{\mathbf{x}_{ij, \ new}^T\cdot \boldsymbol{\beta}^{(2000)} + u_j^{(2000)}}}\Bigg)
 \end{bmatrix}
 $$
 
@@ -448,7 +448,7 @@ While it may not be immediately clear, these processes are really just mimicking
 
 ### Combining the Model Predictions {#comb}
 
-Now that we have two sets which represent approximate the posterior predictive distribution for unit $i$ in group $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, so we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*z_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. One idea is to just match MCMC iteration $k$ from each model together. For example, when using the GLM with normal distribution and identity link as well as the logistic regression model we might just proceed as follows:
+Now that we have two sets which approximate the posterior predictive distribution for unit $i$ in group $j$ for each respective model, we have to think about how we combine them. After all, our final model prediction is the product of these two models, so we certainly need a posterior predictive distribution of $y_{ij, \ new} = y_{ij, \ new}^*z_{ij, \ new}$, but it's unclear how we should combine the predictive distributions from the individual models to get here. In the Frequentist version where our predictions are single point values, this poses no problem at all, but now that our predictions are themselves distributions, it's a little less clear how to proceed. One idea is to just match MCMC iteration $k$ from each model together. For example, when using the GLM with normal distribution and identity link as well as the logistic regression model we might just proceed as follows:
 
 $$
 \Big\{y_{ij , \ new}^{*^{(1)}}\cdot z^{(1)}_{ij, \ new}, \  ... \ , y_{ij, \ new}^{*^{(2000)}}\cdot z^{(2000)}_{ij, \ new}\Big\}
